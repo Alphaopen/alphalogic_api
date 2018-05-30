@@ -1,0 +1,8 @@
+*.txt
+*.pyc
+*.pyo
+*.pyd
+*.idea
+*.log
+build
+venv
