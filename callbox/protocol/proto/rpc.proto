@@ -1,0 +1,314 @@
+syntax = "proto3";
+
+option cc_enable_arenas = true;
+
+package adapter.rpc;
+
+
+message Object {
+    uint64 id = 1;
+}
+
+message Parameter {
+    uint64 id = 1;
+}
+
+message Command {
+    uint64 id = 1;
+}
+
+message Event {
+    uint64 id = 1;
+}
+
+message Value {
+    oneof oneof_value {
+        bool bool_value = 1;
+        int64 int64_value = 2;
+        double double_value = 3;
+        int64 datetime_value = 4;
+        string string_value = 5;
+    }
+}
+
+
+// Object Service
+service ObjectService {
+    rpc root(ObjectRequest) returns (ObjectReply) {}
+    rpc is_root(ObjectRequest) returns (ObjectReply) {}
+    rpc parent(ObjectRequest) returns (ObjectReply) {}
+
+    rpc type(ObjectRequest) returns (ObjectReply) {}
+    rpc set_type(ObjectRequest) returns (ObjectReply) {}
+
+    rpc create_string_parameter(ObjectRequest) returns (ObjectReply) {}
+    rpc create_int_parameter(ObjectRequest) returns (ObjectReply) {}
+    rpc create_double_parameter(ObjectRequest) returns (ObjectReply) {}
+    rpc create_datetime_parameter(ObjectRequest) returns (ObjectReply) {}
+    rpc create_bool_parameter(ObjectRequest) returns (ObjectReply) {}
+
+    rpc create_event(ObjectRequest) returns (ObjectReply) {}
+
+    rpc create_string_command(ObjectRequest) returns (ObjectReply) {}
+    rpc create_int_command(ObjectRequest) returns (ObjectReply) {}
+    rpc create_double_command(ObjectRequest) returns (ObjectReply) {}
+    rpc create_datetime_command(ObjectRequest) returns (ObjectReply) {}
+    rpc create_bool_command(ObjectRequest) returns (ObjectReply) {}
+
+    rpc parameters(ObjectRequest) returns (ObjectReply) {}
+    rpc events(ObjectRequest) returns (ObjectReply) {}
+    rpc commands(ObjectRequest) returns (ObjectReply) {}
+    rpc children(ObjectRequest) returns (ObjectReply) {}
+
+    rpc parameter(ObjectRequest) returns (ObjectReply) {}
+    rpc event(ObjectRequest) returns (ObjectReply) {}
+    rpc command(ObjectRequest) returns (ObjectReply) {}
+
+    rpc is_removed(ObjectRequest) returns (ObjectReply) {}
+
+    // register maker
+    rpc register_maker(ObjectRequest) returns (ObjectReply) {}
+    rpc unregister_all_makers(ObjectRequest) returns (ObjectReply) {}
+
+    // package diagnostic
+    rpc create_package_diagnostic(ObjectRequest) returns (ObjectReply) {}
+    rpc is_connected(ObjectRequest) returns (ObjectReply) {}
+    rpc is_error(ObjectRequest) returns (ObjectReply) {}
+    rpc is_ready_to_work(ObjectRequest) returns (ObjectReply) {}
+    rpc state_no_connection(ObjectRequest) returns (ObjectReply) {}
+    rpc state_connected(ObjectRequest) returns (ObjectReply) {}
+    rpc state_error(ObjectRequest) returns (ObjectReply) {}
+    rpc state_ok(ObjectRequest) returns (ObjectReply) {}
+}
+
+message ObjectRequest {
+    Object object = 1; // rpc all
+    string type = 2; // rpc set_type
+    string name = 3; // rpc create_X_parameter, create_event, create_X_command, register_maker
+}
+
+message ObjectReply {
+    Object object = 1; // rpc root, parent
+
+    Parameter parameter = 3; // rpc create_X_parameter, parameter
+    Event event = 4; // rpc create_event, event
+    Command command = 5; // rpc create_X_command, command
+
+    repeated Parameter parameters = 6; // rpc parameters
+    repeated Event events = 7; // rpc events
+    repeated Command commands = 8; // rpc commands
+    repeated Object children = 9; // rpc children
+
+    string reason = 10; // optional for rpc state_no_connection, state_connected, state_error, state_ok
+
+    bool yes = 100; // rpc is_root, is_removed, is_connected, is_error, is_ready_to_work
+}
+
+
+// Parameter Service
+service ParameterService {
+    rpc name(ParameterRequest) returns (ParameterReply) {}
+    rpc display_name(ParameterRequest) returns (ParameterReply) {}
+    rpc desc(ParameterRequest) returns (ParameterReply) {}
+
+    rpc set_display_name(ParameterRequest) returns (ParameterReply) {}
+    rpc set_desc(ParameterRequest) returns (ParameterReply) {}
+
+    rpc is_string(ParameterRequest) returns (ParameterReply) {}
+    rpc is_int(ParameterRequest) returns (ParameterReply) {}
+    rpc is_double(ParameterRequest) returns (ParameterReply) {}
+    rpc is_datetime(ParameterRequest) returns (ParameterReply) {}
+    rpc is_bool(ParameterRequest) returns (ParameterReply) {}
+
+    rpc is_runtime(ParameterRequest) returns (ParameterReply) {}
+    rpc is_setup(ParameterRequest) returns (ParameterReply) {}
+    rpc is_hidden(ParameterRequest) returns (ParameterReply) {}
+    rpc is_common(ParameterRequest) returns (ParameterReply) {}
+
+    rpc set_runtime(ParameterRequest) returns (ParameterReply) {}
+    rpc set_setup(ParameterRequest) returns (ParameterReply) {}
+    rpc set_hidden(ParameterRequest) returns (ParameterReply) {}
+    rpc set_common(ParameterRequest) returns (ParameterReply) {}
+
+    rpc is_read_only(ParameterRequest) returns (ParameterReply) {}
+    rpc is_read_write(ParameterRequest) returns (ParameterReply) {}
+
+    rpc set_read_only(ParameterRequest) returns (ParameterReply) {}
+    rpc set_read_write(ParameterRequest) returns (ParameterReply) {}
+
+    rpc is_licensed(ParameterRequest) returns (ParameterReply) {}
+    rpc set_licensed(ParameterRequest) returns (ParameterReply) {}
+
+    rpc clear(ParameterRequest) returns (ParameterReply) {} // remove predefined values list
+
+    rpc get(ParameterRequest) returns (ParameterReply) {}
+    rpc set(ParameterRequest) returns (ParameterReply) {}
+
+    // enums
+    rpc enums(ParameterRequest) returns (ParameterReply) {}
+    rpc set_enum(ParameterRequest) returns (ParameterReply) {}
+    rpc set_enums(ParameterRequest) returns (ParameterReply) {}
+    rpc has_enum(ParameterRequest) returns (ParameterReply) {}
+
+    // owner
+    rpc owner(ParameterRequest) returns (ParameterReply) {}
+}
+
+message ParameterRequest {
+    Parameter parameter = 1; // rpc all
+    string display_name = 2; // rpc set_display_name
+    string desc = 3; // rpc set_desc
+    Value value = 4; // rpc set, set_enum
+    map<string, Value> enums = 5; // rpc set_enums
+    string enum_name = 6; // rpc has_enum, set_enum
+}
+
+message ParameterReply {
+    string name = 1; // rpc name
+    string display_name = 2; // rpc display_name
+    string desc = 3; // rpc desc
+    Value value = 4; // rpc get
+    map<string, Value> enums = 5; // rpc enums
+
+    bool yes = 100; // rpc is_string, is_int, is_double, is_datetime, is_bool, is_runtime, is_setup, is_hidden, is_common, is_read_only, is_read_write, is_licensed, has_enum
+    Object object = 200; // rpc owner
+}
+
+
+// Event Service
+service EventService {
+    rpc name(EventRequest) returns (EventReply) {}
+    rpc display_name(EventRequest) returns (EventReply) {}
+    rpc desc(EventRequest) returns (EventReply) {}
+
+    rpc set_display_name(EventRequest) returns (EventReply) {}
+    rpc set_desc(EventRequest) returns (EventReply) {}
+
+    rpc is_trivial(EventRequest) returns (EventReply) {}
+    rpc is_minor(EventRequest) returns (EventReply) {}
+    rpc is_major(EventRequest) returns (EventReply) {}
+    rpc is_critical(EventRequest) returns (EventReply) {}
+    rpc is_blocker(EventRequest) returns (EventReply) {}
+
+    rpc set_trivial(EventRequest) returns (EventReply) {}
+    rpc set_minor(EventRequest) returns (EventReply) {}
+    rpc set_major(EventRequest) returns (EventReply) {}
+    rpc set_critical(EventRequest) returns (EventReply) {}
+    rpc set_blocker(EventRequest) returns (EventReply) {}
+
+    rpc set_time(EventRequest) returns (EventReply) {}
+    rpc emit(EventRequest) returns (EventReply) {}
+
+    // arguments
+    rpc clear(EventRequest) returns (EventReply) {} // remove event arguments (all or one)
+    rpc argument_list(EventRequest) returns (EventReply) {}
+    rpc argument(EventRequest) returns (EventReply) {}
+    rpc set_argument(EventRequest) returns (EventReply) {}
+    rpc has_argument(EventRequest) returns (EventReply) {}
+
+    // owner
+    rpc owner(EventRequest) returns (EventReply) {}
+}
+
+message EventRequest {
+    Event event = 1; // rpc all
+    string display_name = 2; // rpc set_display_name
+    string desc = 3; // rpc set_desc
+    uint64 time = 4; // rpc set_time
+
+    string argument = 5; // rpc argument, set_argument, has_argument, optional for rpc clear
+    Value value = 6; // prc set_argument
+    map<string, Value> enums = 7; // optional for rpc set_argument
+
+    repeated Value values = 8; // rpc emit
+}
+
+message EventReply {
+    string name = 1; // rpc name, argument
+    string display_name = 2; // rpc display_name
+    string desc = 3; // rpc desc
+
+    Value value = 4; // rpc argument
+    map<string, Value> enums = 5; // optional for rpc argument
+    repeated string names = 6; // rpc argument_list
+
+    bool yes = 100; // rpc is_trivial, is_minor, is_major, is_critical, is_blocker, has_argument
+    Object object = 200; // rpc owner
+}
+
+
+// Command Service
+service CommandService {
+    rpc name(CommandRequest) returns (CommandReply) {}
+    rpc display_name(CommandRequest) returns (CommandReply) {}
+    rpc desc(CommandRequest) returns (CommandReply) {}
+
+    rpc set_display_name(CommandRequest) returns (CommandReply) {}
+    rpc set_desc(CommandRequest) returns (CommandReply) {}
+
+    // result type
+    rpc is_string(CommandRequest) returns (CommandReply) {}
+    rpc is_int(CommandRequest) returns (CommandReply) {}
+    rpc is_double(CommandRequest) returns (CommandReply) {}
+    rpc is_datetime(CommandRequest) returns (CommandReply) {}
+    rpc is_bool(CommandRequest) returns (CommandReply) {}
+
+    rpc set_result(CommandRequest) returns (CommandReply) {}
+
+    // arguments
+    rpc clear(CommandRequest) returns (CommandReply) {} // remove command arguments (all or one)
+    rpc argument_list(CommandRequest) returns (CommandReply) {}
+    rpc argument(CommandRequest) returns (CommandReply) {}
+    rpc set_argument(CommandRequest) returns (CommandReply) {}
+    rpc has_argument(CommandRequest) returns (CommandReply) {}
+
+    // owner
+    rpc owner(CommandRequest) returns (CommandReply) {}
+}
+
+message CommandRequest {
+    Command command = 1; // rpc all
+    string display_name = 2; // rpc set_display_name
+    string desc = 3; // rpc set_desc
+
+    string argument = 5; // rpc argument, set_argument, has_argument, optional for rpc clear
+    Value value = 6; // prc set_argument, set_result
+    map<string, Value> enums = 7; // optional for rpc set_argument
+}
+
+message CommandReply {
+    string name = 1; // rpc name, argument
+    string display_name = 2; // rpc display_name
+    string desc = 3; // rpc desc
+
+    Value value = 4; // rpc argument
+    map<string, Value> enums = 5; // optional for rpc argument
+    repeated string names = 6; // rpc argument_list
+
+    bool yes = 100; // rpc is_string, is_int, is_double, is_datetime, is_bool
+    Object object = 200; // rpc owner
+}
+
+
+// Adapter Service
+service AdapterService {
+    rpc states(stream StubStream) returns (stream AdapterStream) {}
+}
+
+message StubStream {
+}
+
+message AdapterStream {
+    AdapterState state = 1;
+    Object object = 2; // state AFTER_CREATING_OBJECT, BEFORE_REMOVING_OBJECT, BEFORE_GETTING_AVAILABLE_CHILDREN
+    Parameter parameter = 3; // state AFTER_SETTING_PARAMETER
+    Command command = 4; // state EXECUTING_COMMAND
+
+    enum AdapterState {
+        AFTER_CREATING_OBJECT = 0;
+        BEFORE_REMOVING_OBJECT = 1;
+        GETTING_AVAILABLE_CHILDREN = 2;
+        AFTER_SETTING_PARAMETER = 3;
+        EXECUTING_COMMAND = 4;
+    }
+}
