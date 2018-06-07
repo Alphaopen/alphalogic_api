@@ -26,7 +26,6 @@ class MultiStub(object):
     def dict_create_helper(service):
         obj_fun_list = [fun for fun in dir(service)
               if callable(getattr(service, fun))]
-
         return set(filter(lambda fun : fun[0:2]!='__', obj_fun_list)) # получить методы Service, исключая служебные
 
     def object_call(self, *args):
@@ -41,8 +40,8 @@ class MultiStub(object):
             raise Exception('{} not found in object_fun_set'.format(argv[0]))
         '''
 
-    def parameter_call(self, *args):
-        par_w = rpc_pb2.ParameterRequest()
+    def parameter_call(self, *args, **kwargs):
+        par_w = rpc_pb2.ParameterRequest(**kwargs)
         return self.call_helper(*args, fun_set=MultiStub.parameter_fun_set, request=par_w, stub=self.stub_parameter)
 
     def event_call(self, *args):
