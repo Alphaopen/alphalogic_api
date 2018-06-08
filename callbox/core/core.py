@@ -13,7 +13,7 @@
 '''
 
 from callbox.core.type_attributes import VisibleType, ValueType, AccessType
-from callbox.core.parameter import Parameter, ParameterBool, ParameterInt64, ParameterDouble, ParameterDatetime, ParameterString, PARAMETER_LIST
+from callbox.core.parameter import Parameter, ParameterBool, ParameterInt64, ParameterDouble, ParameterDatetime, ParameterString
 from callbox.core.multistub import MultiStub
 
 
@@ -27,43 +27,43 @@ class Root(object):
         print self.api.object_call('is_root', 'yes')
 '''
 
-class Component(object):
+
+class Device(object):
     '''
     type - ссылка на реализацию
     '''
-    list_devices = {} # Список всех узлов, по типу узла можно обратиться в словаре к модели узла
-    connection_diag = {} # Описывает связи между узлами
+    list_devices = {}  # Список всех узлов, по типу узла можно обратиться в словаре к модели узла
+    connection_diag = {}  # Описывает связи между узлами
 
     @staticmethod
     def add_device_to_list(type_device, device):
-        Component.list_devices[type_device] = device
+        Device.list_devices[type_device] = device
 
     @staticmethod
     def add_to_connection_diag(parent_type, type_device):
-        if parent_type in Component.connection_diag:
-            Component.connection_diag[parent_type].append(type_device)
+        if parent_type in Device.connection_diag:
+            Device.connection_diag[parent_type].append(type_device)
         else:
-            Component.connection_diag[parent_type] = [type_device]
+            Device.connection_diag[parent_type] = [type_device]
 
-
-class Device(Component):
     def __init__(self, parent, type_device):
         self.__dict__["parent"] = parent
         self.__dict__["type_device"] = type_device
         self.__dict__["parameters"] = []
         self.__dict__["events"] = []
         self.__dict__["commands"] = []
-        Component.add_device_to_list(type_device, self)
+        Device.add_device_to_list(type_device, self)
         if parent != None:
-            Component.add_to_connection_diag(parent.type_device, type_device)
+            Device.add_to_connection_diag(parent.type_device, type_device)
 
     def __getattr__(self, name):
         pass
 
     def __setattr__(self, name, value):
-        if type(value) in PARAMETER_LIST:
+        if issubclass(type(value), Parameter):
             self.parameters.append(name)
             value.name = name
+            value.__class__ = Parameter # ParameterBool, ParameterInt64 - просто обертка. Все данные храняться в Parameter
             self.__dict__[name] = value
         '''
         if name == "parameter":
@@ -81,14 +81,14 @@ class Root(Device):
         super(Root, self).__init__(None, type_device)
 
 
-class Event(Component):
+class Event(object):
     def __init__(self, name, priority, arguments=[]):
         self.name = name
         self.priority = priority
         self.arguments = arguments
         self.id = None
 
-class Command(Component):
+class Command(object):
     def __init__(self, name, result_type, arguments=[]):
         self.name = name
         self.result_type = result_type
@@ -96,8 +96,24 @@ class Command(Component):
         self.defaults = None  # Значения аргументов команды по умолчанию
         self.id = None
 
-
+'''
+Попробовать сделать его абстрактным, чтобы 
+нельзя было создать экземпляр
+'''
 class Adapter(object):
+
+    def __init__(self):
+        self.root = self.get_root()
+
+    def get_root(self):
+        root_list = filter (lambda attr: type(getattr(self, attr)) is Root, dir(self))
+        if len(root_list)<1:
+            raise Exception("Not found Root device")
+        elif len(root_list)>1:
+            raise Exception("The number of Root device is {0}. It's too many".format(len(root_list)))
+        return type(self).__dict__[root_list[0]]
+
+
     def get_available_children(self, connection_diag, type_device):
         #unregister_all_maker(device_id) - вызов api
         print "unregister_all_maker"
@@ -107,6 +123,16 @@ class Adapter(object):
 
     #def after_creating_object(self, type_device, ):
 
+    '''
+    Конфигурирование узла по заготовленной схеме
+    '''
+    def configure_device_from_scheme(self, type_object, object_id):
+        object = self.root.list_devices[type_object]
+        parameters_name = filter (lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
+        '''
+        for name in parameters_name:
+            object.__dict__[name]
+        '''
 
 
 class ExampleAdapter(Adapter):
@@ -121,9 +147,9 @@ class ExampleAdapter(Adapter):
     Можно передавать имя параметра в аргументах Parameter("name1", ...)
     Можно передавать имя параметра в  
     '''
+    d1.name3 = ParameterInt64(Value=3)
     d1.name1 = Parameter(ValueType.INT64, VisibleType.HIDDEN, AccessType.READ_ONLY)
     d1.name2 = Parameter(ValueType.INT64)
-    d1.name3 = ParameterInt64(Value=3)
     #d1.parameter = Parameter("name1", value_type=ValueType.INT64, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
     #d1.parameter = Parameter("name2", value_type=ValueType.STRING, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
     #d2.parameter = Parameter("name3", value_type=ValueType.DOUBLE, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
@@ -142,10 +168,12 @@ class ExampleAdapter(Adapter):
 
 
     def __init__(self, target, name):
-        self.get_available_children(Component.connection_diag, "type")
+        super(ExampleAdapter, self).__init__()
+        #self.get_available_children(Component.connection_diag, "type")
         #root = Root(target, name)
         #d1 = Device(root, "node 1")
         #d2 = Device(parenr=r, "node 2")
+
 
 
     #r = Root("ip:port", "Name node")

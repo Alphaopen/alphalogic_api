@@ -21,30 +21,24 @@ class Parameter(object):
 
 class ParameterBool(Parameter):
     def __init__(self, *args, **kwargs):
-        self.ValueType = ValueType.BOOL()[1]
-        super(ParameterBool, self).__init__(*args, **kwargs)
+        super(ParameterBool, self).__init__(ValueType.BOOL, *args, **kwargs)
 
 
 class ParameterInt64(Parameter):
     def __init__(self, *args, **kwargs):
-        self.ValueType = ValueType.INT64()[1]
-        super(ParameterInt64, self).__init__(*args, **kwargs)
+        super(ParameterInt64, self).__init__(ValueType.INT64, *args, **kwargs)
 
 
 class ParameterDouble(Parameter):
     def __init__(self, *args, **kwargs):
-        self.ValueType = ValueType.DOUBLE()[1]
-        super(ParameterDouble, self).__init__(*args, **kwargs)
+        super(ParameterDouble, self).__init__(ValueType.DOUBLE, *args, **kwargs)
 
 
 class ParameterDatetime(Parameter):
     def __init__(self, *args, **kwargs):
-        self.ValueType = ValueType.DATETIME()[1]
-        super(ParameterDatetime, self).__init__(*args, **kwargs)
+        super(ParameterDatetime, self).__init__(ValueType.DATETIME, *args, **kwargs)
 
 class ParameterString(Parameter):
     def __init__(self, *args, **kwargs):
-        self.ValueType = ValueType.STRING()[1]
-        super(ParameterString, self).__init__(*args, **kwargs)
+        super(ParameterString, self).__init__(ValueType.STRING, *args, **kwargs)
 
-PARAMETER_LIST = [Parameter, ParameterBool, ParameterInt64, ParameterDouble, ParameterDatetime, ParameterString]
