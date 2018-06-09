@@ -46,8 +46,9 @@ class MultiStub(object):
               if callable(getattr(service, fun))]
         return set(filter(lambda fun : fun[0:2]!='__', obj_fun_list)) # получить методы Service, исключая служебные
 
-    def object_call(self, *args):
-        obj_w = ObjectRequest()
+    def object_call(self, *args, **kwargs):
+        #obj_w = ObjectRequest(**kwargs)
+        obj_w = ObjectRequest(**kwargs)
         return self.call_helper(*args, fun_set=MultiStub.object_fun_set,  request=obj_w, stub=self.stub_object)
         '''
         if argv[0] in MultiStub.object_fun_set:
@@ -82,9 +83,11 @@ class MultiStub(object):
        Как можно проинспектировать тип переменной, которую надо создать чтобы передать в stub?
     '''
     def call_helper(self, *args, **kwargs):
-        if args[0] in kwargs['fun_set']:
+        if args[0] in kwargs['fun_set']: # args[0] -название функции, проверка на допустимость
             answer = getattr(kwargs['stub'], args[0])(kwargs['request'])
-            return getattr(answer.object, args[1])
+            for attr_name in args[1:]:
+                answer = getattr(answer, attr_name)
+            return answer
         else:
             raise Exception('{0} not found in {1}'.format(args[0], kwargs['fun_set']))
 

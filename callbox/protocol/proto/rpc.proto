@@ -84,7 +84,8 @@ service ObjectService {
 message ObjectRequest {
     Object object = 1; // rpc all
     string type = 2; // rpc set_type
-    string name = 3; // rpc create_X_parameter, create_event, create_X_command, register_maker
+    string name = 3; // rpc create_X_parameter, create_event, create_X_command, register_maker, parameter, event, command
+    string reason = 4; // optional for rpc state_no_connection, state_connected, state_error, state_ok
 }
 
 message ObjectReply {
@@ -99,7 +100,7 @@ message ObjectReply {
     repeated Command commands = 8; // rpc commands
     repeated Object children = 9; // rpc children
 
-    string reason = 10; // optional for rpc state_no_connection, state_connected, state_error, state_ok
+    string type = 10; // rpc type
 
     bool yes = 100; // rpc is_root, is_removed, is_connected, is_error, is_ready_to_work
 }

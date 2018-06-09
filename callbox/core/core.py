@@ -16,6 +16,7 @@ from callbox.core.type_attributes import VisibleType, ValueType, AccessType
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt64, ParameterDouble, ParameterDatetime, ParameterString
 from callbox.core.multistub import MultiStub
 
+import callbox.protocol.rpc_pb2 as rpc_pb2
 
 '''
 class Root(object):
@@ -104,6 +105,7 @@ class Adapter(object):
 
     def __init__(self):
         self.root = self.get_root()
+        self.multi_stub = MultiStub("192.168.50.23:42001")
 
     def get_root(self):
         root_list = filter (lambda attr: type(getattr(self, attr)) is Root, dir(self))
@@ -128,11 +130,48 @@ class Adapter(object):
     '''
     def configure_device_from_scheme(self, type_object, object_id):
         object = self.root.list_devices[type_object]
-        parameters_name = filter (lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
-        '''
-        for name in parameters_name:
-            object.__dict__[name]
-        '''
+        list_parameters_name = filter (lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
+        object_rpc = rpc_pb2.Object(id = object_id)
+        for name in list_parameters_name:
+            value_type = object.__dict__[name].ValueType
+            if value_type == "BOOL":
+                id_parameter = self.multi_stub.object_call('create_bool_parameter', 'parameter', 'id', object=object_rpc, name=name)
+            elif value_type == "INT64":
+                id_parameter = self.multi_stub.object_call('create_int_parameter', 'parameter', 'id', object=object_rpc, name=name)
+            elif value_type == "DOUBLE":
+                id_parameter = self.multi_stub.object_call('create_double_parameter', 'parameter', 'id', object=object_rpc, name=name)
+            elif value_type == "DATETIME":
+                id_parameter = self.multi_stub.object_call('create_datetime_parameter', 'parameter', 'id', object=object_rpc, name=name)
+            elif value_type == "STRING":
+                id_parameter = self.multi_stub.object_call('create_string_parameter', 'parameter', 'id', object=object_rpc, name=name)
+
+            parameter_rpc = rpc_pb2.Parameter(id=id_parameter)
+            visible_type = object.__dict__[name].VisibleType
+            if visible_type == "RUNTIME":
+                self.multi_stub.parameter_call('set_runtime', parameter=parameter_rpc)
+            elif visible_type == "SETUP":
+                self.multi_stub.parameter_call('set_setup', parameter=parameter_rpc)
+            elif visible_type == "HIDDEN":
+                self.multi_stub.parameter_call('set_hidden', parameter=parameter_rpc)
+            elif visible_type == "COMMON":
+                self.multi_stub.parameter_call('set_common', parameter=parameter_rpc)
+
+            access_type = object.__dict__[name].AccessType
+            if access_type == "READ_ONLY":
+                self.multi_stub.parameter_call('set_read_only', parameter=parameter_rpc)
+            elif access_type == "READ_WRITE":
+                self.multi_stub.parameter_call('set_read_write', parameter=parameter_rpc)
+            '''
+            if hasattr(object, 'Value'):
+                self.multi_stub.parameter_call('set', parameter=parameter_rpc)
+            '''
+
+
+        #ObjectService.create_string_parameter etc
+        #set_runtime, set_setup
+        #set_read_only, set_read_write
+        #set value
+
 
 
 class ExampleAdapter(Adapter):
@@ -140,16 +179,24 @@ class ExampleAdapter(Adapter):
     Общая схема адаптера
     '''
 
-    root = Root("type")
+    root = Root("healhAdapterRoot")
     d1 = Device(root, "type1")
     d2 = Device(root, "type2")
     '''
     Можно передавать имя параметра в аргументах Parameter("name1", ...)
     Можно передавать имя параметра в  
     '''
-    d1.name3 = ParameterInt64(Value=3)
-    d1.name1 = Parameter(ValueType.INT64, VisibleType.HIDDEN, AccessType.READ_ONLY)
-    d1.name2 = Parameter(ValueType.INT64)
+    root.name3 = ParameterInt64(Value=3)
+    root.name1 = Parameter(ValueType.INT64, VisibleType.HIDDEN, AccessType.READ_ONLY)
+    root.name2 = Parameter(ValueType.INT64)
+
+    root.name4 = ParameterDouble(Value=-1.9)
+    root.name5 = Parameter(VisibleType.HIDDEN, AccessType.READ_ONLY, ValueType.INT64)
+    root.name6 = Parameter(ValueType.INT64)
+
+    root.name7 = ParameterInt64(Value=3)
+    root.name8 = Parameter(ValueType.INT64, VisibleType.HIDDEN, AccessType.READ_ONLY)
+    root.name9 = Parameter(ValueType.INT64)
     #d1.parameter = Parameter("name1", value_type=ValueType.INT64, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
     #d1.parameter = Parameter("name2", value_type=ValueType.STRING, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
     #d2.parameter = Parameter("name3", value_type=ValueType.DOUBLE, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)

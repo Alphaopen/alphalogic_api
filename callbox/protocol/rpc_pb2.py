@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='rpc.proto',
   package='adapter.rpc',
   syntax='proto3',
-  serialized_pb=_b('\n\trpc.proto\x12\x0b\x61\x64\x61pter.rpc\"\x14\n\x06Object\x12\n\n\x02id\x18\x01 \x01(\x04\"\x17\n\tParameter\x12\n\n\x02id\x18\x01 \x01(\x04\"\x15\n\x07\x43ommand\x12\n\n\x02id\x18\x01 \x01(\x04\"\x13\n\x05\x45vent\x12\n\n\x02id\x18\x01 \x01(\x04\"\x8d\x01\n\x05Value\x12\x14\n\nbool_value\x18\x01 \x01(\x08H\x00\x12\x15\n\x0bint64_value\x18\x02 \x01(\x03H\x00\x12\x16\n\x0c\x64ouble_value\x18\x03 \x01(\x01H\x00\x12\x18\n\x0e\x64\x61tetime_value\x18\x04 \x01(\x03H\x00\x12\x16\n\x0cstring_value\x18\x05 \x01(\tH\x00\x42\r\n\x0boneof_value\"P\n\rObjectRequest\x12#\n\x06object\x18\x01 \x01(\x0b\x32\x13.adapter.rpc.Object\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"\xe3\x02\n\x0bObjectReply\x12#\n\x06object\x18\x01 \x01(\x0b\x32\x13.adapter.rpc.Object\x12)\n\tparameter\x18\x03 \x01(\x0b\x32\x16.adapter.rpc.Parameter\x12!\n\x05\x65vent\x18\x04 \x01(\x0b\x32\x12.adapter.rpc.Event\x12%\n\x07\x63ommand\x18\x05 \x01(\x0b\x32\x14.adapter.rpc.Command\x12*\n\nparameters\x18\x06 \x03(\x0b\x32\x16.adapter.rpc.Parameter\x12\"\n\x06\x65vents\x18\x07 \x03(\x0b\x32\x12.adapter.rpc.Event\x12&\n\x08\x63ommands\x18\x08 \x03(\x0b\x32\x14.adapter.rpc.Command\x12%\n\x08\x63hildren\x18\t \x03(\x0b\x32\x13.adapter.rpc.Object\x12\x0e\n\x06reason\x18\n \x01(\t\x12\x0b\n\x03yes\x18\x64 \x01(\x08\"\x92\x02\n\x10ParameterRequest\x12)\n\tparameter\x18\x01 \x01(\x0b\x32\x16.adapter.rpc.Parameter\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12!\n\x05value\x18\x04 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x37\n\x05\x65nums\x18\x05 \x03(\x0b\x32(.adapter.rpc.ParameterRequest.EnumsEntry\x12\x11\n\tenum_name\x18\x06 \x01(\t\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\x91\x02\n\x0eParameterReply\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12!\n\x05value\x18\x04 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x35\n\x05\x65nums\x18\x05 \x03(\x0b\x32&.adapter.rpc.ParameterReply.EnumsEntry\x12\x0b\n\x03yes\x18\x64 \x01(\x08\x12$\n\x06object\x18\xc8\x01 \x01(\x0b\x32\x13.adapter.rpc.Object\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\xb3\x02\n\x0c\x45ventRequest\x12!\n\x05\x65vent\x18\x01 \x01(\x0b\x32\x12.adapter.rpc.Event\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\x0c\n\x04time\x18\x04 \x01(\x04\x12\x10\n\x08\x61rgument\x18\x05 \x01(\t\x12!\n\x05value\x18\x06 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x33\n\x05\x65nums\x18\x07 \x03(\x0b\x32$.adapter.rpc.EventRequest.EnumsEntry\x12\"\n\x06values\x18\x08 \x03(\x0b\x32\x12.adapter.rpc.Value\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\x98\x02\n\nEventReply\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12!\n\x05value\x18\x04 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x31\n\x05\x65nums\x18\x05 \x03(\x0b\x32\".adapter.rpc.EventReply.EnumsEntry\x12\r\n\x05names\x18\x06 \x03(\t\x12\x0b\n\x03yes\x18\x64 \x01(\x08\x12$\n\x06object\x18\xc8\x01 \x01(\x0b\x32\x13.adapter.rpc.Object\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\x89\x02\n\x0e\x43ommandRequest\x12%\n\x07\x63ommand\x18\x01 \x01(\x0b\x32\x14.adapter.rpc.Command\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\x10\n\x08\x61rgument\x18\x05 \x01(\t\x12!\n\x05value\x18\x06 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x35\n\x05\x65nums\x18\x07 \x03(\x0b\x32&.adapter.rpc.CommandRequest.EnumsEntry\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\x9c\x02\n\x0c\x43ommandReply\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12!\n\x05value\x18\x04 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x33\n\x05\x65nums\x18\x05 \x03(\x0b\x32$.adapter.rpc.CommandReply.EnumsEntry\x12\r\n\x05names\x18\x06 \x03(\t\x12\x0b\n\x03yes\x18\x64 \x01(\x08\x12$\n\x06object\x18\xc8\x01 \x01(\x0b\x32\x13.adapter.rpc.Object\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\x0c\n\nStubStream\"\xda\x02\n\rAdapterStream\x12\x36\n\x05state\x18\x01 \x01(\x0e\x32\'.adapter.rpc.AdapterStream.AdapterState\x12#\n\x06object\x18\x02 \x01(\x0b\x32\x13.adapter.rpc.Object\x12)\n\tparameter\x18\x03 \x01(\x0b\x32\x16.adapter.rpc.Parameter\x12%\n\x07\x63ommand\x18\x04 \x01(\x0b\x32\x14.adapter.rpc.Command\"\x99\x01\n\x0c\x41\x64\x61pterState\x12\x19\n\x15\x41\x46TER_CREATING_OBJECT\x10\x00\x12\x1a\n\x16\x42\x45\x46ORE_REMOVING_OBJECT\x10\x01\x12\x1e\n\x1aGETTING_AVAILABLE_CHILDREN\x10\x02\x12\x1b\n\x17\x41\x46TER_SETTING_PARAMETER\x10\x03\x12\x15\n\x11\x45XECUTING_COMMAND\x10\x04\x32\xda\x13\n\rObjectService\x12>\n\x04root\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x41\n\x07is_root\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12@\n\x06parent\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12>\n\x04type\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x42\n\x08set_type\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12Q\n\x17\x63reate_string_parameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12N\n\x14\x63reate_int_parameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12Q\n\x17\x63reate_double_parameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12S\n\x19\x63reate_datetime_parameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12O\n\x15\x63reate_bool_parameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x46\n\x0c\x63reate_event\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12O\n\x15\x63reate_string_command\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12L\n\x12\x63reate_int_command\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12O\n\x15\x63reate_double_command\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12Q\n\x17\x63reate_datetime_command\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12M\n\x13\x63reate_bool_command\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x44\n\nparameters\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12@\n\x06\x65vents\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x42\n\x08\x63ommands\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x42\n\x08\x63hildren\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x43\n\tparameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12?\n\x05\x65vent\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x41\n\x07\x63ommand\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x44\n\nis_removed\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12H\n\x0eregister_maker\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12O\n\x15unregister_all_makers\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12S\n\x19\x63reate_package_diagnostic\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x46\n\x0cis_connected\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x42\n\x08is_error\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12J\n\x10is_ready_to_work\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12M\n\x13state_no_connection\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12I\n\x0fstate_connected\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x45\n\x0bstate_error\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x42\n\x08state_ok\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x32\xed\x12\n\x10ParameterService\x12\x44\n\x04name\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12L\n\x0c\x64isplay_name\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x44\n\x04\x64\x65sc\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12P\n\x10set_display_name\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12H\n\x08set_desc\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tis_string\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x46\n\x06is_int\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tis_double\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12K\n\x0bis_datetime\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12G\n\x07is_bool\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12J\n\nis_runtime\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12H\n\x08is_setup\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tis_hidden\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tis_common\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12K\n\x0bset_runtime\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tset_setup\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12J\n\nset_hidden\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12J\n\nset_common\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12L\n\x0cis_read_only\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12M\n\ris_read_write\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12M\n\rset_read_only\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12N\n\x0eset_read_write\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12K\n\x0bis_licensed\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12L\n\x0cset_licensed\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x45\n\x05\x63lear\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x43\n\x03get\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x43\n\x03set\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x45\n\x05\x65nums\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12H\n\x08set_enum\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tset_enums\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12H\n\x08has_enum\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x45\n\x05owner\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x32\x96\x0c\n\x0c\x45ventService\x12<\n\x04name\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x44\n\x0c\x64isplay_name\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12<\n\x04\x64\x65sc\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12H\n\x10set_display_name\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12@\n\x08set_desc\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x42\n\nis_trivial\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12@\n\x08is_minor\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12@\n\x08is_major\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x43\n\x0bis_critical\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x42\n\nis_blocker\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x43\n\x0bset_trivial\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x41\n\tset_minor\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x41\n\tset_major\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x44\n\x0cset_critical\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x43\n\x0bset_blocker\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12@\n\x08set_time\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12<\n\x04\x65mit\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12=\n\x05\x63lear\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x45\n\rargument_list\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12@\n\x08\x61rgument\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x44\n\x0cset_argument\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x44\n\x0chas_argument\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12=\n\x05owner\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x32\xc5\t\n\x0e\x43ommandService\x12@\n\x04name\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12H\n\x0c\x64isplay_name\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12@\n\x04\x64\x65sc\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12L\n\x10set_display_name\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x44\n\x08set_desc\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x45\n\tis_string\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x42\n\x06is_int\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x45\n\tis_double\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12G\n\x0bis_datetime\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x43\n\x07is_bool\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x46\n\nset_result\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x41\n\x05\x63lear\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12I\n\rargument_list\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x44\n\x08\x61rgument\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12H\n\x0cset_argument\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12H\n\x0chas_argument\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x41\n\x05owner\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x32U\n\x0e\x41\x64\x61pterService\x12\x43\n\x06states\x12\x17.adapter.rpc.StubStream\x1a\x1a.adapter.rpc.AdapterStream\"\x00(\x01\x30\x01\x42\x03\xf8\x01\x01\x62\x06proto3')
+  serialized_pb=_b('\n\trpc.proto\x12\x0b\x61\x64\x61pter.rpc\"\x14\n\x06Object\x12\n\n\x02id\x18\x01 \x01(\x04\"\x17\n\tParameter\x12\n\n\x02id\x18\x01 \x01(\x04\"\x15\n\x07\x43ommand\x12\n\n\x02id\x18\x01 \x01(\x04\"\x13\n\x05\x45vent\x12\n\n\x02id\x18\x01 \x01(\x04\"\x8d\x01\n\x05Value\x12\x14\n\nbool_value\x18\x01 \x01(\x08H\x00\x12\x15\n\x0bint64_value\x18\x02 \x01(\x03H\x00\x12\x16\n\x0c\x64ouble_value\x18\x03 \x01(\x01H\x00\x12\x18\n\x0e\x64\x61tetime_value\x18\x04 \x01(\x03H\x00\x12\x16\n\x0cstring_value\x18\x05 \x01(\tH\x00\x42\r\n\x0boneof_value\"`\n\rObjectRequest\x12#\n\x06object\x18\x01 \x01(\x0b\x32\x13.adapter.rpc.Object\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0e\n\x06reason\x18\x04 \x01(\t\"\xe1\x02\n\x0bObjectReply\x12#\n\x06object\x18\x01 \x01(\x0b\x32\x13.adapter.rpc.Object\x12)\n\tparameter\x18\x03 \x01(\x0b\x32\x16.adapter.rpc.Parameter\x12!\n\x05\x65vent\x18\x04 \x01(\x0b\x32\x12.adapter.rpc.Event\x12%\n\x07\x63ommand\x18\x05 \x01(\x0b\x32\x14.adapter.rpc.Command\x12*\n\nparameters\x18\x06 \x03(\x0b\x32\x16.adapter.rpc.Parameter\x12\"\n\x06\x65vents\x18\x07 \x03(\x0b\x32\x12.adapter.rpc.Event\x12&\n\x08\x63ommands\x18\x08 \x03(\x0b\x32\x14.adapter.rpc.Command\x12%\n\x08\x63hildren\x18\t \x03(\x0b\x32\x13.adapter.rpc.Object\x12\x0c\n\x04type\x18\n \x01(\t\x12\x0b\n\x03yes\x18\x64 \x01(\x08\"\x92\x02\n\x10ParameterRequest\x12)\n\tparameter\x18\x01 \x01(\x0b\x32\x16.adapter.rpc.Parameter\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12!\n\x05value\x18\x04 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x37\n\x05\x65nums\x18\x05 \x03(\x0b\x32(.adapter.rpc.ParameterRequest.EnumsEntry\x12\x11\n\tenum_name\x18\x06 \x01(\t\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\x91\x02\n\x0eParameterReply\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12!\n\x05value\x18\x04 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x35\n\x05\x65nums\x18\x05 \x03(\x0b\x32&.adapter.rpc.ParameterReply.EnumsEntry\x12\x0b\n\x03yes\x18\x64 \x01(\x08\x12$\n\x06object\x18\xc8\x01 \x01(\x0b\x32\x13.adapter.rpc.Object\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\xb3\x02\n\x0c\x45ventRequest\x12!\n\x05\x65vent\x18\x01 \x01(\x0b\x32\x12.adapter.rpc.Event\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\x0c\n\x04time\x18\x04 \x01(\x04\x12\x10\n\x08\x61rgument\x18\x05 \x01(\t\x12!\n\x05value\x18\x06 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x33\n\x05\x65nums\x18\x07 \x03(\x0b\x32$.adapter.rpc.EventRequest.EnumsEntry\x12\"\n\x06values\x18\x08 \x03(\x0b\x32\x12.adapter.rpc.Value\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\x98\x02\n\nEventReply\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12!\n\x05value\x18\x04 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x31\n\x05\x65nums\x18\x05 \x03(\x0b\x32\".adapter.rpc.EventReply.EnumsEntry\x12\r\n\x05names\x18\x06 \x03(\t\x12\x0b\n\x03yes\x18\x64 \x01(\x08\x12$\n\x06object\x18\xc8\x01 \x01(\x0b\x32\x13.adapter.rpc.Object\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\x89\x02\n\x0e\x43ommandRequest\x12%\n\x07\x63ommand\x18\x01 \x01(\x0b\x32\x14.adapter.rpc.Command\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\x10\n\x08\x61rgument\x18\x05 \x01(\t\x12!\n\x05value\x18\x06 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x35\n\x05\x65nums\x18\x07 \x03(\x0b\x32&.adapter.rpc.CommandRequest.EnumsEntry\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\x9c\x02\n\x0c\x43ommandReply\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12!\n\x05value\x18\x04 \x01(\x0b\x32\x12.adapter.rpc.Value\x12\x33\n\x05\x65nums\x18\x05 \x03(\x0b\x32$.adapter.rpc.CommandReply.EnumsEntry\x12\r\n\x05names\x18\x06 \x03(\t\x12\x0b\n\x03yes\x18\x64 \x01(\x08\x12$\n\x06object\x18\xc8\x01 \x01(\x0b\x32\x13.adapter.rpc.Object\x1a@\n\nEnumsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.adapter.rpc.Value:\x02\x38\x01\"\x0c\n\nStubStream\"\xda\x02\n\rAdapterStream\x12\x36\n\x05state\x18\x01 \x01(\x0e\x32\'.adapter.rpc.AdapterStream.AdapterState\x12#\n\x06object\x18\x02 \x01(\x0b\x32\x13.adapter.rpc.Object\x12)\n\tparameter\x18\x03 \x01(\x0b\x32\x16.adapter.rpc.Parameter\x12%\n\x07\x63ommand\x18\x04 \x01(\x0b\x32\x14.adapter.rpc.Command\"\x99\x01\n\x0c\x41\x64\x61pterState\x12\x19\n\x15\x41\x46TER_CREATING_OBJECT\x10\x00\x12\x1a\n\x16\x42\x45\x46ORE_REMOVING_OBJECT\x10\x01\x12\x1e\n\x1aGETTING_AVAILABLE_CHILDREN\x10\x02\x12\x1b\n\x17\x41\x46TER_SETTING_PARAMETER\x10\x03\x12\x15\n\x11\x45XECUTING_COMMAND\x10\x04\x32\xda\x13\n\rObjectService\x12>\n\x04root\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x41\n\x07is_root\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12@\n\x06parent\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12>\n\x04type\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x42\n\x08set_type\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12Q\n\x17\x63reate_string_parameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12N\n\x14\x63reate_int_parameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12Q\n\x17\x63reate_double_parameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12S\n\x19\x63reate_datetime_parameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12O\n\x15\x63reate_bool_parameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x46\n\x0c\x63reate_event\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12O\n\x15\x63reate_string_command\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12L\n\x12\x63reate_int_command\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12O\n\x15\x63reate_double_command\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12Q\n\x17\x63reate_datetime_command\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12M\n\x13\x63reate_bool_command\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x44\n\nparameters\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12@\n\x06\x65vents\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x42\n\x08\x63ommands\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x42\n\x08\x63hildren\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x43\n\tparameter\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12?\n\x05\x65vent\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x41\n\x07\x63ommand\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x44\n\nis_removed\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12H\n\x0eregister_maker\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12O\n\x15unregister_all_makers\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12S\n\x19\x63reate_package_diagnostic\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x46\n\x0cis_connected\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x42\n\x08is_error\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12J\n\x10is_ready_to_work\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12M\n\x13state_no_connection\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12I\n\x0fstate_connected\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x45\n\x0bstate_error\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x12\x42\n\x08state_ok\x12\x1a.adapter.rpc.ObjectRequest\x1a\x18.adapter.rpc.ObjectReply\"\x00\x32\xed\x12\n\x10ParameterService\x12\x44\n\x04name\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12L\n\x0c\x64isplay_name\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x44\n\x04\x64\x65sc\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12P\n\x10set_display_name\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12H\n\x08set_desc\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tis_string\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x46\n\x06is_int\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tis_double\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12K\n\x0bis_datetime\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12G\n\x07is_bool\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12J\n\nis_runtime\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12H\n\x08is_setup\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tis_hidden\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tis_common\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12K\n\x0bset_runtime\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tset_setup\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12J\n\nset_hidden\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12J\n\nset_common\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12L\n\x0cis_read_only\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12M\n\ris_read_write\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12M\n\rset_read_only\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12N\n\x0eset_read_write\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12K\n\x0bis_licensed\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12L\n\x0cset_licensed\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x45\n\x05\x63lear\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x43\n\x03get\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x43\n\x03set\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x45\n\x05\x65nums\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12H\n\x08set_enum\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12I\n\tset_enums\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12H\n\x08has_enum\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x12\x45\n\x05owner\x12\x1d.adapter.rpc.ParameterRequest\x1a\x1b.adapter.rpc.ParameterReply\"\x00\x32\x96\x0c\n\x0c\x45ventService\x12<\n\x04name\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x44\n\x0c\x64isplay_name\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12<\n\x04\x64\x65sc\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12H\n\x10set_display_name\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12@\n\x08set_desc\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x42\n\nis_trivial\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12@\n\x08is_minor\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12@\n\x08is_major\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x43\n\x0bis_critical\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x42\n\nis_blocker\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x43\n\x0bset_trivial\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x41\n\tset_minor\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x41\n\tset_major\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x44\n\x0cset_critical\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x43\n\x0bset_blocker\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12@\n\x08set_time\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12<\n\x04\x65mit\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12=\n\x05\x63lear\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x45\n\rargument_list\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12@\n\x08\x61rgument\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x44\n\x0cset_argument\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12\x44\n\x0chas_argument\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x12=\n\x05owner\x12\x19.adapter.rpc.EventRequest\x1a\x17.adapter.rpc.EventReply\"\x00\x32\xc5\t\n\x0e\x43ommandService\x12@\n\x04name\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12H\n\x0c\x64isplay_name\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12@\n\x04\x64\x65sc\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12L\n\x10set_display_name\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x44\n\x08set_desc\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x45\n\tis_string\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x42\n\x06is_int\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x45\n\tis_double\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12G\n\x0bis_datetime\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x43\n\x07is_bool\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x46\n\nset_result\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x41\n\x05\x63lear\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12I\n\rargument_list\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x44\n\x08\x61rgument\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12H\n\x0cset_argument\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12H\n\x0chas_argument\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x12\x41\n\x05owner\x12\x1b.adapter.rpc.CommandRequest\x1a\x19.adapter.rpc.CommandReply\"\x00\x32U\n\x0e\x41\x64\x61pterService\x12\x43\n\x06states\x12\x17.adapter.rpc.StubStream\x1a\x1a.adapter.rpc.AdapterStream\"\x00(\x01\x30\x01\x42\x03\xf8\x01\x01\x62\x06proto3')
 )
 
 
@@ -53,8 +53,8 @@ _ADAPTERSTREAM_ADAPTERSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=2610,
-  serialized_end=2763,
+  serialized_start=2624,
+  serialized_end=2777,
 )
 _sym_db.RegisterEnumDescriptor(_ADAPTERSTREAM_ADAPTERSTATE)
 
@@ -273,6 +273,13 @@ _OBJECTREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='reason', full_name='adapter.rpc.ObjectRequest.reason', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -286,7 +293,7 @@ _OBJECTREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=261,
-  serialized_end=341,
+  serialized_end=357,
 )
 
 
@@ -354,7 +361,7 @@ _OBJECTREPLY = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='reason', full_name='adapter.rpc.ObjectReply.reason', index=8,
+      name='type', full_name='adapter.rpc.ObjectReply.type', index=8,
       number=10, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -379,8 +386,8 @@ _OBJECTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=344,
-  serialized_end=699,
+  serialized_start=360,
+  serialized_end=713,
 )
 
 
@@ -417,8 +424,8 @@ _PARAMETERREQUEST_ENUMSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=912,
-  serialized_end=976,
+  serialized_start=926,
+  serialized_end=990,
 )
 
 _PARAMETERREQUEST = _descriptor.Descriptor(
@@ -482,8 +489,8 @@ _PARAMETERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=702,
-  serialized_end=976,
+  serialized_start=716,
+  serialized_end=990,
 )
 
 
@@ -520,8 +527,8 @@ _PARAMETERREPLY_ENUMSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=912,
-  serialized_end=976,
+  serialized_start=926,
+  serialized_end=990,
 )
 
 _PARAMETERREPLY = _descriptor.Descriptor(
@@ -592,8 +599,8 @@ _PARAMETERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=979,
-  serialized_end=1252,
+  serialized_start=993,
+  serialized_end=1266,
 )
 
 
@@ -630,8 +637,8 @@ _EVENTREQUEST_ENUMSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=912,
-  serialized_end=976,
+  serialized_start=926,
+  serialized_end=990,
 )
 
 _EVENTREQUEST = _descriptor.Descriptor(
@@ -709,8 +716,8 @@ _EVENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1255,
-  serialized_end=1562,
+  serialized_start=1269,
+  serialized_end=1576,
 )
 
 
@@ -747,8 +754,8 @@ _EVENTREPLY_ENUMSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=912,
-  serialized_end=976,
+  serialized_start=926,
+  serialized_end=990,
 )
 
 _EVENTREPLY = _descriptor.Descriptor(
@@ -826,8 +833,8 @@ _EVENTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1565,
-  serialized_end=1845,
+  serialized_start=1579,
+  serialized_end=1859,
 )
 
 
@@ -864,8 +871,8 @@ _COMMANDREQUEST_ENUMSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=912,
-  serialized_end=976,
+  serialized_start=926,
+  serialized_end=990,
 )
 
 _COMMANDREQUEST = _descriptor.Descriptor(
@@ -929,8 +936,8 @@ _COMMANDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1848,
-  serialized_end=2113,
+  serialized_start=1862,
+  serialized_end=2127,
 )
 
 
@@ -967,8 +974,8 @@ _COMMANDREPLY_ENUMSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=912,
-  serialized_end=976,
+  serialized_start=926,
+  serialized_end=990,
 )
 
 _COMMANDREPLY = _descriptor.Descriptor(
@@ -1046,8 +1053,8 @@ _COMMANDREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2116,
-  serialized_end=2400,
+  serialized_start=2130,
+  serialized_end=2414,
 )
 
 
@@ -1070,8 +1077,8 @@ _STUBSTREAM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2402,
-  serialized_end=2414,
+  serialized_start=2416,
+  serialized_end=2428,
 )
 
 
@@ -1123,8 +1130,8 @@ _ADAPTERSTREAM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2417,
-  serialized_end=2763,
+  serialized_start=2431,
+  serialized_end=2777,
 )
 
 _VALUE.oneofs_by_name['oneof_value'].fields.append(
@@ -1379,8 +1386,8 @@ _OBJECTSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=2766,
-  serialized_end=5288,
+  serialized_start=2780,
+  serialized_end=5302,
   methods=[
   _descriptor.MethodDescriptor(
     name='root',
@@ -1700,8 +1707,8 @@ _PARAMETERSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   options=None,
-  serialized_start=5291,
-  serialized_end=7704,
+  serialized_start=5305,
+  serialized_end=7718,
   methods=[
   _descriptor.MethodDescriptor(
     name='name',
@@ -2003,8 +2010,8 @@ _EVENTSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   options=None,
-  serialized_start=7707,
-  serialized_end=9265,
+  serialized_start=7721,
+  serialized_end=9279,
   methods=[
   _descriptor.MethodDescriptor(
     name='name',
@@ -2225,8 +2232,8 @@ _COMMANDSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=3,
   options=None,
-  serialized_start=9268,
-  serialized_end=10489,
+  serialized_start=9282,
+  serialized_end=10503,
   methods=[
   _descriptor.MethodDescriptor(
     name='name',
@@ -2393,8 +2400,8 @@ _ADAPTERSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=4,
   options=None,
-  serialized_start=10491,
-  serialized_end=10576,
+  serialized_start=10505,
+  serialized_end=10590,
   methods=[
   _descriptor.MethodDescriptor(
     name='states',
