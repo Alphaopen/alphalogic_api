@@ -144,11 +144,6 @@ class ObjectServiceStub(object):
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
         response_deserializer=rpc__pb2.ObjectReply.FromString,
         )
-    self.create_package_diagnostic = channel.unary_unary(
-        '/adapter.rpc.ObjectService/create_package_diagnostic',
-        request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
-        response_deserializer=rpc__pb2.ObjectReply.FromString,
-        )
     self.is_connected = channel.unary_unary(
         '/adapter.rpc.ObjectService/is_connected',
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
@@ -372,16 +367,9 @@ class ObjectServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def create_package_diagnostic(self, request, context):
+  def is_connected(self, request, context):
     """package diagnostic
     """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def is_connected(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
@@ -558,11 +546,6 @@ def add_ObjectServiceServicer_to_server(servicer, server):
       ),
       'unregister_all_makers': grpc.unary_unary_rpc_method_handler(
           servicer.unregister_all_makers,
-          request_deserializer=rpc__pb2.ObjectRequest.FromString,
-          response_serializer=rpc__pb2.ObjectReply.SerializeToString,
-      ),
-      'create_package_diagnostic': grpc.unary_unary_rpc_method_handler(
-          servicer.create_package_diagnostic,
           request_deserializer=rpc__pb2.ObjectRequest.FromString,
           response_serializer=rpc__pb2.ObjectReply.SerializeToString,
       ),
@@ -1291,11 +1274,6 @@ class EventServiceStub(object):
         request_serializer=rpc__pb2.EventRequest.SerializeToString,
         response_deserializer=rpc__pb2.EventReply.FromString,
         )
-    self.has_argument = channel.unary_unary(
-        '/adapter.rpc.EventService/has_argument',
-        request_serializer=rpc__pb2.EventRequest.SerializeToString,
-        response_deserializer=rpc__pb2.EventReply.FromString,
-        )
     self.owner = channel.unary_unary(
         '/adapter.rpc.EventService/owner',
         request_serializer=rpc__pb2.EventRequest.SerializeToString,
@@ -1454,13 +1432,6 @@ class EventServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def has_argument(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
   def owner(self, request, context):
     """owner
     """
@@ -1576,11 +1547,6 @@ def add_EventServiceServicer_to_server(servicer, server):
           request_deserializer=rpc__pb2.EventRequest.FromString,
           response_serializer=rpc__pb2.EventReply.SerializeToString,
       ),
-      'has_argument': grpc.unary_unary_rpc_method_handler(
-          servicer.has_argument,
-          request_deserializer=rpc__pb2.EventRequest.FromString,
-          response_serializer=rpc__pb2.EventReply.SerializeToString,
-      ),
       'owner': grpc.unary_unary_rpc_method_handler(
           servicer.owner,
           request_deserializer=rpc__pb2.EventRequest.FromString,
@@ -1674,11 +1640,6 @@ class CommandServiceStub(object):
         )
     self.set_argument = channel.unary_unary(
         '/adapter.rpc.CommandService/set_argument',
-        request_serializer=rpc__pb2.CommandRequest.SerializeToString,
-        response_deserializer=rpc__pb2.CommandReply.FromString,
-        )
-    self.has_argument = channel.unary_unary(
-        '/adapter.rpc.CommandService/has_argument',
         request_serializer=rpc__pb2.CommandRequest.SerializeToString,
         response_deserializer=rpc__pb2.CommandReply.FromString,
         )
@@ -1798,13 +1759,6 @@ class CommandServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def has_argument(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
   def owner(self, request, context):
     """owner
     """
@@ -1887,11 +1841,6 @@ def add_CommandServiceServicer_to_server(servicer, server):
       ),
       'set_argument': grpc.unary_unary_rpc_method_handler(
           servicer.set_argument,
-          request_deserializer=rpc__pb2.CommandRequest.FromString,
-          response_serializer=rpc__pb2.CommandReply.SerializeToString,
-      ),
-      'has_argument': grpc.unary_unary_rpc_method_handler(
-          servicer.has_argument,
           request_deserializer=rpc__pb2.CommandRequest.FromString,
           response_serializer=rpc__pb2.CommandReply.SerializeToString,
       ),

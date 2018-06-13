@@ -58,7 +58,7 @@ class Device(object):
             Device.add_to_connection_diag(parent.type_device, type_device)
 
     def __getattr__(self, name):
-        pass
+        return self.__dict__[name]
 
     def __setattr__(self, name, value):
         if issubclass(type(value), Parameter):
@@ -105,7 +105,7 @@ class Adapter(object):
 
     def __init__(self):
         self.root = self.get_root()
-        self.multi_stub = MultiStub("192.168.50.23:42001")
+        self.multi_stub = MultiStub("localhost:42001")
 
     def get_root(self):
         root_list = filter (lambda attr: type(getattr(self, attr)) is Root, dir(self))
@@ -130,41 +130,43 @@ class Adapter(object):
     '''
     def configure_device_from_scheme(self, type_object, object_id):
         object = self.root.list_devices[type_object]
-        list_parameters_name = filter (lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
-        object_rpc = rpc_pb2.Object(id = object_id)
+        self.configure_parameters(object, object_id)
+
+
+    def configure_parameters(self, object, object_id):
+        list_parameters_name = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
+        object_rpc = rpc_pb2.Object(id=object_id)
         for name in list_parameters_name:
-            value_type = object.__dict__[name].ValueType
-            if value_type == "BOOL":
-                id_parameter = self.multi_stub.object_call('create_bool_parameter', 'parameter', 'id', object=object_rpc, name=name)
-            elif value_type == "INT64":
-                id_parameter = self.multi_stub.object_call('create_int_parameter', 'parameter', 'id', object=object_rpc, name=name)
-            elif value_type == "DOUBLE":
-                id_parameter = self.multi_stub.object_call('create_double_parameter', 'parameter', 'id', object=object_rpc, name=name)
-            elif value_type == "DATETIME":
-                id_parameter = self.multi_stub.object_call('create_datetime_parameter', 'parameter', 'id', object=object_rpc, name=name)
-            elif value_type == "STRING":
-                id_parameter = self.multi_stub.object_call('create_string_parameter', 'parameter', 'id', object=object_rpc, name=name)
+            parameter = object.__dict__[name]
+            value_type = parameter.ValueType
+            id_parameter = self.multi_stub.object_call(ValueType.create_dict[value_type], 'parameter', 'id',
+                                                       object=object_rpc, name=name)
 
             parameter_rpc = rpc_pb2.Parameter(id=id_parameter)
-            visible_type = object.__dict__[name].VisibleType
-            if visible_type == "RUNTIME":
-                self.multi_stub.parameter_call('set_runtime', parameter=parameter_rpc)
-            elif visible_type == "SETUP":
-                self.multi_stub.parameter_call('set_setup', parameter=parameter_rpc)
-            elif visible_type == "HIDDEN":
-                self.multi_stub.parameter_call('set_hidden', parameter=parameter_rpc)
-            elif visible_type == "COMMON":
-                self.multi_stub.parameter_call('set_common', parameter=parameter_rpc)
+            visible_type = parameter.VisibleType
+            self.multi_stub.parameter_call(VisibleType.set_dict[visible_type], parameter=parameter_rpc)
 
-            access_type = object.__dict__[name].AccessType
-            if access_type == "READ_ONLY":
-                self.multi_stub.parameter_call('set_read_only', parameter=parameter_rpc)
-            elif access_type == "READ_WRITE":
-                self.multi_stub.parameter_call('set_read_write', parameter=parameter_rpc)
-            '''
-            if hasattr(object, 'Value'):
-                self.multi_stub.parameter_call('set', parameter=parameter_rpc)
-            '''
+            access_type = parameter.AccessType
+            self.multi_stub.parameter_call(AccessType.set_dict[access_type], parameter=parameter_rpc)
+
+            if hasattr(parameter, 'Value'):
+                if not (isinstance(parameter.Value, list)):  # для одного значения
+                    value = rpc_pb2.Value(**ValueType.val_dict[value_type](parameter.Value))
+                    self.multi_stub.parameter_call('set', parameter=parameter_rpc, value=value)
+                else:  # для списков
+                    req = rpc_pb2.ParameterRequest(parameter=parameter_rpc)
+                    attr_type = ValueType.val_dict[value_type]('').keys()[0]
+                    for val in parameter.Value:
+                        if isinstance(val, dict):  # два поля в листе
+                            setattr(req.enums[val.keys()[0]], attr_type, val.values()[0])  # проверить
+                        else:
+                            setattr(req.enums[str(val)], attr_type, val)
+
+                    self.multi_stub.call_helper('set_enums', fun_set=MultiStub.parameter_fun_set, request=req,
+                                                stub=self.multi_stub.stub_parameter)
+
+
+
 
 
         #ObjectService.create_string_parameter etc
@@ -182,13 +184,12 @@ class ExampleAdapter(Adapter):
     root = Root("healhAdapterRoot")
     d1 = Device(root, "type1")
     d2 = Device(root, "type2")
-    '''
-    Можно передавать имя параметра в аргументах Parameter("name1", ...)
-    Можно передавать имя параметра в  
-    '''
-    root.name3 = ParameterInt64(Value=3)
-    root.name1 = Parameter(ValueType.INT64, VisibleType.HIDDEN, AccessType.READ_ONLY)
+
+    root.name3 = ParameterInt64(Value=[{'val1': True}, {'val2' : False}])
+
+    root.name1 = Parameter(ValueType.INT64, VisibleType.COMMON, AccessType.READ_WRITE, Value = [1, 2])
     root.name2 = Parameter(ValueType.INT64)
+
 
     root.name4 = ParameterDouble(Value=-1.9)
     root.name5 = Parameter(VisibleType.HIDDEN, AccessType.READ_ONLY, ValueType.INT64)
@@ -197,6 +198,7 @@ class ExampleAdapter(Adapter):
     root.name7 = ParameterInt64(Value=3)
     root.name8 = Parameter(ValueType.INT64, VisibleType.HIDDEN, AccessType.READ_ONLY)
     root.name9 = Parameter(ValueType.INT64)
+
     #d1.parameter = Parameter("name1", value_type=ValueType.INT64, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
     #d1.parameter = Parameter("name2", value_type=ValueType.STRING, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
     #d2.parameter = Parameter("name3", value_type=ValueType.DOUBLE, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)

@@ -4,16 +4,15 @@ from callbox.core.type_attributes import VisibleType, ValueType, AccessType
 
 class Parameter(object):
     def __init__(self, *args, **kwargs):
-        #self.name = name
         for arg in filter(lambda arg : callable(arg) , args):
-            self.__dict__[arg()[0]] = arg()[1] # пр. ["ValueType", "STRING"]
+            self.__dict__[arg()[0]] = arg()[1] # example: ["ValueType", "STRING"], ["VisibleType" , "RUNTIME"]
 
         if not('VisibleType' in self.__dict__):
             self.VisibleType = VisibleType.RUNTIME()[1]
         if not('AccessType' in self.__dict__):
             self.AccessType = AccessType.READ_WRITE()[1]
-        #if not ('ValueType' in self.__dict__):
-            #raise Exception('ValueType not found in Parameter')
+        if not ('ValueType' in self.__dict__):
+            raise Exception('ValueType not found in Parameter')
 
         if 'Value' in kwargs:
             self.Value = kwargs['Value']

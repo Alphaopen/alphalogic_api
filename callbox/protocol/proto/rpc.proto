@@ -71,7 +71,6 @@ service ObjectService {
     rpc unregister_all_makers(ObjectRequest) returns (ObjectReply) {}
 
     // package diagnostic
-    rpc create_package_diagnostic(ObjectRequest) returns (ObjectReply) {}
     rpc is_connected(ObjectRequest) returns (ObjectReply) {}
     rpc is_error(ObjectRequest) returns (ObjectReply) {}
     rpc is_ready_to_work(ObjectRequest) returns (ObjectReply) {}
@@ -205,7 +204,6 @@ service EventService {
     rpc argument_list(EventRequest) returns (EventReply) {}
     rpc argument(EventRequest) returns (EventReply) {}
     rpc set_argument(EventRequest) returns (EventReply) {}
-    rpc has_argument(EventRequest) returns (EventReply) {}
 
     // owner
     rpc owner(EventRequest) returns (EventReply) {}
@@ -217,11 +215,9 @@ message EventRequest {
     string desc = 3; // rpc set_desc
     uint64 time = 4; // rpc set_time
 
-    string argument = 5; // rpc argument, set_argument, has_argument, optional for rpc clear
+    string argument = 5; // rpc argument, set_argument, has_argument
     Value value = 6; // prc set_argument
     map<string, Value> enums = 7; // optional for rpc set_argument
-
-    repeated Value values = 8; // rpc emit
 }
 
 message EventReply {
@@ -230,8 +226,7 @@ message EventReply {
     string desc = 3; // rpc desc
 
     Value value = 4; // rpc argument
-    map<string, Value> enums = 5; // optional for rpc argument
-    repeated string names = 6; // rpc argument_list
+    repeated string names = 5; // rpc argument_list
 
     bool yes = 100; // rpc is_trivial, is_minor, is_major, is_critical, is_blocker, has_argument
     Object object = 200; // rpc owner
@@ -261,7 +256,6 @@ service CommandService {
     rpc argument_list(CommandRequest) returns (CommandReply) {}
     rpc argument(CommandRequest) returns (CommandReply) {}
     rpc set_argument(CommandRequest) returns (CommandReply) {}
-    rpc has_argument(CommandRequest) returns (CommandReply) {}
 
     // owner
     rpc owner(CommandRequest) returns (CommandReply) {}
@@ -272,7 +266,7 @@ message CommandRequest {
     string display_name = 2; // rpc set_display_name
     string desc = 3; // rpc set_desc
 
-    string argument = 5; // rpc argument, set_argument, has_argument, optional for rpc clear
+    string argument = 5; // rpc argument, set_argument, has_argument
     Value value = 6; // prc set_argument, set_result
     map<string, Value> enums = 7; // optional for rpc set_argument
 }
@@ -283,8 +277,7 @@ message CommandReply {
     string desc = 3; // rpc desc
 
     Value value = 4; // rpc argument
-    map<string, Value> enums = 5; // optional for rpc argument
-    repeated string names = 6; // rpc argument_list
+    repeated string names = 5; // rpc argument_list
 
     bool yes = 100; // rpc is_string, is_int, is_double, is_datetime, is_bool
     Object object = 200; // rpc owner

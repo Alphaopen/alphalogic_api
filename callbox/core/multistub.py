@@ -82,14 +82,14 @@ class MultiStub(object):
 
        Как можно проинспектировать тип переменной, которую надо создать чтобы передать в stub?
     '''
-    def call_helper(self, *args, **kwargs):
-        if args[0] in kwargs['fun_set']: # args[0] -название функции, проверка на допустимость
-            answer = getattr(kwargs['stub'], args[0])(kwargs['request'])
-            for attr_name in args[1:]:
+    def call_helper(self, function_name, *args, **kwargs):
+        if function_name in kwargs['fun_set']: # function_name -название функции, проверка на допустимость
+            answer = getattr(kwargs['stub'], function_name)(kwargs['request'])
+            for attr_name in args:
                 answer = getattr(answer, attr_name)
             return answer
         else:
-            raise Exception('{0} not found in {1}'.format(args[0], kwargs['fun_set']))
+            raise Exception('{0} not found in {1}'.format(function_name, kwargs['fun_set']))
 
 
 print "static MultiStub initialization"
