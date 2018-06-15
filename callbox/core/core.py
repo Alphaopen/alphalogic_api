@@ -64,8 +64,8 @@ class Device(object):
         if issubclass(type(value), Parameter):
             self.parameters.append(name)
             value.name = name
-            value.__class__ = Parameter # ParameterBool, ParameterInt64 - просто обертка. Все данные храняться в Parameter
             self.__dict__[name] = value
+
         '''
         if name == "parameter":
             self.parameters.append(value)
@@ -135,36 +135,22 @@ class Adapter(object):
 
     def configure_parameters(self, object, object_id):
         list_parameters_name = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
-        object_rpc = rpc_pb2.Object(id=object_id)
         for name in list_parameters_name:
             parameter = object.__dict__[name]
+            parameter.set_multi_stub(self.multi_stub)
             value_type = parameter.ValueType
-            id_parameter = self.multi_stub.object_call(ValueType.create_dict[value_type], 'parameter', 'id',
-                                                       object=object_rpc, name=name)
+            id_parameter = self.multi_stub.object_call(ValueType.create_parameter[value_type], 'id',
+                                                       id=object_id, name=name)
+            parameter.id = id_parameter
 
-            parameter_rpc = rpc_pb2.Parameter(id=id_parameter)
             visible_type = parameter.VisibleType
-            self.multi_stub.parameter_call(VisibleType.set_dict[visible_type], parameter=parameter_rpc)
+            getattr(parameter, VisibleType.set_visible_type[visible_type])()
 
             access_type = parameter.AccessType
-            self.multi_stub.parameter_call(AccessType.set_dict[access_type], parameter=parameter_rpc)
+            getattr(parameter, AccessType.set_access_type[access_type])()
 
-            if hasattr(parameter, 'Value'):
-                if not (isinstance(parameter.Value, list)):  # для одного значения
-                    value = rpc_pb2.Value(**ValueType.val_dict[value_type](parameter.Value))
-                    self.multi_stub.parameter_call('set', parameter=parameter_rpc, value=value)
-                else:  # для списков
-                    req = rpc_pb2.ParameterRequest(parameter=parameter_rpc)
-                    attr_type = ValueType.val_dict[value_type]('').keys()[0]
-                    for val in parameter.Value:
-                        if isinstance(val, dict):  # два поля в листе
-                            setattr(req.enums[val.keys()[0]], attr_type, val.values()[0])  # проверить
-                        else:
-                            setattr(req.enums[str(val)], attr_type, val)
-
-                    self.multi_stub.call_helper('set_enums', fun_set=MultiStub.parameter_fun_set, request=req,
-                                                stub=self.multi_stub.stub_parameter)
-
+            values = getattr(parameter, 'Value', None)
+            parameter.val = values
 
 
 
@@ -185,19 +171,19 @@ class ExampleAdapter(Adapter):
     d1 = Device(root, "type1")
     d2 = Device(root, "type2")
 
-    root.name3 = ParameterInt64(Value=[{'val1': True}, {'val2' : False}])
+    #root.name1 = ParameterInt64(Value=[{'val1': True}, {'val2' : False}])
 
-    root.name1 = Parameter(ValueType.INT64, VisibleType.COMMON, AccessType.READ_WRITE, Value = [1, 2])
-    root.name2 = Parameter(ValueType.INT64)
+    #root.name2 = Parameter(ValueType.INT64, VisibleType.COMMON, AccessType.READ_WRITE, Value = [1, 2])
+    #root.name3 = Parameter(ValueType.INT64)
 
 
     root.name4 = ParameterDouble(Value=-1.9)
-    root.name5 = Parameter(VisibleType.HIDDEN, AccessType.READ_ONLY, ValueType.INT64)
-    root.name6 = Parameter(ValueType.INT64)
+    #root.name5 = Parameter(VisibleType.HIDDEN, AccessType.READ_ONLY, ValueType.INT64)
+    #root.name6 = Parameter(ValueType.INT64)
 
-    root.name7 = ParameterInt64(Value=3)
-    root.name8 = Parameter(ValueType.INT64, VisibleType.HIDDEN, AccessType.READ_ONLY)
-    root.name9 = Parameter(ValueType.INT64)
+    #root.name7 = ParameterInt64(Value=3)
+    #root.name8 = Parameter(ValueType.INT64, VisibleType.HIDDEN, AccessType.READ_ONLY)
+    #root.name9 = Parameter(ValueType.INT64, VisibleType.SETUP)
 
     #d1.parameter = Parameter("name1", value_type=ValueType.INT64, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
     #d1.parameter = Parameter("name2", value_type=ValueType.STRING, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
@@ -222,6 +208,63 @@ class ExampleAdapter(Adapter):
         #root = Root(target, name)
         #d1 = Device(root, "node 1")
         #d2 = Device(parenr=r, "node 2")
+
+    def check(self):
+        #print ExampleAdapter.root.name4.val # как сделать по-нормальному? root.name
+
+        ExampleAdapter.root.name4.val = 1.77
+        ExampleAdapter.root.name4.val = [1, 4, 5, 6]
+        ExampleAdapter.root.name4.clear()
+        ExampleAdapter.root.name4.val = [{'val1': 1.2}, {'val2': 4.5}]
+        ExampleAdapter.root.name4.set_enum('val2')
+
+        print ExampleAdapter.root.name4.owner()
+        ExampleAdapter.root.name4.set(819238.99)
+        print ExampleAdapter.root.name4.clear()
+        print ExampleAdapter.root.name4.set_enums([10,20])
+        print ExampleAdapter.root.name4.clear()
+        print ExampleAdapter.root.name4.set_enums([{'val1': True}, {'val2' : False}])
+
+        print ExampleAdapter.root.name4.enums()
+        print ExampleAdapter.root.name4.set_enum(251, 'felg')
+        print ExampleAdapter.root.name4.has_enum('felg')
+        print ExampleAdapter.root.name4.has_enum('abc')
+
+        print ExampleAdapter.root.name4.get()
+        print ExampleAdapter.root.name4.set(555)
+
+        print ExampleAdapter.root.name4.has_enum()
+        print ExampleAdapter.root.name4.is_licensed()
+        print ExampleAdapter.root.name4.set_licensed()
+        print ExampleAdapter.root.name4.is_licensed()
+
+        print ExampleAdapter.root.name4.set_read_only()
+        print ExampleAdapter.root.name4.set_read_write()
+
+        print ExampleAdapter.root.name4.is_read_only()
+        print ExampleAdapter.root.name4.is_read_write()
+
+        print ExampleAdapter.root.name4.set_setup()
+        print ExampleAdapter.root.name4.set_runtime()
+        print ExampleAdapter.root.name4.set_hidden()
+        print ExampleAdapter.root.name4.set_common()
+
+        print ExampleAdapter.root.name4.is_string()
+        print ExampleAdapter.root.name4.is_int()
+        print ExampleAdapter.root.name4.is_double()
+        print ExampleAdapter.root.name4.is_datetime()
+        print ExampleAdapter.root.name4.is_bool()
+
+        print ExampleAdapter.root.name4.is_runtime()
+        print ExampleAdapter.root.name4.is_setup()
+        print ExampleAdapter.root.name4.is_hidden()
+        print ExampleAdapter.root.name4.is_common()
+
+        print ExampleAdapter.root.name4.set_desc('asdasd')
+        print ExampleAdapter.root.name4.desc()
+        #print ExampleAdapter.root.name4.set_display_name('erer')
+        #print ExampleAdapter.root.name4.display_name()
+        ExampleAdapter.root.name4.val = 1.77
 
 
 

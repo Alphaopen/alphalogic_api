@@ -47,7 +47,6 @@ class MultiStub(object):
         return set(filter(lambda fun : fun[0:2]!='__', obj_fun_list)) # получить методы Service, исключая служебные
 
     def object_call(self, *args, **kwargs):
-        #obj_w = ObjectRequest(**kwargs)
         obj_w = ObjectRequest(**kwargs)
         return self.call_helper(*args, fun_set=MultiStub.object_fun_set,  request=obj_w, stub=self.stub_object)
         '''

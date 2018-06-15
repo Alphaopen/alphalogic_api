@@ -1865,9 +1865,9 @@ class AdapterServiceStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.states = channel.stream_stream(
+    self.states = channel.unary_stream(
         '/adapter.rpc.AdapterService/states',
-        request_serializer=rpc__pb2.StubStream.SerializeToString,
+        request_serializer=rpc__pb2.Empty.SerializeToString,
         response_deserializer=rpc__pb2.AdapterStream.FromString,
         )
 
@@ -1876,7 +1876,7 @@ class AdapterServiceServicer(object):
   """Adapter Service
   """
 
-  def states(self, request_iterator, context):
+  def states(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1886,9 +1886,9 @@ class AdapterServiceServicer(object):
 
 def add_AdapterServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'states': grpc.stream_stream_rpc_method_handler(
+      'states': grpc.unary_stream_rpc_method_handler(
           servicer.states,
-          request_deserializer=rpc__pb2.StubStream.FromString,
+          request_deserializer=rpc__pb2.Empty.FromString,
           response_serializer=rpc__pb2.AdapterStream.SerializeToString,
       ),
   }
