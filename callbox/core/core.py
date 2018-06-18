@@ -92,14 +92,23 @@ class Adapter(object):
     def __init__(self):
        # self.root = self.get_root()
         self.multi_stub = MultiStub("localhost:42001")
+        id_root = self.multi_stub.object_call('root').id
+        id_parameter = self.multi_stub.object_call('parameter', id=id_root, name='type_when_create').id
+        type_device_str = self.multi_stub.parameter_call('get', id=id_parameter).value.string_value
+        Adapter.dict_type_objects[type_device_str] = type(self)
+        Adapter.add_object_to_list(id_root, self)
+        list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
+        for name in list_parameters_name:
+            self.__dict__[name] = type(self).__dict__[name]
+        self.configure_parameters(self, id_root)
+
 
     def create_object(self, object_id):
         parent_id = self.multi_stub.object_call('parent', id=object_id).id
         parent = Adapter.list_objects[parent_id] if (parent_id in Adapter.list_objects) else None
         id_parameter = self.multi_stub.object_call('parameter', id=object_id, name='type_when_create').id
         type_device_str = self.multi_stub.parameter_call('get', id=id_parameter).value.string_value
-        #Device_type = Adapter.dict_type_objects[type_device_str]
-        Device_type = Controller
+        Device_type = Adapter.dict_type_objects[type_device_str]
         object = Device_type(parent, type_device_str, object_id)
         Adapter.add_object_to_list(object_id, object)
         self.configure_parameters(object, object_id)
@@ -153,6 +162,8 @@ class Adapter(object):
 
 
 class ExampleAdapter(Adapter):
+
+    noopr = ParameterString(Value='noop')
 
     def handle_create(self):
         pass
