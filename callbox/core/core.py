@@ -18,44 +18,24 @@ from callbox.core.multistub import MultiStub
 
 import callbox.protocol.rpc_pb2 as rpc_pb2
 
-'''
-class Root(object):
-
-    def __init__(self, target, name):
-        self.api = Api(target)
-        self.id = self.api.object_call('root', 'id')
-        print self.id
-        print self.api.object_call('is_root', 'yes')
-'''
-
 
 class Device(object):
     '''
     type - ссылка на реализацию
     '''
-    list_devices = {}  # Список всех узлов, по типу узла можно обратиться в словаре к модели узла
-    connection_diag = {}  # Описывает связи между узлами
 
-    @staticmethod
-    def add_device_to_list(type_device, device):
-        Device.list_devices[type_device] = device
-
-    @staticmethod
-    def add_to_connection_diag(parent_type, type_device):
-        if parent_type in Device.connection_diag:
-            Device.connection_diag[parent_type].append(type_device)
-        else:
-            Device.connection_diag[parent_type] = [type_device]
-
-    def __init__(self, parent, type_device):
+    def __init__(self, parent, type_device, id_device):
         self.__dict__["parent"] = parent
         self.__dict__["type_device"] = type_device
         self.__dict__["parameters"] = []
         self.__dict__["events"] = []
         self.__dict__["commands"] = []
-        Device.add_device_to_list(type_device, self)
-        if parent != None:
-            Device.add_to_connection_diag(parent.type_device, type_device)
+        list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
+        for name in list_parameters_name:
+            self.__dict__[name] = type(self).__dict__[name]
+        #Device.add_device_to_list(id_device, self)
+        #if parent != None:
+        #    Device.add_to_connection_diag(parent.type_device, type_device)
 
     def __getattr__(self, name):
         return self.__dict__[name]
@@ -78,8 +58,8 @@ class Device(object):
         '''
 
 class Root(Device):
-    def __init__(self, type_device):
-        super(Root, self).__init__(None, type_device)
+    def __init__(self, type_device, id_device):
+        super(Root, self).__init__(None, type_device, id_device)
 
 
 class Event(object):
@@ -102,11 +82,29 @@ class Command(object):
 нельзя было создать экземпляр
 '''
 class Adapter(object):
+    dict_type_objects = {} #По type_when_create можно определить тип узла
+    list_objects = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
+
+    @staticmethod
+    def add_object_to_list(object_id, device):
+        Adapter.list_objects[object_id] = device
 
     def __init__(self):
-        self.root = self.get_root()
+       # self.root = self.get_root()
         self.multi_stub = MultiStub("localhost:42001")
 
+    def create_object(self, object_id):
+        parent_id = self.multi_stub.object_call('parent', id=object_id).id
+        parent = Adapter.list_objects[parent_id] if (parent_id in Adapter.list_objects) else None
+        id_parameter = self.multi_stub.object_call('parameter', id=object_id, name='type_when_create').id
+        type_device_str = self.multi_stub.parameter_call('get', id=id_parameter).value.string_value
+        #Device_type = Adapter.dict_type_objects[type_device_str]
+        Device_type = Controller
+        object = Device_type(parent, type_device_str, object_id)
+        Adapter.add_object_to_list(object_id, object)
+        self.configure_parameters(object, object_id)
+
+    '''
     def get_root(self):
         root_list = filter (lambda attr: type(getattr(self, attr)) is Root, dir(self))
         if len(root_list)<1:
@@ -114,24 +112,23 @@ class Adapter(object):
         elif len(root_list)>1:
             raise Exception("The number of Root device is {0}. It's too many".format(len(root_list)))
         return type(self).__dict__[root_list[0]]
+    '''
 
-
-    def get_available_children(self, connection_diag, type_device):
-        #unregister_all_maker(device_id) - вызов api
-        print "unregister_all_maker"
-        for tmp_type in connection_diag[type_device]:
-            print "tmp_type=", tmp_type
-            #register_maker(tmp_type)
-
-    #def after_creating_object(self, type_device, ):
+    def get_available_children(self, id_device):
+        available_devices = self.handle_get_available_children()
+        self.multi_stub.object_call('unregister_all_makers', id = id_device)
+        for device_type, name in available_devices:
+            self.multi_stub.object_call('register_maker', id=id_device, name=name)
+            Adapter.dict_type_objects[name] = device_type
 
     '''
     Конфигурирование узла по заготовленной схеме
     '''
+    '''
     def configure_device_from_scheme(self, type_object, object_id):
         object = self.root.list_devices[type_object]
         self.configure_parameters(object, object_id)
-
+    '''
 
     def configure_parameters(self, object, object_id):
         list_parameters_name = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
@@ -155,124 +152,85 @@ class Adapter(object):
 
 
 
-        #ObjectService.create_string_parameter etc
-        #set_runtime, set_setup
-        #set_read_only, set_read_write
-        #set value
-
-
-
 class ExampleAdapter(Adapter):
-    '''
-    Общая схема адаптера
-    '''
 
-    root = Root("healhAdapterRoot")
-    d1 = Device(root, "type1")
-    d2 = Device(root, "type2")
+    def handle_create(self):
+        pass
 
-    #root.name1 = ParameterInt64(Value=[{'val1': True}, {'val2' : False}])
+    def handle_remove(self):
+        pass
 
-    #root.name2 = Parameter(ValueType.INT64, VisibleType.COMMON, AccessType.READ_WRITE, Value = [1, 2])
-    #root.name3 = Parameter(ValueType.INT64)
-
-
-    root.name4 = ParameterDouble(Value=-1.9)
-    #root.name5 = Parameter(VisibleType.HIDDEN, AccessType.READ_ONLY, ValueType.INT64)
-    #root.name6 = Parameter(ValueType.INT64)
-
-    #root.name7 = ParameterInt64(Value=3)
-    #root.name8 = Parameter(ValueType.INT64, VisibleType.HIDDEN, AccessType.READ_ONLY)
-    #root.name9 = Parameter(ValueType.INT64, VisibleType.SETUP)
-
-    #d1.parameter = Parameter("name1", value_type=ValueType.INT64, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
-    #d1.parameter = Parameter("name2", value_type=ValueType.STRING, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
-    #d2.parameter = Parameter("name3", value_type=ValueType.DOUBLE, visible=VisibleType.HIDDEN, access=AccessType.READ_ONLY)
-    #d2.event = Event("name", priority=EventPriority.MAJOR)
-    #d1.command = Command("name", result_type=ValueType.BOOL, arguments=[("chat_id", ValueType.INT64)])
-    #d2.package = PackageDiagnostic()
-
-    '''
-    def scheme():
-        root = Root("type")
-        d1 = Device(parenr=root, "type1")
-        d2 = Device(parent=root, "type2")
-        d3 = Device(parent=d1, "type3")
-        par = d1.Parameter("")
-    '''
-
-
-    def __init__(self, target, name):
-        super(ExampleAdapter, self).__init__()
-        #self.get_available_children(Component.connection_diag, "type")
-        #root = Root(target, name)
-        #d1 = Device(root, "node 1")
-        #d2 = Device(parenr=r, "node 2")
+    def handle_get_available_children(self):
+        return [
+            (Controller, 'Controller')
+        ]
 
     def check(self):
-        #print ExampleAdapter.root.name4.val # как сделать по-нормальному? root.name
-
-        ExampleAdapter.root.name4.val = 1.77
-        ExampleAdapter.root.name4.val = [1, 4, 5, 6]
-        ExampleAdapter.root.name4.clear()
-        ExampleAdapter.root.name4.val = [{'val1': 1.2}, {'val2': 4.5}]
-        ExampleAdapter.root.name4.set_enum('val2')
-
-        print ExampleAdapter.root.name4.owner()
-        ExampleAdapter.root.name4.set(819238.99)
-        print ExampleAdapter.root.name4.clear()
-        print ExampleAdapter.root.name4.set_enums([10,20])
-        print ExampleAdapter.root.name4.clear()
-        print ExampleAdapter.root.name4.set_enums([{'val1': True}, {'val2' : False}])
-
-        print ExampleAdapter.root.name4.enums()
-        print ExampleAdapter.root.name4.set_enum(251, 'felg')
-        print ExampleAdapter.root.name4.has_enum('felg')
-        print ExampleAdapter.root.name4.has_enum('abc')
-
-        print ExampleAdapter.root.name4.get()
-        print ExampleAdapter.root.name4.set(555)
-
-        print ExampleAdapter.root.name4.has_enum()
-        print ExampleAdapter.root.name4.is_licensed()
-        print ExampleAdapter.root.name4.set_licensed()
-        print ExampleAdapter.root.name4.is_licensed()
-
-        print ExampleAdapter.root.name4.set_read_only()
-        print ExampleAdapter.root.name4.set_read_write()
-
-        print ExampleAdapter.root.name4.is_read_only()
-        print ExampleAdapter.root.name4.is_read_write()
-
-        print ExampleAdapter.root.name4.set_setup()
-        print ExampleAdapter.root.name4.set_runtime()
-        print ExampleAdapter.root.name4.set_hidden()
-        print ExampleAdapter.root.name4.set_common()
-
-        print ExampleAdapter.root.name4.is_string()
-        print ExampleAdapter.root.name4.is_int()
-        print ExampleAdapter.root.name4.is_double()
-        print ExampleAdapter.root.name4.is_datetime()
-        print ExampleAdapter.root.name4.is_bool()
-
-        print ExampleAdapter.root.name4.is_runtime()
-        print ExampleAdapter.root.name4.is_setup()
-        print ExampleAdapter.root.name4.is_hidden()
-        print ExampleAdapter.root.name4.is_common()
-
-        print ExampleAdapter.root.name4.set_desc('asdasd')
-        print ExampleAdapter.root.name4.desc()
-        #print ExampleAdapter.root.name4.set_display_name('erer')
-        #print ExampleAdapter.root.name4.display_name()
-        ExampleAdapter.root.name4.val = 1.77
+        pass
 
 
+class Controller(Device):
+    name = ParameterString(Value='Controller')
+    displayName = ParameterString(Value='Controller')
+    hostname = ParameterString(VisibleType.SETUP, AccessType.READ_WRITE, Value=['1', '2'])
+    mode = ParameterBool(VisibleType.SETUP, Value=[{'On': True}, {'Off': False}])
+    version = Parameter(ValueType.INT64)
 
-    #r = Root("ip:port", "Name node")
-    #d = Device(parent=r)
-    # Сделать обязательным что-то одно либо type, либо #value
-    # Можно опредлять тип из value 
-    #p = Parameter(parent=d, "name", type, value, visible_type, access_type, display_name)
-    #c = Command(parent=d)
-    #e = Event(parent=e)
+'''
+class Root(Adapter):
 
+    # Parameters:
+    # default: read_write & runtime
+    #hostname = ParameterString(visible=setup, default='localhost', callback=hostname_change)
+    #mode = ParameterBool(visible=setup, default=True, choices=MODE_CHOICES)
+    #version = ParameterInt64(access=read_only)
+
+    hostname = ParameterString(VisibleType.SETUP, AccessType.READ_WRITE, Value = [1, 2])
+    mode = ParameterBool(VisibleType.SETUP, Value= [{'On': True, 'Off': False}])
+    version = Parameter(ValueType.INT64)
+
+
+    def handle_create(self):
+        pass
+
+    def handle_remove(self):
+        pass
+
+    #def handle_get_available_children(self):
+    #    return (
+    #        (Controller, 'Controller')
+    #    )
+'''
+
+'''
+class Controller(object):
+    MODE_CHOICES = (
+        (True, "On"),
+        (False, "Off"),
+    )
+
+    # Parameters:
+    # default: read_write & runtime
+    hostname = ParameterString(visible=setup, default='localhost', callback=hostname_change)
+    mode = ParameterBool(visible=setup, default=True, choices=MODE_CHOICES)
+    version = ParameterInt64(access=read_only)
+
+    # Events:
+    simple_event = Event()
+    alarm = Event(priority=MAJOR, args=dict(where=str, when=datetime.datetime, why=int))
+
+    # Commands:
+    @command(result_type=bool)
+    def relax(self, where='room', when=datetime.datetime.now(), why=42, which=MODE_CHOICES):
+        return True
+
+    def run(self):
+        # call periodically
+        time.sleep(1.0)
+        self.alarm.emit('room', datetime.datetime.now(), 42)  # emit event
+        self.version = 777
+
+    def hostname_change(self):
+        # что?
+        pass
+'''
