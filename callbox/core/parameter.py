@@ -4,6 +4,7 @@ from callbox.core.type_attributes import VisibleType, ValueType, AccessType
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
 
+
 class AbstractParameter(object):
     def get_name(self):
         answer = self.multi_stub.parameter_call('name', id=self.id)
@@ -164,7 +165,6 @@ class Parameter(AbstractParameter):
         if (item == 'val'):
             return self.get()
 
-
     def __setattr__(self, attr, value):
         if attr in ['ValueType', 'VisibleType', 'AccessType', 'Value', 'name', 'multi_stub', 'id']:
             self.__dict__[attr] = value
@@ -176,21 +176,26 @@ class Parameter(AbstractParameter):
                     self.set_enums(value)
             return self
 
+
 class ParameterBool(Parameter):
     def __new__(cls, *args, **kwargs):
         return Parameter(ValueType.BOOL, *args, **kwargs)
+
 
 class ParameterInt64(Parameter):
     def __new__(cls, *args, **kwargs):
         return Parameter(ValueType.INT64, *args, **kwargs)
 
+
 class ParameterDouble(Parameter):
     def __new__(cls, *args, **kwargs):
         return Parameter(ValueType.DOUBLE, *args, **kwargs)
 
+
 class ParameterDatetime(Parameter):
     def __new__(cls, *args, **kwargs):
         return Parameter(ValueType.DATETIME, *args, **kwargs)
+
 
 class ParameterString(Parameter):
     def __new__(cls, *args, **kwargs):

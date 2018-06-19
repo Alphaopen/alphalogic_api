@@ -22,6 +22,7 @@ CommandServiceServicer,
 AdapterServiceServicer
 )
 
+
 class MultiStub(object):
 
     def __init__(self, target):
@@ -69,6 +70,7 @@ class MultiStub(object):
     def command_call(self, *args):
         command_w = CommandRequest()
         return self.call_helper(*args, fun_set=MultiStub.command_fun_set, request=command_w, stub=self.stub_command)
+
     '''
     def adapter_call(self, *args):
         adapter_w = rpc_pb2.AdapterRequest()
