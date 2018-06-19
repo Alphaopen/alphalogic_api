@@ -35,11 +35,11 @@ print('test get', value)
 '''
 
 #python loop
-adapter = core.ExampleAdapter()
+adapter = core.MyRoot("localhost:42001")
 
-for r in adapter.multi_stub.stub_adapter.states(Empty()):
+for r in adapter.manager.multi_stub.stub_adapter.states(Empty()):
     if r.state == AdapterStream.AFTER_CREATING_OBJECT:
-        adapter.create_object(r.id)
+        adapter.manager.create_object(r.id)
         #req = ObjectRequest(id=r.id, name='type_when_create')
         #r = root.multi_stub.stub_object.parameter(req)
         #req = ParameterRequest(id=r.id)
@@ -48,28 +48,7 @@ for r in adapter.multi_stub.stub_adapter.states(Empty()):
 
     elif r.state == AdapterStream.GETTING_AVAILABLE_CHILDREN:
         print "id={0}".format(r.id)
-        adapter.get_available_children(r.id)
+        adapter.manager.get_available_children(r.id)
 
-
-
-
-
-
-
-d = core.Device(None, "type23")
-
-#core.Api.initialization()
-root = core.ExampleAdapter()
-id_root = root.multi_stub.object_call('root', 'id')
-root.configure_device_from_scheme("healhAdapterRoot", id_root)
-
-root.check()
-'''
-object_rpc = rpc_pb2.Object(id = id_root)
-req = rpc_pb2.ObjectRequest(object = object_rpc)
-r = root.multi_stub.stub_object.create_int_parameter(req)
-'''
-
-a=2
 
 

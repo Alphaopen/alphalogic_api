@@ -19,10 +19,96 @@ from callbox.core.multistub import MultiStub
 import callbox.protocol.rpc_pb2 as rpc_pb2
 
 
+class Manager(object):
+    dict_type_objects = {} #По type_when_create можно определить тип узла
+    list_objects = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
+
+    @staticmethod
+    def add_object_to_list(object_id, device):
+        Manager.list_objects[object_id] = device
+
+    def __init__(self):
+        pass
+
+    def configure_multi_stub(self, address):
+        self.multi_stub = MultiStub(address)
+
+    def prepare_root_node(self, root_device, id_root, type_device_str):
+        Manager.dict_type_objects[type_device_str] = type(root_device)
+        Manager.add_object_to_list(id_root, root_device)
+        list_parameters_name = filter(lambda attr: type(getattr(root_device, attr)) is Parameter, dir(root_device))
+        for name in list_parameters_name:
+            root_device.__dict__[name] = type(root_device).__dict__[name]
+        self.configure_parameters(root_device, id_root)
+
+
+    def create_object(self, object_id):
+        parent_id = self.multi_stub.object_call('parent', id=object_id).id
+        parent = Manager.list_objects[parent_id] if (parent_id in Manager.list_objects) else None
+        id_parameter = self.multi_stub.object_call('parameter', id=object_id, name='type_when_create').id
+        type_device_str = self.multi_stub.parameter_call('get', id=id_parameter).value.string_value
+        Device_type = Manager.dict_type_objects[type_device_str]
+        object = Device_type(parent, type_device_str, object_id)
+        Manager.add_object_to_list(object_id, object)
+        self.configure_parameters(object, object_id)
+
+    '''
+    def get_root(self):
+        root_list = filter (lambda attr: type(getattr(self, attr)) is Root, dir(self))
+        if len(root_list)<1:
+            raise Exception("Not found Root device")
+        elif len(root_list)>1:
+            raise Exception("The number of Root device is {0}. It's too many".format(len(root_list)))
+        return type(self).__dict__[root_list[0]]
+    '''
+
+    def get_available_children(self, id_device):
+        device = Manager.list_objects[id_device]
+        available_devices = device.handle_get_available_children()
+        self.multi_stub.object_call('unregister_all_makers', id = id_device)
+        for device_type, name in available_devices:
+            self.multi_stub.object_call('register_maker', id=id_device, name=name)
+            Manager.dict_type_objects[name] = device_type
+
+    '''
+    Конфигурирование узла по заготовленной схеме
+    '''
+    '''
+    def configure_device_from_scheme(self, type_object, object_id):
+        object = self.root.list_devices[type_object]
+        self.configure_parameters(object, object_id)
+    '''
+    def root_id_and_type(self):
+        id_root = self.multi_stub.object_call('root').id
+        id_parameter = self.multi_stub.object_call('parameter', id=id_root, name='type_when_create').id
+        type_device_str = self.multi_stub.parameter_call('get', id=id_parameter).value.string_value
+        return (id_root, type_device_str)
+
+    def configure_parameters(self, object, object_id):
+        list_parameters_name = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
+        for name in list_parameters_name:
+            parameter = object.__dict__[name]
+            parameter.set_multi_stub(self.multi_stub)
+            value_type = parameter.ValueType
+            id_parameter = self.multi_stub.object_call(ValueType.create_parameter[value_type], 'id',
+                                                       id=object_id, name=name)
+            parameter.id = id_parameter
+
+            visible_type = parameter.VisibleType
+            getattr(parameter, VisibleType.set_visible_type[visible_type])()
+
+            access_type = parameter.AccessType
+            getattr(parameter, AccessType.set_access_type[access_type])()
+
+            values = getattr(parameter, 'Value', None)
+            parameter.val = values
+
+
 class Device(object):
     '''
     type - ссылка на реализацию
     '''
+    manager = Manager()
 
     def __init__(self, parent, type_device, id_device):
         self.__dict__["parent"] = parent
@@ -58,8 +144,11 @@ class Device(object):
         '''
 
 class Root(Device):
-    def __init__(self, type_device, id_device):
-        super(Root, self).__init__(None, type_device, id_device)
+    def __init__(self, address):
+        self.manager.configure_multi_stub(address)
+        id_root, type_device = self.manager.root_id_and_type()
+        self.manager.prepare_root_node(self, id_root, type_device)
+        super(Root, self).__init__(None, type_device, id_root)
 
 
 class Event(object):
@@ -77,91 +166,10 @@ class Command(object):
         self.defaults = None  # Значения аргументов команды по умолчанию
         self.id = None
 
-'''
-Попробовать сделать его абстрактным, чтобы 
-нельзя было создать экземпляр
-'''
-class Adapter(object):
-    dict_type_objects = {} #По type_when_create можно определить тип узла
-    list_objects = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
-
-    @staticmethod
-    def add_object_to_list(object_id, device):
-        Adapter.list_objects[object_id] = device
-
-    def __init__(self):
-       # self.root = self.get_root()
-        self.multi_stub = MultiStub("localhost:42001")
-        id_root = self.multi_stub.object_call('root').id
-        id_parameter = self.multi_stub.object_call('parameter', id=id_root, name='type_when_create').id
-        type_device_str = self.multi_stub.parameter_call('get', id=id_parameter).value.string_value
-        Adapter.dict_type_objects[type_device_str] = type(self)
-        Adapter.add_object_to_list(id_root, self)
-        list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
-        for name in list_parameters_name:
-            self.__dict__[name] = type(self).__dict__[name]
-        self.configure_parameters(self, id_root)
-
-
-    def create_object(self, object_id):
-        parent_id = self.multi_stub.object_call('parent', id=object_id).id
-        parent = Adapter.list_objects[parent_id] if (parent_id in Adapter.list_objects) else None
-        id_parameter = self.multi_stub.object_call('parameter', id=object_id, name='type_when_create').id
-        type_device_str = self.multi_stub.parameter_call('get', id=id_parameter).value.string_value
-        Device_type = Adapter.dict_type_objects[type_device_str]
-        object = Device_type(parent, type_device_str, object_id)
-        Adapter.add_object_to_list(object_id, object)
-        self.configure_parameters(object, object_id)
-
-    '''
-    def get_root(self):
-        root_list = filter (lambda attr: type(getattr(self, attr)) is Root, dir(self))
-        if len(root_list)<1:
-            raise Exception("Not found Root device")
-        elif len(root_list)>1:
-            raise Exception("The number of Root device is {0}. It's too many".format(len(root_list)))
-        return type(self).__dict__[root_list[0]]
-    '''
-
-    def get_available_children(self, id_device):
-        available_devices = self.handle_get_available_children()
-        self.multi_stub.object_call('unregister_all_makers', id = id_device)
-        for device_type, name in available_devices:
-            self.multi_stub.object_call('register_maker', id=id_device, name=name)
-            Adapter.dict_type_objects[name] = device_type
-
-    '''
-    Конфигурирование узла по заготовленной схеме
-    '''
-    '''
-    def configure_device_from_scheme(self, type_object, object_id):
-        object = self.root.list_devices[type_object]
-        self.configure_parameters(object, object_id)
-    '''
-
-    def configure_parameters(self, object, object_id):
-        list_parameters_name = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
-        for name in list_parameters_name:
-            parameter = object.__dict__[name]
-            parameter.set_multi_stub(self.multi_stub)
-            value_type = parameter.ValueType
-            id_parameter = self.multi_stub.object_call(ValueType.create_parameter[value_type], 'id',
-                                                       id=object_id, name=name)
-            parameter.id = id_parameter
-
-            visible_type = parameter.VisibleType
-            getattr(parameter, VisibleType.set_visible_type[visible_type])()
-
-            access_type = parameter.AccessType
-            getattr(parameter, AccessType.set_access_type[access_type])()
-
-            values = getattr(parameter, 'Value', None)
-            parameter.val = values
 
 
 
-
-class ExampleAdapter(Adapter):
+class MyRoot(Root):
 
     noopr = ParameterString(Value='noop')
 
@@ -186,62 +194,3 @@ class Controller(Device):
     hostname = ParameterString(VisibleType.SETUP, AccessType.READ_WRITE, Value=['1', '2'])
     mode = ParameterBool(VisibleType.SETUP, Value=[{'On': True}, {'Off': False}])
     version = Parameter(ValueType.INT64)
-
-'''
-class Root(Adapter):
-
-    # Parameters:
-    # default: read_write & runtime
-    #hostname = ParameterString(visible=setup, default='localhost', callback=hostname_change)
-    #mode = ParameterBool(visible=setup, default=True, choices=MODE_CHOICES)
-    #version = ParameterInt64(access=read_only)
-
-    hostname = ParameterString(VisibleType.SETUP, AccessType.READ_WRITE, Value = [1, 2])
-    mode = ParameterBool(VisibleType.SETUP, Value= [{'On': True, 'Off': False}])
-    version = Parameter(ValueType.INT64)
-
-
-    def handle_create(self):
-        pass
-
-    def handle_remove(self):
-        pass
-
-    #def handle_get_available_children(self):
-    #    return (
-    #        (Controller, 'Controller')
-    #    )
-'''
-
-'''
-class Controller(object):
-    MODE_CHOICES = (
-        (True, "On"),
-        (False, "Off"),
-    )
-
-    # Parameters:
-    # default: read_write & runtime
-    hostname = ParameterString(visible=setup, default='localhost', callback=hostname_change)
-    mode = ParameterBool(visible=setup, default=True, choices=MODE_CHOICES)
-    version = ParameterInt64(access=read_only)
-
-    # Events:
-    simple_event = Event()
-    alarm = Event(priority=MAJOR, args=dict(where=str, when=datetime.datetime, why=int))
-
-    # Commands:
-    @command(result_type=bool)
-    def relax(self, where='room', when=datetime.datetime.now(), why=42, which=MODE_CHOICES):
-        return True
-
-    def run(self):
-        # call periodically
-        time.sleep(1.0)
-        self.alarm.emit('room', datetime.datetime.now(), 42)  # emit event
-        self.version = 777
-
-    def hostname_change(self):
-        # что?
-        pass
-'''
