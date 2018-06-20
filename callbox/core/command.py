@@ -29,3 +29,15 @@ class AbstractCommand(object):
         answer = self.multi_sub.command_call('is_string', id=self.id)
         return answer.yes
 
+
+def command(*argv_c, **kwargs_c):
+    print 'A'
+    def decorator(func):
+        print 'B'
+        def wrapped(self, *argv, **kwargs):
+            print 'C'
+            return func(*argv, **kwargs)
+        wrapped.result_type = kwargs_c['result_type']
+        return wrapped
+
+    return decorator

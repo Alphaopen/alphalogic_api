@@ -13,11 +13,14 @@
 '''
 
 from callbox.core.type_attributes import VisibleType, ValueType, AccessType
-from callbox.core.parameter import Parameter, ParameterBool, ParameterInt64, ParameterDouble, ParameterDatetime, ParameterString
+from callbox.core.parameter import Parameter, ParameterBool, ParameterInt64, \
+    ParameterDouble, ParameterDatetime, ParameterString
 from callbox.core.multistub import MultiStub
+from callbox.core.command import command
 
 import callbox.protocol.rpc_pb2 as rpc_pb2
-
+import datetime
+import inspect
 
 class Manager(object):
     dict_type_objects = {} #По type_when_create можно определить тип узла
@@ -36,10 +39,19 @@ class Manager(object):
     def prepare_root_node(self, root_device, id_root, type_device_str):
         Manager.dict_type_objects[type_device_str] = type(root_device)
         Manager.add_object_to_list(id_root, root_device)
+
         list_parameters_name = filter(lambda attr: type(getattr(root_device, attr)) is Parameter, dir(root_device))
         for name in list_parameters_name:
             root_device.__dict__[name] = type(root_device).__dict__[name]
+
+        list_command_name = filter(lambda attr: callable(getattr(root_device, attr)) and attr[0:2] != '__'
+                                                and hasattr(getattr(root_device, attr), 'result_type'), dir(root_device))
+        for name in list_command_name:
+            root_device.__dict__[name] = type(root_device).__dict__[name]
+
+
         self.configure_parameters(root_device, id_root)
+        self.configure_commands(root_device, id_root)
 
 
     def create_object(self, object_id):
@@ -52,20 +64,11 @@ class Manager(object):
         Manager.add_object_to_list(object_id, object)
         self.configure_parameters(object, object_id)
 
-    '''
-    def get_root(self):
-        root_list = filter (lambda attr: type(getattr(self, attr)) is Root, dir(self))
-        if len(root_list)<1:
-            raise Exception("Not found Root device")
-        elif len(root_list)>1:
-            raise Exception("The number of Root device is {0}. It's too many".format(len(root_list)))
-        return type(self).__dict__[root_list[0]]
-    '''
 
     def get_available_children(self, id_device):
         device = Manager.list_objects[id_device]
         available_devices = device.handle_get_available_children()
-        self.multi_stub.object_call('unregister_all_makers', id = id_device)
+        self.multi_stub.object_call('unregister_all_makers', id = id_device) # можно будет переписать вызвав у объекта функцию unregister_makers
         for device_type, name in available_devices:
             self.multi_stub.object_call('register_maker', id=id_device, name=name)
             Manager.dict_type_objects[name] = device_type
@@ -103,6 +106,36 @@ class Manager(object):
             values = getattr(parameter, 'Value', None)
             parameter.val = values
 
+    def configure_commands(self, object, object_id):
+        list_command_name = filter(lambda attr: callable(getattr(object, attr)) and attr[0:2]!='__'
+                                                and hasattr(getattr(object, attr), 'result_type'), dir(object))
+        for name in list_command_name:
+            command = object.__dict__[name]
+            command.multi_stub = self.multi_stub
+            result_type = command.result_type
+            if 'string' in str(result_type):
+                id_command = self.multi_stub.object_call('create_string_command', 'id',
+                                                         id=object_id, name=name)
+            elif 'int' in str(result_type):
+                id_command = self.multi_stub.object_call('create_int_command', 'id',
+                                                         id=object_id, name=name)
+            elif 'double' in str(result_type):
+                id_command = self.multi_stub.object_call('create_double_command', 'id',
+                                                         id=object_id, name=name)
+            elif 'datetime' in str(result_type):
+                id_command = self.multi_stub.object_call('create_datetime_command', 'id',
+                                                         id=object_id, name=name)
+            elif 'bool' in str(result_type):
+                id_command = self.multi_stub.object_call('create_bool_command', 'id',
+                                                         id=object_id, name=name)
+
+            command.id = id_command
+            value_rpc = rpc_pb2.Value()
+            value_rpc.string_value = '1234'
+            answer = self.multi_stub.command_call('set_argument', id=id_command, argument='a', value=value_rpc)
+
+
+            #id_command = self.multi_stub.object_call()
 
 class Device(object):
     '''
@@ -143,6 +176,9 @@ class Device(object):
             raise Exception('{0} not found in Device'.format(name))
         '''
 
+    def handle_get_available_children(self):
+        return []
+
 class Root(Device):
     def __init__(self, address):
         self.manager.configure_multi_stub(address)
@@ -170,8 +206,10 @@ class Command(object):
 
 
 class MyRoot(Root):
-
+    name = ParameterString(Value='RootNode')
+    displayName = ParameterString(Value='RootNode')
     noopr = ParameterString(Value='noop')
+    valuet = ParameterInt64(Value=[0,1,2,3])
 
     def handle_create(self):
         pass
@@ -187,10 +225,32 @@ class MyRoot(Root):
     def check(self):
         pass
 
+    @command(result_type=bool)
+    def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
+        return True
+
+    @command(result_type=int)
+    def affair(self, where):
+        return 1
+
 
 class Controller(Device):
+    #Parameters:
     name = ParameterString(Value='Controller')
     displayName = ParameterString(Value='Controller')
     hostname = ParameterString(VisibleType.SETUP, AccessType.READ_WRITE, Value=['1', '2'])
     mode = ParameterBool(VisibleType.SETUP, Value=[{'On': True}, {'Off': False}])
     version = Parameter(ValueType.INT64)
+    counter = ParameterDouble(Value=1.0)
+
+    #Events:
+    #simple_event = Event()
+    #alarm = Event(priority=MAJOR, args=dict(where=str, when=datetime.datetime, why=int))
+    '''
+    @command(result_type=bool)
+    def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
+        return True
+    '''
+
+    def run(self):
+        pass

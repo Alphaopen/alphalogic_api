@@ -67,8 +67,8 @@ class MultiStub(object):
         event_w = EventRequest()
         return self.call_helper(*args, fun_set=MultiStub.event_fun_set, request=event_w, stub=self.stub_event)
 
-    def command_call(self, *args):
-        command_w = CommandRequest()
+    def command_call(self, *args,  **kwargs):
+        command_w = CommandRequest( **kwargs)
         return self.call_helper(*args, fun_set=MultiStub.command_fun_set, request=command_w, stub=self.stub_command)
 
     '''

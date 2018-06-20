@@ -36,6 +36,7 @@ print('test get', value)
 
 #python loop
 adapter = core.MyRoot("localhost:42001")
+adapter.relax(1, 2)
 
 for r in adapter.manager.multi_stub.stub_adapter.states(Empty()):
     if r.state == AdapterStream.AFTER_CREATING_OBJECT:
