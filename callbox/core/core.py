@@ -113,13 +113,13 @@ class Manager(object):
             command = object.__dict__[name]
             command.multi_stub = self.multi_stub
             result_type = command.result_type
-            if 'string' in str(result_type):
+            if 'str' in str(result_type):
                 id_command = self.multi_stub.object_call('create_string_command', 'id',
                                                          id=object_id, name=name)
             elif 'int' in str(result_type):
                 id_command = self.multi_stub.object_call('create_int_command', 'id',
                                                          id=object_id, name=name)
-            elif 'double' in str(result_type):
+            elif 'float' in str(result_type):
                 id_command = self.multi_stub.object_call('create_double_command', 'id',
                                                          id=object_id, name=name)
             elif 'datetime' in str(result_type):
@@ -130,9 +130,54 @@ class Manager(object):
                                                          id=object_id, name=name)
 
             command.id = id_command
-            value_rpc = rpc_pb2.Value()
-            value_rpc.string_value = '1234'
-            answer = self.multi_stub.command_call('set_argument', id=id_command, argument='a', value=value_rpc)
+            for arg in command.arguments:
+                name_arg = arg
+                value_arg = command.arguments[arg]
+                value_rpc = rpc_pb2.Value()
+                if 'str' in str(type(value_arg)):
+                    value_rpc.string_value = value_arg
+                    answer = self.multi_stub.command_call('set_argument', id=id_command, argument=name_arg, value=value_rpc)
+                elif 'int' in str(type(value_arg)):
+                    value_rpc.int64_value = value_arg
+                    answer = self.multi_stub.command_call('set_argument', id=id_command, argument=name_arg, value=value_rpc)
+                elif 'float' in str(type(value_arg)):
+                    value_rpc.double_value = value_arg
+                    answer = self.multi_stub.command_call('set_argument', id=id_command, argument=name_arg, value=value_rpc)
+                elif 'datetime' in str(type(value_arg)):
+                    value_rpc.datetime_value = milliseconds_from_epoch(value_arg)
+                    answer = self.multi_stub.command_call('set_argument', id=id_command, argument=name_arg, value=value_rpc)
+                elif 'bool' in str(type(value_arg)):
+                    value_rpc.bool_value = value_arg
+                    answer = self.multi_stub.command_call('set_argument', id=id_command, argument=name_arg, value=value_rpc)
+                elif 'list' in str(type(value_arg)):
+                    req = rpc_pb2.CommandRequest(id=id_command, argument=name_arg)
+                    for val in value_arg:
+                        if isinstance(val, dict):  # два поля в листе
+                            if 'str' in str(type(val.values()[0])):
+                                req.enums[val.keys()[0]].string_value = val.values()[0]
+                            elif 'int' in str(type(val.values()[0])):
+                                req.enums[val.keys()[0]].int64_value = val.values()[0]
+                            elif 'float' in str(type(val.values()[0])):
+                                req.enums[val.keys()[0]].double_value = val.values()[0]
+                            elif 'datetime' in str(type(val.values()[0])):
+                                req.enums[val.keys()[0]].datetime_value = val.values()[0]
+                            elif 'bool' in str(type(val.values()[0])):
+                                req.enums[val.keys()[0]].bool_value = val.values()[0]
+                        else:
+                            if 'str' in str(type(val)):
+                                req.enums[str(val)].string_value = val
+                            elif 'int' in str(type(val)):
+                                req.enums[str(val)].int64_value = val
+                            elif 'float' in str(type(val)):
+                                req.enums[str(val)].double_value = val
+                            elif 'datetime' in str(type(val)):
+                                req.enums[str(val)].datetime_value = milliseconds_from_epoch(val)
+                            elif 'bool' in str(type(val)):
+                                req.enums[str(val)].bool_value = val
+
+                    answer = self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set, request=req,
+                                    stub=self.multi_stub.stub_command)
+
 
 
             #id_command = self.multi_stub.object_call()
@@ -201,56 +246,3 @@ class Command(object):
         self.arguments = arguments
         self.defaults = None  # Значения аргументов команды по умолчанию
         self.id = None
-
-
-
-
-class MyRoot(Root):
-    name = ParameterString(Value='RootNode')
-    displayName = ParameterString(Value='RootNode')
-    noopr = ParameterString(Value='noop')
-    valuet = ParameterInt64(Value=[0,1,2,3])
-
-    def handle_create(self):
-        pass
-
-    def handle_remove(self):
-        pass
-
-    def handle_get_available_children(self):
-        return [
-            (Controller, 'Controller')
-        ]
-
-    def check(self):
-        pass
-
-    @command(result_type=bool)
-    def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
-        return True
-
-    @command(result_type=int)
-    def affair(self, where):
-        return 1
-
-
-class Controller(Device):
-    #Parameters:
-    name = ParameterString(Value='Controller')
-    displayName = ParameterString(Value='Controller')
-    hostname = ParameterString(VisibleType.SETUP, AccessType.READ_WRITE, Value=['1', '2'])
-    mode = ParameterBool(VisibleType.SETUP, Value=[{'On': True}, {'Off': False}])
-    version = Parameter(ValueType.INT64)
-    counter = ParameterDouble(Value=1.0)
-
-    #Events:
-    #simple_event = Event()
-    #alarm = Event(priority=MAJOR, args=dict(where=str, when=datetime.datetime, why=int))
-    '''
-    @command(result_type=bool)
-    def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
-        return True
-    '''
-
-    def run(self):
-        pass
