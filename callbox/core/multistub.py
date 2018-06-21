@@ -63,12 +63,12 @@ class MultiStub(object):
         par_w = ParameterRequest(**kwargs)
         return self.call_helper(*args, fun_set=MultiStub.parameter_fun_set, request=par_w, stub=self.stub_parameter)
 
-    def event_call(self, *args):
-        event_w = EventRequest()
+    def event_call(self, *args, **kwargs):
+        event_w = EventRequest(**kwargs)
         return self.call_helper(*args, fun_set=MultiStub.event_fun_set, request=event_w, stub=self.stub_event)
 
-    def command_call(self, *args):
-        command_w = CommandRequest()
+    def command_call(self, *args, **kwargs):
+        command_w = CommandRequest(**kwargs)
         return self.call_helper(*args, fun_set=MultiStub.command_fun_set, request=command_w, stub=self.stub_command)
 
     '''
@@ -84,7 +84,7 @@ class MultiStub(object):
        Как можно проинспектировать тип переменной, которую надо создать чтобы передать в stub?
     '''
     def call_helper(self, function_name, *args, **kwargs):
-        if function_name in kwargs['fun_set']: # function_name -название функции, проверка на допустимость
+        if function_name in kwargs['fun_set']:  # function_name - название функции, проверка на допустимость
             answer = getattr(kwargs['stub'], function_name)(kwargs['request'])
             for attr_name in args:
                 answer = getattr(answer, attr_name)

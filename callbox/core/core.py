@@ -14,8 +14,9 @@
 
 from callbox.core.type_attributes import VisibleType, ValueType, AccessType
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt64, ParameterDouble, ParameterDatetime, ParameterString
+from callbox.core.event import Event
 from callbox.core.multistub import MultiStub
-
+import datetime
 import callbox.protocol.rpc_pb2 as rpc_pb2
 
 
@@ -41,6 +42,10 @@ class Manager(object):
             root_device.__dict__[name] = type(root_device).__dict__[name]
         self.configure_parameters(root_device, id_root)
 
+        list_events_name = filter(lambda attr: type(getattr(root_device, attr)) is Event, dir(root_device))
+        for name in list_events_name:
+            root_device.__dict__[name] = type(root_device).__dict__[name]
+        self.configure_events(root_device, id_root)
 
     def create_object(self, object_id):
         parent_id = self.multi_stub.object_call('parent', id=object_id).id
@@ -103,6 +108,32 @@ class Manager(object):
             values = getattr(parameter, 'Value', None)
             parameter.val = values
 
+    def configure_events(self, object, object_id):
+        list_events_name = filter(lambda attr: type(getattr(object, attr)) is Event, dir(object))
+        for name in list_events_name:
+            event = object.__dict__[name]
+            event.set_multi_stub(self.multi_stub)
+
+            rep = self.multi_stub.object_call('create_event', id=object_id, name=name)
+            event.id = rep.id
+
+            self.multi_stub.event_call(event.priority, id=event.id)
+
+            self.multi_stub.event_call('clear', id=event.id)
+            for key, val in event.args.iteritems():
+                value_rpc = rpc_pb2.Value()
+                if val == int:
+                    value_rpc.int64_value = 0
+                elif val == str:
+                    value_rpc.string_value = ''
+                elif val == float:
+                    value_rpc.double_value = 0.0
+                elif val == datetime.datetime:
+                    value_rpc.datetime_value = 0  # ms
+                elif val == bool:
+                    value_rpc.bool_value = True
+                self.multi_stub.event_call('set_argument', id=event.id, argument=key, value=value_rpc)
+
 
 class Device(object):
     '''
@@ -143,6 +174,7 @@ class Device(object):
             raise Exception('{0} not found in Device'.format(name))
         '''
 
+
 class Root(Device):
     def __init__(self, address):
         self.manager.configure_multi_stub(address)
@@ -150,13 +182,6 @@ class Root(Device):
         self.manager.prepare_root_node(self, id_root, type_device)
         super(Root, self).__init__(None, type_device, id_root)
 
-
-class Event(object):
-    def __init__(self, name, priority, arguments=[]):
-        self.name = name
-        self.priority = priority
-        self.arguments = arguments
-        self.id = None
 
 class Command(object):
     def __init__(self, name, result_type, arguments=[]):
@@ -171,7 +196,11 @@ class Command(object):
 
 class MyRoot(Root):
 
+    mode = ParameterBool(VisibleType.SETUP, Value=[{'On': True}, {'Off': False}])
     noopr = ParameterString(Value='noop')
+
+    simple_event = Event()
+    event2 = Event(args=dict(where=str, why=int))
 
     def handle_create(self):
         pass

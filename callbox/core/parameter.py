@@ -142,8 +142,10 @@ class AbstractParameter(object):
 
 class Parameter(AbstractParameter):
     def __init__(self, *args, **kwargs):
-        for arg in filter(lambda arg : callable(arg) , args):
-            self.__dict__[arg()[0]] = arg()[1] # example: ["ValueType", "STRING"], ["VisibleType" , "RUNTIME"]
+        self.multi_stub = None
+
+        for arg in filter(lambda x: callable(x), args):
+            self.__dict__[arg()[0]] = arg()[1]  # example: ["ValueType", "STRING"], ["VisibleType" , "RUNTIME"]
 
         if not('VisibleType' in self.__dict__):
             self.VisibleType = VisibleType.RUNTIME()[1]
@@ -152,17 +154,16 @@ class Parameter(AbstractParameter):
         if not ('ValueType' in self.__dict__):
             raise Exception('ValueType not found in Parameter')
 
-        if 'Value' in kwargs:
-            self.Value = kwargs['Value']
+        self.Value = kwargs.get('Value', None)
 
     def set_multi_stub(self, multi_stub):
         self.multi_stub = multi_stub
 
     def __getattr__(self, item):
-        if (item == 'Value'):
+        if item == 'Value':
             return None
 
-        if (item == 'val'):
+        if item == 'val':
             return self.get()
 
     def __setattr__(self, attr, value):

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from callbox.core.type_attributes import VisibleType, ValueType, AccessType
+from callbox.core.type_attributes import EventPriority
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
-
+import time
+import datetime
 
 class AbstractEvent(object):
 
@@ -44,7 +45,7 @@ class AbstractEvent(object):
     def is_blocker(self):
         answer = self.multi_sub.event_call('is_blocker', id=self.id)
         return answer.yes
-
+    '''
     def set_trivial(self):
         answer = self.multi_sub.event_call('set_trivial', id=self.id)
 
@@ -59,13 +60,48 @@ class AbstractEvent(object):
 
     def set_blocker(self):
         answer = self.multi_sub.event_call('set_blocker', id=self.id)
-
-    def set_time(self, t):
-        answer = self.multi_sub.event_call('set_time', id=self.id, time=t)
+    '''
+    def set_time(self, timestamp):
+        '''
+        Установить время события
+        :param timestamp: int(time.time() * 1000) (мс)
+        '''
+        self.multi_stub.event_call('set_time', id=self.id, time=timestamp)
 
     def emit(self, **kwargs):  # TODO
+        '''
+        Если время требуется не текущее, то вызовите set_time
+        :param kwargs: аргументы
+        '''
         # set_argument
-        answer = self.multi_stub.event_call('emit', id=self.id, args=kwargs)
+
+        for key, val in kwargs.iteritems():
+            if key not in self.args.keys():
+                raise Exception('Incorrect argument name of event {0}'.format(self.name))
+            value_rpc = rpc_pb2.Value()
+            if self.args[key] == int:
+                value_rpc.int64_value = val
+            elif self.args[key] == str:
+                value_rpc.string_value = val
+            elif self.args[key] == float:
+                value_rpc.double_value = val
+            elif self.args[key] == datetime.datetime:
+                value_rpc.datetime_value = val  # ms
+            elif self.args[key] == bool:
+                value_rpc.bool_value = val
+
+        self.multi_stub.event_call('emit', id=self.id)
 
     def clear(self):
-        answer = self.multi_stub.event_call('clear', id=self.id)
+        self.multi_stub.event_call('clear', id=self.id)
+
+
+class Event(AbstractEvent):
+    def __init__(self, **kwargs):
+        self.priority = kwargs.get('priority', EventPriority.MAJOR)
+        self.args = kwargs.get('args', {})
+        self.id = None
+        self.multi_stub = None
+
+    def set_multi_stub(self, multi_stub):
+        self.multi_stub = multi_stub

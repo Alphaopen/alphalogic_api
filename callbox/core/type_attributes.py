@@ -38,3 +38,10 @@ class AccessType(object):
     set_access_type = {'READ_ONLY': 'set_read_only',
                 'READ_WRITE': 'set_read_write'}
 
+
+class EventPriority(object):
+    TRIVIAL = 'set_trivial'
+    MINOR = 'set_minor'
+    MAJOR = 'set_major'
+    CRITICAL = 'set_critical'
+    BLOCKER = 'set_blocker'
