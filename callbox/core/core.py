@@ -16,11 +16,14 @@ from callbox.core.type_attributes import VisibleType, ValueType, AccessType
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt64, \
     ParameterDouble, ParameterDatetime, ParameterString
 from callbox.core.multistub import MultiStub
-from callbox.core.command import command
-
+from callbox.core.command import (
+    command,
+    Command
+)
 import callbox.protocol.rpc_pb2 as rpc_pb2
 import datetime
 import inspect
+import utils
 
 class Manager(object):
     dict_type_objects = {} #По type_when_create можно определить тип узла
@@ -47,7 +50,7 @@ class Manager(object):
         list_command_name = filter(lambda attr: callable(getattr(root_device, attr)) and attr[0:2] != '__'
                                                 and hasattr(getattr(root_device, attr), 'result_type'), dir(root_device))
         for name in list_command_name:
-            root_device.__dict__[name] = type(root_device).__dict__[name]
+            root_device.__dict__['command_'+name] = Command(type(root_device).__dict__[name])
 
 
         self.configure_parameters(root_device, id_root)
@@ -107,80 +110,23 @@ class Manager(object):
             parameter.val = values
 
     def configure_commands(self, object, object_id):
-        list_command_name = filter(lambda attr: callable(getattr(object, attr)) and attr[0:2]!='__'
-                                                and hasattr(getattr(object, attr), 'result_type'), dir(object))
+        list_command_name = filter(lambda attr: type(getattr(object, attr)) is Command, dir(object))
         for name in list_command_name:
             command = object.__dict__[name]
-            command.multi_stub = self.multi_stub
+            command.set_multi_stub(self.multi_stub)
             result_type = command.result_type
-            if 'str' in str(result_type):
-                id_command = self.multi_stub.object_call('create_string_command', 'id',
-                                                         id=object_id, name=name)
-            elif 'int' in str(result_type):
-                id_command = self.multi_stub.object_call('create_int_command', 'id',
-                                                         id=object_id, name=name)
-            elif 'float' in str(result_type):
-                id_command = self.multi_stub.object_call('create_double_command', 'id',
-                                                         id=object_id, name=name)
-            elif 'datetime' in str(result_type):
-                id_command = self.multi_stub.object_call('create_datetime_command', 'id',
-                                                         id=object_id, name=name)
-            elif 'bool' in str(result_type):
-                id_command = self.multi_stub.object_call('create_bool_command', 'id',
+            id_command = self.multi_stub.object_call(utils.create_command_definer(str(result_type)), 'id',
                                                          id=object_id, name=name)
 
             command.id = id_command
             for arg in command.arguments:
                 name_arg = arg
                 value_arg = command.arguments[arg]
-                value_rpc = rpc_pb2.Value()
-                if 'str' in str(type(value_arg)):
-                    value_rpc.string_value = value_arg
-                    answer = self.multi_stub.command_call('set_argument', id=id_command, argument=name_arg, value=value_rpc)
-                elif 'int' in str(type(value_arg)):
-                    value_rpc.int64_value = value_arg
-                    answer = self.multi_stub.command_call('set_argument', id=id_command, argument=name_arg, value=value_rpc)
-                elif 'float' in str(type(value_arg)):
-                    value_rpc.double_value = value_arg
-                    answer = self.multi_stub.command_call('set_argument', id=id_command, argument=name_arg, value=value_rpc)
-                elif 'datetime' in str(type(value_arg)):
-                    value_rpc.datetime_value = milliseconds_from_epoch(value_arg)
-                    answer = self.multi_stub.command_call('set_argument', id=id_command, argument=name_arg, value=value_rpc)
-                elif 'bool' in str(type(value_arg)):
-                    value_rpc.bool_value = value_arg
-                    answer = self.multi_stub.command_call('set_argument', id=id_command, argument=name_arg, value=value_rpc)
-                elif 'list' in str(type(value_arg)):
-                    req = rpc_pb2.CommandRequest(id=id_command, argument=name_arg)
-                    for val in value_arg:
-                        if isinstance(val, dict):  # два поля в листе
-                            if 'str' in str(type(val.values()[0])):
-                                req.enums[val.keys()[0]].string_value = val.values()[0]
-                            elif 'int' in str(type(val.values()[0])):
-                                req.enums[val.keys()[0]].int64_value = val.values()[0]
-                            elif 'float' in str(type(val.values()[0])):
-                                req.enums[val.keys()[0]].double_value = val.values()[0]
-                            elif 'datetime' in str(type(val.values()[0])):
-                                req.enums[val.keys()[0]].datetime_value = val.values()[0]
-                            elif 'bool' in str(type(val.values()[0])):
-                                req.enums[val.keys()[0]].bool_value = val.values()[0]
-                        else:
-                            if 'str' in str(type(val)):
-                                req.enums[str(val)].string_value = val
-                            elif 'int' in str(type(val)):
-                                req.enums[str(val)].int64_value = val
-                            elif 'float' in str(type(val)):
-                                req.enums[str(val)].double_value = val
-                            elif 'datetime' in str(type(val)):
-                                req.enums[str(val)].datetime_value = milliseconds_from_epoch(val)
-                            elif 'bool' in str(type(val)):
-                                req.enums[str(val)].bool_value = val
-
-                    answer = self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set, request=req,
-                                    stub=self.multi_stub.stub_command)
+                command.set_argument(name_arg, value_arg)
 
 
 
-            #id_command = self.multi_stub.object_call()
+
 
 class Device(object):
     '''
@@ -197,6 +143,12 @@ class Device(object):
         list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
         for name in list_parameters_name:
             self.__dict__[name] = type(self).__dict__[name]
+
+        list_command_name = filter(lambda attr: callable(getattr(self, attr)) and attr[0:2] != '__'
+                                                and hasattr(getattr(self, attr), 'result_type'), dir(self))
+        for name in list_command_name:
+            self.__dict__['command_'+name] = Command(type(self).__dict__[name])
+
         #Device.add_device_to_list(id_device, self)
         #if parent != None:
         #    Device.add_to_connection_diag(parent.type_device, type_device)
@@ -237,12 +189,4 @@ class Event(object):
         self.name = name
         self.priority = priority
         self.arguments = arguments
-        self.id = None
-
-class Command(object):
-    def __init__(self, name, result_type, arguments=[]):
-        self.name = name
-        self.result_type = result_type
-        self.arguments = arguments
-        self.defaults = None  # Значения аргументов команды по умолчанию
         self.id = None

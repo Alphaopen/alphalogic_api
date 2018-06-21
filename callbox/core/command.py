@@ -5,6 +5,7 @@ import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
 
 import inspect
+import utils
 
 class AbstractCommand(object):
 
@@ -47,26 +48,56 @@ class AbstractCommand(object):
         return answer.yes
 
     def set_result(self, value):
-        value_type_proto = ValueType.set_value_type[self.ValueType]('').keys()[0]
-        value_rpc = rpc_pb2.Value()
-        setattr(value_rpc, value_type_proto, value)
-        answer = self.multi_stub.parameter_call('set', id=self.id, value=value_rpc)
+        value_rpc = utils.get_rpc_value(type(value), value)
+        answer = self.multi_stub.command_call('set_result', id=self.id, value=value_rpc)
 
     def clear(self):
-        pass
+        answer = self.multi_stub.command_call('clear', id=self.id)
 
     def argument_list(self):
-        pass
+        answer = self.multi_stub.command_call('argument_list', id=self.id)
+        return answer.names
 
-    def argument(self):
-        pass
+    def argument(self, name_argument, type_argument):
+        answer = self.multi_stub.command_call('argument', id=self.id, argument=name_argument)
+        return getattr(answer.value, type_argument)
 
-    def set_argument(self):
-        pass
+
+    def set_argument(self, name_arg, value):
+        value_rpc = rpc_pb2.Value()
+        value_type = utils.value_field_definer(value)
+        if value_type!='list':
+            setattr(value_rpc, value_type, value)
+            answer = self.multi_stub.command_call('set_argument', id=self.id,
+                                                  argument=name_arg, value=value_rpc)
+        else:
+            req = rpc_pb2.CommandRequest(id=self.id, argument=name_arg)
+            for index, val in enumerate(value):
+                if isinstance(val, dict):  # два поля в листе
+                    val_type = utils.value_field_definer(val.values()[0])
+                    setattr(req.enums[val.keys()[0]], val_type, val.values()[0])
+                    if index==0:
+                        setattr(req.value, val_type, val.values()[0])
+                else:
+                    val_type = utils.value_field_definer(val)
+                    setattr(req.enums[str(val)], val_type, val)
+                    if index==0:
+                        setattr(req.value, val_type, val)
+
+            answer = self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set, request=req,
+                            stub=self.multi_stub.stub_command)
 
     def owner(self):
         pass
 
+class Command(AbstractCommand):
+    def __init__(self, function):
+        self.function = function
+        self.result_type = function.result_type
+        self.arguments = function.arguments
+
+    def set_multi_stub(self, multi_stub):
+        self.multi_stub = multi_stub
 
 def command_preparation(wrapped, func, **kwargs_c): #В этой функции задаются возвращаемое значение команды и ее аргументы
     wrapped.result_type = kwargs_c['result_type']
