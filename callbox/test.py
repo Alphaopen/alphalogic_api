@@ -89,7 +89,7 @@ class MyRoot(Root):
         pass
 
     @command(result_type=unicode)
-    def relax(self, where='room', why=42, which=[1, 2, 3], which2=[{'On': True}, {'Off': False}]):
+    def relax(self, where='room', why=42, which=(1, 2, 3), which2=({'On': True}, {'Off': False})):
         # def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
         return True
 

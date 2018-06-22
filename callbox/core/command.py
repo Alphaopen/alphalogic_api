@@ -107,7 +107,21 @@ def command_preparation(wrapped, func, **kwargs_c): #В этой функции 
     bias = 1 if 'self' in args else 0 # если первый аргумент self, то нужно рассматривать со второго элемента
     wrapped.__dict__['arguments'] = {}
     for index, name in enumerate(args[bias:]):
-        wrapped.arguments[name] = defaults[index]
+        default_value = defaults[index]
+        if type(default_value)==tuple:
+            for val_type in default_value:
+                if type(val_type)==dict:
+                    key = val_type.keys()[0]
+                    val_dict = val_type.values()[0]
+                    key = utils.decode_string(key) if (type(key) == str) else key
+                    val_dict = utils.decode_string(val_dict) if (type(val_dict) == str) else val_dict
+                else:
+                    val_type = utils.decode_string(val_type) if (type(val_type)==str) else val_type
+            wrapped.arguments[name] = default_value
+        elif type(default_value)!= str: # дополнительное приведение к юникоду
+            wrapped.arguments[name] = default_value
+        else:
+            wrapped.arguments[name] = utils.decode_string(default_value)
 
 def command(*argv_c, **kwargs_c):
     def decorator(func):
