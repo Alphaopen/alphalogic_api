@@ -1,12 +1,34 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from enum import Enum
 import datetime
 
+class runtime(object):
+    pass
+
+class setup(object):
+    pass
+
+class hidden(object):
+    pass
+
+class common(object):
+    pass
+
+class read_only(object):
+    pass
+
+class read_write(object):
+    pass
+
+'''
 class ValueType(object):
-    BOOL = staticmethod(lambda: ["ValueType", "BOOL"])
-    INT64 = staticmethod(lambda:  ["ValueType", "INT64"])
-    DOUBLE = staticmethod(lambda: ["ValueType", "DOUBLE"])
-    DATETIME = staticmethod(lambda: ["ValueType", "DATETIME"])
-    STRING = staticmethod(lambda: ["ValueType", "STRING"])
+    bool = staticmethod(lambda: ["ValueType", "BOOL"])
+    int64 = staticmethod(lambda:  ["ValueType", "INT64"])
+    double = staticmethod(lambda: ["ValueType", "DOUBLE"])
+    datetime = staticmethod(lambda: ["ValueType", "DATETIME"])
+    string = staticmethod(lambda: ["ValueType", "STRING"])
+
     create_parameter = {'BOOL': 'create_bool_parameter',
                    'INT64': 'create_int_parameter',
                    'DOUBLE': 'create_double_parameter',
@@ -17,15 +39,13 @@ class ValueType(object):
                 'DOUBLE': (lambda val: {'double_value': val}),
                 'DATETIME': (lambda val: {'datetime_value': val}),
                 'STRING': (lambda val: {'string_value': val})}
-    #BYTES = staticmethod(lambda  : ["ValueType", "BYTES"])
-    #MAP = staticmethod(lambda  : ["ValueType", "MAP"])
 
 
 class VisibleType(object):
-    RUNTIME = staticmethod(lambda: ["VisibleType", "RUNTIME"])
-    SETUP = staticmethod(lambda: ["VisibleType", "SETUP"])
-    HIDDEN = staticmethod(lambda: ["VisibleType", "HIDDEN"])
-    COMMON = staticmethod(lambda: ["VisibleType", "COMMON"])
+    runtime = staticmethod(lambda: ["VisibleType", "RUNTIME"])
+    setup = staticmethod(lambda: ["VisibleType", "SETUP"])
+    hidden = staticmethod(lambda: ["VisibleType", "HIDDEN"])
+    commmon = staticmethod(lambda: ["VisibleType", "COMMON"])
     set_visible_type = {'RUNTIME': 'set_runtime',
                 'SETUP': 'set_setup',
                 'HIDDEN': 'set_hidden',
@@ -33,9 +53,9 @@ class VisibleType(object):
 
 
 class AccessType(object):
-    READ_ONLY = staticmethod(lambda: ["AccessType", "READ_ONLY"])
-    READ_WRITE = staticmethod(lambda: ["AccessType", "READ_WRITE"])
+    read_only = staticmethod(lambda: ["AccessType", "READ_ONLY"])
+    read_write = staticmethod(lambda: ["AccessType", "READ_WRITE"])
     set_access_type = {'READ_ONLY': 'set_read_only',
                 'READ_WRITE': 'set_read_write'}
 
-
+'''

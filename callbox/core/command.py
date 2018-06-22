@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-
-from callbox.core.type_attributes import VisibleType, ValueType, AccessType
+from __future__ import unicode_literals
+from callbox.core.type_attributes import runtime, setup, hidden, common
+from callbox.core.type_attributes import read_only, read_write
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
 
 import inspect
-import utils
+import callbox.core.utils as utils
 
 class AbstractCommand(object):
 
@@ -88,7 +89,8 @@ class AbstractCommand(object):
                             stub=self.multi_stub.stub_command)
 
     def owner(self):
-        pass
+        answer = self.multi_stub.command_call('owner', id=self.id)
+        return answer.owner
 
 class Command(AbstractCommand):
     def __init__(self, function):

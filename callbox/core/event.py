@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from callbox.core.type_attributes import VisibleType, ValueType, AccessType
+from __future__ import unicode_literals
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
 

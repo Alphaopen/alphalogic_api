@@ -11,9 +11,11 @@
 Ничего не удалять подсоединиться и просто наблюдать за деревом
 
 '''
+from __future__ import unicode_literals
+from callbox.core.type_attributes import runtime, setup, hidden, common
+from callbox.core.type_attributes import read_only, read_write
 
-from callbox.core.type_attributes import VisibleType, ValueType, AccessType
-from callbox.core.parameter import Parameter, ParameterBool, ParameterInt64, \
+from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
 from callbox.core.multistub import MultiStub
 from callbox.core.command import (
@@ -23,7 +25,7 @@ from callbox.core.command import (
 import callbox.protocol.rpc_pb2 as rpc_pb2
 import datetime
 import inspect
-import utils
+import callbox.core.utils as utils
 
 class Manager(object):
     dict_type_objects = {} #По type_when_create можно определить тип узла
@@ -95,18 +97,18 @@ class Manager(object):
         for name in list_parameters_name:
             parameter = object.__dict__[name]
             parameter.set_multi_stub(self.multi_stub)
-            value_type = parameter.ValueType
-            id_parameter = self.multi_stub.object_call(ValueType.create_parameter[value_type], 'id',
+            value_type = parameter.value_type
+            id_parameter = self.multi_stub.object_call(utils.create_parameter_definer(str(value_type)), 'id',
                                                        id=object_id, name=name)
             parameter.id = id_parameter
 
-            visible_type = parameter.VisibleType
-            getattr(parameter, VisibleType.set_visible_type[visible_type])()
+            visible_type = parameter.visible
+            getattr(parameter, utils.set_visible_definer(visible_type))
 
-            access_type = parameter.AccessType
-            getattr(parameter, AccessType.set_access_type[access_type])()
+            access_type = parameter.access
+            getattr(parameter, utils.set_access_definer(access_type))
 
-            values = getattr(parameter, 'Value', None)
+            values = getattr(parameter, 'value', None)
             parameter.val = values
 
     def configure_commands(self, object, object_id):

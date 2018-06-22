@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-
-from callbox.core.type_attributes import VisibleType, ValueType, AccessType
+from __future__ import unicode_literals
+from callbox.core.type_attributes import runtime, setup, hidden, common
+from callbox.core.type_attributes import read_only, read_write
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
-
+import callbox.core.utils as utils
+import datetime
 
 class AbstractParameter(object):
     def get_name(self):
@@ -98,30 +100,30 @@ class AbstractParameter(object):
 
     def get(self):
         answer = self.multi_stub.parameter_call('get', id=self.id)
-        value_type_proto = ValueType.set_value_type[self.ValueType]('').keys()[0]
+        value_type_proto = utils.value_type_field_definer(self.value_type)
         return getattr(answer.value, value_type_proto)
 
     def set(self, value):
-        value_type_proto = ValueType.set_value_type[self.ValueType]('').keys()[0]
+        value_type_proto = utils.value_type_field_definer(self.value_type)
         value_rpc = rpc_pb2.Value()
         setattr(value_rpc, value_type_proto, value)
         answer = self.multi_stub.parameter_call('set', id=self.id, value=value_rpc)
 
     def enums(self):
         answer = self.multi_stub.parameter_call('enums', id=self.id)
-        value_type_proto = ValueType.set_value_type[self.ValueType]('').keys()[0]
+        value_type_proto = utils.value_type_field_definer(self.value_type)
         return [(key, getattr(answer.enums[key], value_type_proto)) for key in answer.enums]
 
     def set_enum(self, value, enum_name):
-        value_type_proto = ValueType.set_value_type[self.ValueType]('').keys()[0]
+        value_type_proto = utils.value_type_field_definer(self.value_type)
         value_rpc = rpc_pb2.Value()
         setattr(value_rpc, value_type_proto, value)
         answer = self.multi_stub.parameter_call('set_enum', id=self.id, enum_name=enum_name, value=value_rpc)
 
     def set_enums(self, values):
-        value_type = self.ValueType
+        value_type = self.value_type
         req = rpc_pb2.ParameterRequest(id=self.id)
-        attr_type = ValueType.set_value_type[value_type]('').keys()[0]
+        attr_type = utils.value_type_field_definer(value_type)
         for val in values:
             if isinstance(val, dict):  # два поля в листе
                 setattr(req.enums[val.keys()[0]], attr_type, val.values()[0])  # проверить
@@ -142,31 +144,39 @@ class AbstractParameter(object):
 
 class Parameter(AbstractParameter):
     def __init__(self, *args, **kwargs):
-        for arg in filter(lambda arg : callable(arg) , args):
-            self.__dict__[arg()[0]] = arg()[1] # example: ["ValueType", "STRING"], ["VisibleType" , "RUNTIME"]
+        for arg in kwargs:
+            self.__dict__[arg] = kwargs[arg]
 
-        if not('VisibleType' in self.__dict__):
-            self.VisibleType = VisibleType.RUNTIME()[1]
-        if not('AccessType' in self.__dict__):
-            self.AccessType = AccessType.READ_WRITE()[1]
-        if not ('ValueType' in self.__dict__):
-            raise Exception('ValueType not found in Parameter')
+        if not('visible' in kwargs):
+            self.visible = runtime
+        if not('access' in kwargs):
+            self.access = read_write
+        if not ('value_type' in kwargs):
+            raise Exception('value_type not found in Parameter')
 
-        if 'Value' in kwargs:
-            self.Value = kwargs['Value']
+        res = map(lambda x: kwargs['value_type']==x, [bool, int, float, datetime.datetime, unicode])
+        if not(any(res)):
+            raise Exception('value_type={0} is unknown'.format(kwargs['value_type']))
+
+        if 'value' in kwargs:
+            self.value = kwargs['value']
+
+        if 'default' in kwargs:
+            self.value = kwargs['default']
+
 
     def set_multi_stub(self, multi_stub):
         self.multi_stub = multi_stub
 
     def __getattr__(self, item):
-        if (item == 'Value'):
+        if (item == 'value'):
             return None
 
         if (item == 'val'):
             return self.get()
 
     def __setattr__(self, attr, value):
-        if attr in ['ValueType', 'VisibleType', 'AccessType', 'Value', 'name', 'multi_stub', 'id']:
+        if attr in ['value_type', 'visible', 'access', 'value', 'name', 'multi_stub', 'id']:
             self.__dict__[attr] = value
         elif attr == 'val':
             if value is not None:
@@ -179,25 +189,25 @@ class Parameter(AbstractParameter):
 
 class ParameterBool(Parameter):
     def __new__(cls, *args, **kwargs):
-        return Parameter(ValueType.BOOL, *args, **kwargs)
+        return Parameter(*args, value_type=bool, **kwargs)
 
 
-class ParameterInt64(Parameter):
+class ParameterInt(Parameter):
     def __new__(cls, *args, **kwargs):
-        return Parameter(ValueType.INT64, *args, **kwargs)
+        return Parameter(*args, value_type=int, **kwargs)
 
 
 class ParameterDouble(Parameter):
     def __new__(cls, *args, **kwargs):
-        return Parameter(ValueType.DOUBLE, *args, **kwargs)
+        return Parameter(*args, value_type=float, **kwargs)
 
 
 class ParameterDatetime(Parameter):
     def __new__(cls, *args, **kwargs):
-        return Parameter(ValueType.DATETIME, *args, **kwargs)
+        return Parameter(*args, value_type=datetime.datetime, **kwargs)
 
 
 class ParameterString(Parameter):
     def __new__(cls, *args, **kwargs):
-        return Parameter(ValueType.STRING, *args, **kwargs)
+        return Parameter(*args, value_type=unicode, **kwargs)
 
