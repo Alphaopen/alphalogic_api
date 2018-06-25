@@ -30,6 +30,7 @@ import callbox.core.utils as utils
 class Manager(object):
     dict_type_objects = {} #По type_when_create можно определить тип узла
     list_objects = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
+    list_commands = {} #По словарю можно обратиться к командам
 
     @staticmethod
     def add_object_to_list(object_id, device):
@@ -119,15 +120,12 @@ class Manager(object):
             result_type = command.result_type
             id_command = self.multi_stub.object_call(utils.create_command_definer(str(result_type)), 'id',
                                                          id=object_id, name=name)
-
             command.id = id_command
             for arg in command.arguments:
                 name_arg = arg
                 value_arg = command.arguments[arg]
                 command.set_argument(name_arg, value_arg)
-
-
-
+            self.list_commands[id_command] = command
 
 
 class Device(object):
@@ -177,6 +175,7 @@ class Device(object):
 
     def handle_get_available_children(self):
         return []
+
 
 class Root(Device):
     def __init__(self, address):

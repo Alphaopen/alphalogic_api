@@ -265,6 +265,7 @@ message CommandReply {
 // Adapter Service
 service AdapterService {
     rpc states(Empty) returns (stream AdapterStream) {}
+    rpc ack(AdapterStream) returns (Empty) {}  // state acknowledge 
 }
 
 message AdapterStream {

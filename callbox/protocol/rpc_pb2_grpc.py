@@ -1870,6 +1870,11 @@ class AdapterServiceStub(object):
         request_serializer=rpc__pb2.Empty.SerializeToString,
         response_deserializer=rpc__pb2.AdapterStream.FromString,
         )
+    self.ack = channel.unary_unary(
+        '/adapter.rpc.AdapterService/ack',
+        request_serializer=rpc__pb2.AdapterStream.SerializeToString,
+        response_deserializer=rpc__pb2.Empty.FromString,
+        )
 
 
 class AdapterServiceServicer(object):
@@ -1883,6 +1888,13 @@ class AdapterServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def ack(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_AdapterServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -1890,6 +1902,11 @@ def add_AdapterServiceServicer_to_server(servicer, server):
           servicer.states,
           request_deserializer=rpc__pb2.Empty.FromString,
           response_serializer=rpc__pb2.AdapterStream.SerializeToString,
+      ),
+      'ack': grpc.unary_unary_rpc_method_handler(
+          servicer.ack,
+          request_deserializer=rpc__pb2.AdapterStream.FromString,
+          response_serializer=rpc__pb2.Empty.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

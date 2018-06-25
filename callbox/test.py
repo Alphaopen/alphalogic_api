@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import callbox.core.core as core
 
 import callbox.protocol.rpc_pb2 as rpc_pb2
@@ -10,6 +11,7 @@ from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
 
 import grpc
 import datetime
+import time
 
 from protocol.rpc_pb2 import (
     Value,
@@ -85,12 +87,16 @@ class MyRoot(Root):
             (Controller, 'Controller')
         ]
 
-    def check(self, where='here'):
-        pass
-
     @command(result_type=unicode)
+    def check(self, where='here'):
+        return 'abc'
+
+    @command(result_type=bool)
     def relax(self, where='room', why=42, which=(1, 2, 3), which2=({'On': True}, {'Off': False})):
-        # def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
+        print where
+        print why
+        print which
+        print which2
         return True
 
     '''
@@ -124,9 +130,10 @@ class Controller(Device):
 
 # python loop
 adapter = MyRoot("localhost:42001")
-adapter.relax(1, 2)
+#adapter.relax(1, 2, 3, 4)
 
 for r in adapter.manager.multi_stub.stub_adapter.states(Empty()):
+    ack = r
     if r.state == AdapterStream.AFTER_CREATING_OBJECT:
         adapter.manager.create_object(r.id)
         # req = ObjectRequest(id=r.id, name='type_when_create')
@@ -138,3 +145,12 @@ for r in adapter.manager.multi_stub.stub_adapter.states(Empty()):
     elif r.state == AdapterStream.GETTING_AVAILABLE_CHILDREN:
         print "id={0}".format(r.id)
         adapter.manager.get_available_children(r.id)
+
+    elif r.state == AdapterStream.EXECUTING_COMMAND:
+        # simulate executing command
+        time.sleep(1.0)
+        print(AdapterStream.AdapterState.Name(r.state))
+        adapter.manager.list_commands[r.id].call_function()
+
+    adapter.manager.multi_stub.stub_adapter.ack(ack)
+

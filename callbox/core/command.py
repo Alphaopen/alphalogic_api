@@ -63,11 +63,10 @@ class AbstractCommand(object):
         answer = self.multi_stub.command_call('argument', id=self.id, argument=name_argument)
         return getattr(answer.value, type_argument)
 
-
     def set_argument(self, name_arg, value):
         value_rpc = rpc_pb2.Value()
         value_type = utils.value_field_definer(value)
-        if value_type!='list':
+        if value_type!='list' and value_type!='tuple':
             setattr(value_rpc, value_type, value)
             answer = self.multi_stub.command_call('set_argument', id=self.id,
                                                   argument=name_arg, value=value_rpc)
@@ -97,36 +96,36 @@ class Command(AbstractCommand):
         self.function = function
         self.result_type = function.result_type
         self.arguments = function.arguments
+        self.arguments_type = function.arguments_type
 
     def set_multi_stub(self, multi_stub):
         self.multi_stub = multi_stub
+
+    def call_function(self):
+        arg_list = self.argument_list()
+        function_dict = {}
+        for name_arg in arg_list:
+            type_arg = self.arguments_type[name_arg]
+            function_dict[name_arg] = self.argument(name_arg, utils.value_type_field_definer(type_arg))
+        self.function(self, **function_dict)
+
 
 def command_preparation(wrapped, func, **kwargs_c): #В этой функции задаются возвращаемое значение команды и ее аргументы
     wrapped.result_type = kwargs_c['result_type']
     (args, varargs, keywords, defaults) = inspect.getargspec(func)
     bias = 1 if 'self' in args else 0 # если первый аргумент self, то нужно рассматривать со второго элемента
     wrapped.__dict__['arguments'] = {}
+    wrapped.__dict__['arguments_type'] = {}
     for index, name in enumerate(args[bias:]):
-        default_value = defaults[index]
-        if type(default_value)==tuple:
-            for val_type in default_value:
-                if type(val_type)==dict:
-                    key = val_type.keys()[0]
-                    val_dict = val_type.values()[0]
-                    key = utils.decode_string(key) if (type(key) == str) else key
-                    val_dict = utils.decode_string(val_dict) if (type(val_dict) == str) else val_dict
-                else:
-                    val_type = utils.decode_string(val_type) if (type(val_type)==str) else val_type
-            wrapped.arguments[name] = default_value
-        elif type(default_value)!= str: # дополнительное приведение к юникоду
-            wrapped.arguments[name] = default_value
-        else:
-            wrapped.arguments[name] = utils.decode_string(default_value)
+        wrapped.arguments[name] = defaults[index]
+        wrapped.arguments_type[name] = utils.get_command_argument_type(defaults[index])
 
 def command(*argv_c, **kwargs_c):
     def decorator(func):
-        def wrapped(self, *argv, **kwargs):
-            return func(*argv, **kwargs)
+        def wrapped(this_command, *argv, **kwargs):
+            result = func(this_command, *argv, **kwargs)
+            this_command.set_result(result)
+            return result
         command_preparation(wrapped, func, **kwargs_c)
         return wrapped
     return decorator

@@ -6,8 +6,10 @@ from callbox.core.type_attributes import runtime, setup, hidden, common
 from callbox.core.type_attributes import read_only, read_write
 import locale
 
+
 def milliseconds_from_epoch(dt):
     return int((dt - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000)
+
 
 def value_type_field_definer(value_type):
     if 'unicode' in str(value_type):
@@ -23,6 +25,7 @@ def value_type_field_definer(value_type):
     elif 'list' in str(value_type):
         return 'list'
 
+
 def value_field_definer(value):
     if 'unicode' in str(type(value)):
         return 'string_value'
@@ -30,12 +33,15 @@ def value_field_definer(value):
         return 'int64_value'
     elif 'float' in str(type(value)):
         return 'double_value'
-    elif 'datetime' in str(value):
+    elif 'datetime' in str(type(value)):
         return 'datetime_value'
-    elif 'bool' in str(value):
+    elif 'bool' in str(type(value)):
         return 'bool_value'
-    elif 'list' in str(value):
+    elif 'list' in str(type(value)):
         return 'list'
+    elif 'tuple' in str(type(value)):
+        return 'tuple'
+
 
 def create_command_definer(result_type_str):
     if 'unicode' in result_type_str:
@@ -49,6 +55,7 @@ def create_command_definer(result_type_str):
     elif 'bool' in result_type_str:
         return 'create_bool_command'
 
+
 def create_parameter_definer(result_type_str):
     if 'unicode' in result_type_str:
         return 'create_string_parameter'
@@ -61,6 +68,7 @@ def create_parameter_definer(result_type_str):
     elif 'bool' in result_type_str:
         return 'create_bool_parameter'
 
+
 def set_visible_definer(visible_type):
     if visible_type==runtime:
         return 'set_runtime'
@@ -71,11 +79,25 @@ def set_visible_definer(visible_type):
     elif visible_type==common:
         return 'set_common'
 
+
 def set_access_definer(access_type):
     if access_type==read_only:
         return 'set_read_only'
     elif access_type==read_write:
         return 'set_read_write'
+
+
+def get_command_argument_type(arg):
+    if type(arg) == tuple:
+        for val_type in arg:
+            if type(val_type) == dict:
+                val_dict = val_type.values()[0]
+                return type(val_dict)
+            else:
+                return type(val_type)
+    else:
+        return type(arg)
+
 
 def decode_string(s):
     """
@@ -91,6 +113,7 @@ def decode_string(s):
             pass
     # Если ничего не осталось
     return unicode(s)
+
 
 def get_rpc_value(value_type, value=None):
     value_rpc = rpc_pb2.Value()
