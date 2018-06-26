@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import unicode_literals
 from callbox.core.type_attributes import EventPriority
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
