@@ -1,27 +1,34 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from callbox.core.type_attributes import runtime, setup, hidden, common
-from callbox.core.type_attributes import read_only, read_write
-import callbox.protocol.rpc_pb2 as rpc_pb2
-from callbox.core.multistub import MultiStub
-import callbox.core.utils as utils
+
 import datetime
 
+import callbox.protocol.rpc_pb2 as rpc_pb2
+
+from callbox.core.type_attributes import runtime, setup, hidden, common, read_only, read_write
+from callbox.core.multistub import MultiStub
+from callbox.core import utils
+
+
 class AbstractParameter(object):
-    def get_name(self):
-        answer = self.multi_stub.parameter_call('name', id=self.id)
+
+    def _call(name, *args, **kwargs):
+        return self.multi_stub.parameter_call(name, id=self.id, *args, **kwargs)
+
+    def name(self):
+        answer = self._call('name')
         return answer.name
 
     def display_name(self):
-        answer = self.multi_stub.parameter_call('display_name', id=self.id)
+        answer = self._call('display_name')
         return answer.display_name
 
     def desc(self):
-        answer = self.multi_stub.parameter_call('desc', id=self.id)
+        answer = self._call('desc')
         return answer.desc
 
     def set_display_name(self, display_name):
-        answer = self.multi_stub.parameter_call('set_display_name', id=self.id, display_name=display_name)
+        answer = self._call('set_display_name', display_name=display_name)  # и так далее...
 
     def set_desc(self, desc):
         answer = self.multi_stub.parameter_call('set_desc', id=self.id, desc=desc)
@@ -154,8 +161,7 @@ class Parameter(AbstractParameter):
         if not ('value_type' in kwargs):
             raise Exception('value_type not found in Parameter')
 
-        res = map(lambda x: kwargs['value_type']==x, [bool, int, float, datetime.datetime, unicode])
-        if not(any(res)):
+        if kwargs['value_type'] not in [bool, int, float, datetime.datetime, unicode]:
             raise Exception('value_type={0} is unknown'.format(kwargs['value_type']))
 
         if 'value' in kwargs:
