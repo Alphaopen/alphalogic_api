@@ -12,7 +12,7 @@ from callbox.core import utils
 
 class AbstractParameter(object):
 
-    def _call(name, *args, **kwargs):
+    def _call(self, name, *args, **kwargs):
         return self.multi_stub.parameter_call(name, id=self.id, *args, **kwargs)
 
     def name(self):
@@ -28,85 +28,85 @@ class AbstractParameter(object):
         return answer.desc
 
     def set_display_name(self, display_name):
-        answer = self._call('set_display_name', display_name=display_name)  # и так далее...
+        answer = self._call('set_display_name', display_name=display_name)
 
     def set_desc(self, desc):
-        answer = self.multi_stub.parameter_call('set_desc', id=self.id, desc=desc)
+        answer = self._call('set_desc', desc=desc)
 
     def is_string(self):
-        answer = self.multi_stub.parameter_call('is_string', id=self.id)
+        answer = self._call('is_string')
         return answer.yes
 
     def is_int(self):
-        answer = self.multi_stub.parameter_call('is_int', id=self.id)
+        answer = self._call('is_int')
         return answer.yes
 
     def is_double(self):
-        answer = self.multi_stub.parameter_call('is_double', id=self.id)
+        answer = self._call('is_double')
         return answer.yes
 
     def is_datetime(self):
-        answer = self.multi_stub.parameter_call('is_datetime', id=self.id)
+        answer = self._call('is_datetime')
         return answer.yes
 
     def is_bool(self):
-        answer = self.multi_stub.parameter_call('is_bool', id=self.id)
+        answer = self._call('is_bool')
         return answer.yes
 
     def is_runtime(self):
-        answer = self.multi_stub.parameter_call('is_runtime', id=self.id)
+        answer = self._call('is_runtime')
         return answer.yes
 
     def is_setup(self):
-        answer = self.multi_stub.parameter_call('is_setup', id=self.id)
+        answer = self._call('is_setup')
         return answer.yes
 
     def is_hidden(self):
-        answer = self.multi_stub.parameter_call('is_hidden', id=self.id)
+        answer = self._call('is_hidden')
         return answer.yes
 
     def is_common(self):
-        answer = self.multi_stub.parameter_call('is_common', id=self.id)
+        answer = self._call('is_common')
         return answer.yes
 
     def set_runtime(self):
-        answer = self.multi_stub.parameter_call('set_runtime', id=self.id)
+        answer = self._call('set_runtime')
 
     def set_setup(self):
-        answer = self.multi_stub.parameter_call('set_setup', id=self.id)
+        answer = self._call('set_setup')
 
     def set_hidden(self):
-        answer = self.multi_stub.parameter_call('set_hidden', id=self.id)
+        answer = self._call('set_hidden')
 
     def set_common(self):
-        answer = self.multi_stub.parameter_call('set_common', id=self.id)
+        answer = self._call('set_common')
 
     def is_read_only(self):
-        answer = self.multi_stub.parameter_call('is_read_only', id=self.id)
+        answer = self._call('is_read_only')
         return answer.yes
 
     def is_read_write(self):
-        answer = self.multi_stub.parameter_call('is_read_write', id=self.id)
+        answer = self._call('is_read_write')
         return answer.yes
 
     def set_read_only(self):
-        answer = self.multi_stub.parameter_call('set_read_only', id=self.id)
+        answer = self._call('set_read_only')
 
     def set_read_write(self):
-        answer = self.multi_stub.parameter_call('set_read_write', id=self.id)
+        answer = self._call('set_read_write')
 
     def is_licensed(self):
-        answer = self.multi_stub.parameter_call('is_licensed', id=self.id)
+        answer = self._call('is_licensed')
         return answer.yes
 
     def set_licensed(self):
-        answer = self.multi_stub.parameter_call('set_licensed', id=self.id)
+        answer = self._call('set_licensed')
 
     def clear(self):
-        answer = self.multi_stub.parameter_call('clear', id=self.id)
+        answer = self._call('clear')
 
     def get(self):
-        answer = self.multi_stub.parameter_call('get', id=self.id)
+        answer = self._call('get')
         value_type_proto = utils.value_type_field_definer(self.value_type)
         return getattr(answer.value, value_type_proto)
 
@@ -114,10 +114,10 @@ class AbstractParameter(object):
         value_type_proto = utils.value_type_field_definer(self.value_type)
         value_rpc = rpc_pb2.Value()
         setattr(value_rpc, value_type_proto, value)
-        answer = self.multi_stub.parameter_call('set', id=self.id, value=value_rpc)
+        answer = self._call('set', value=value_rpc)
 
     def enums(self):
-        answer = self.multi_stub.parameter_call('enums', id=self.id)
+        answer = self._call('enums')
         value_type_proto = utils.value_type_field_definer(self.value_type)
         return [(key, getattr(answer.enums[key], value_type_proto)) for key in answer.enums]
 
@@ -125,7 +125,7 @@ class AbstractParameter(object):
         value_type_proto = utils.value_type_field_definer(self.value_type)
         value_rpc = rpc_pb2.Value()
         setattr(value_rpc, value_type_proto, value)
-        answer = self.multi_stub.parameter_call('set_enum', id=self.id, enum_name=enum_name, value=value_rpc)
+        answer = self._call('set_enum', enum_name=enum_name, value=value_rpc)
 
     def set_enums(self, values):
         value_type = self.value_type
@@ -141,11 +141,11 @@ class AbstractParameter(object):
                                     stub=self.multi_stub.stub_parameter)
 
     def has_enum(self, enum_name):
-        answer = self.multi_stub.parameter_call('has_enum', id=self.id, enum_name=enum_name)
+        answer = self._call('has_enum', enum_name=enum_name)
         return answer.yes
 
     def owner(self):
-        answer = self.multi_stub.parameter_call('owner', id=self.id)
+        answer = self._call('owner')
         return answer.owner
 
 

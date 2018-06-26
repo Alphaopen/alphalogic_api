@@ -74,7 +74,7 @@ class Manager(object):
     def get_available_children(self, id_device):
         device = Manager.list_objects[id_device]
         available_devices = device.handle_get_available_children()
-        self.multi_stub.object_call('unregister_all_makers', id = id_device) # можно будет переписать вызвав у объекта функцию unregister_makers
+        self.multi_stub.object_call('unregister_all_makers', id=id_device) # можно будет переписать вызвав у объекта функцию unregister_makers
         for device_type, name in available_devices:
             self.multi_stub.object_call('register_maker', id=id_device, name=name)
             Manager.dict_type_objects[name] = device_type
@@ -143,8 +143,9 @@ class Device(object):
         for name in list_parameters_name:
             self.__dict__[name] = type(self).__dict__[name]
 
-        list_command_name = filter(lambda attr: callable(getattr(self, attr)) and attr[0:2] != '__'
-                                                and hasattr(getattr(self, attr), 'result_type'), dir(self))
+        is_callable = lambda x: callable(getattr(self, x)) and not x.startswith('_') and\
+                                hasattr(getattr(self, x), 'result_type')
+        list_command_name = filter(is_callable, dir(self))
         for name in list_command_name:
             self.commands[name] = Command(self, type(self).__dict__[name])
 
@@ -156,17 +157,6 @@ class Device(object):
             self.parameters.append(name)
             value.name = name
             self.__dict__[name] = value
-
-        '''
-        if name == "parameter":
-            self.parameters.append(value)
-        elif name == "event":
-            self.events.append(value)
-        elif name == "command":
-            self.commands.append(value)
-        else:
-            raise Exception('{0} not found in Device'.format(name))
-        '''
 
     def handle_get_available_children(self):
         return []
