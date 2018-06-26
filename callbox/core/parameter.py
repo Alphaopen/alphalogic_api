@@ -153,7 +153,6 @@ class Parameter(AbstractParameter):
     def __init__(self, *args, **kwargs):
         for arg in kwargs:
             self.__dict__[arg] = kwargs[arg]
-        for arg in filter(lambda x: callable(x), args):
 
         if not('visible' in kwargs):
             self.visible = runtime
@@ -171,12 +170,11 @@ class Parameter(AbstractParameter):
         if 'default' in kwargs:
             self.value = kwargs['default']
 
-
     def set_multi_stub(self, multi_stub):
         self.multi_stub = multi_stub
 
     def __getattr__(self, item):
-        if (item == 'value'):
+        if item == 'value':
             return None
 
         if item == 'val':
@@ -187,10 +185,10 @@ class Parameter(AbstractParameter):
             self.__dict__[attr] = value
         elif attr == 'val':
             if value is not None:
-                if not (isinstance(value, list)):  # для одного значения
-                    self.set(value)
-                else:  # для списков
+                if isinstance(value, list) or isinstance(value, tuple):  # для кортежей
                     self.set_enums(value)
+                else: #для одного значения
+                    self.set(value)
             return self
 
 

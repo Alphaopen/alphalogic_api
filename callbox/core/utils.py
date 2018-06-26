@@ -135,5 +135,7 @@ def get_rpc_value(value_type, value=None):
             value_rpc.datetime_value = 0
     elif value_type == bool:
         value_rpc.bool_value = value if value else False
+    elif value_type == unicode:
+        value_rpc.string_value = value
 
     return value_rpc

@@ -101,7 +101,7 @@ class MyRoot(Root):
     name = ParameterString(value='RootNode')
     displayName = ParameterString(value='RootNode')
     noopr = ParameterString(value='noop')
-    valuet = ParameterInt(value=[0, 1, 2, 3])
+    valuet = ParameterInt(value=(0, 1, 2, 3))
 
     def handle_create(self):
         pass
@@ -116,7 +116,7 @@ class MyRoot(Root):
 
     @command(result_type=unicode)
     def check(self, where='here'):
-        self.relax(1, 2, 3, 4)
+        #self.relax(1, 2, 3, 4)
         return 'abc'
 
     @command(result_type=bool)
@@ -138,8 +138,8 @@ class Controller(Device):
     # Parameters:
     name = ParameterString(value='Controller')
     displayName = ParameterString(value='Controller')
-    hostname = ParameterString(visible=setup, access=read_write, value=['1', '2'])
-    mode = ParameterBool(visible=setup, value=[{'On': True}, {'Off': False}])
+    hostname = ParameterString(visible=setup, access=read_write, value=('1', '2'))
+    mode = ParameterBool(visible=setup, value=({'On': True}, {'Off': False}))
     version = Parameter(value_type=int)
     counter = ParameterDouble(default=1.0)
 
@@ -159,9 +159,9 @@ class Controller(Device):
 # python loop
 adapter = MyRoot("localhost:42001")
 #adapter.relax(1, 2, 3, 4)
-adapter.simple_event.emit()
-adapter.event2.set_time(int(time.time()) * 1000 - 100000)
-adapter.event2.emit(where='here', why=1)
+#adapter.simple_event.emit()
+#adapter.event2.set_time(int(time.time()) * 1000 - 100000)
+#adapter.event2.emit(where='here', why=1)
 
 for r in adapter.manager.multi_stub.stub_adapter.states(Empty()):
     ack = r

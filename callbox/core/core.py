@@ -117,6 +117,20 @@ class Manager(object):
             values = getattr(parameter, 'value', None)
             parameter.val = values
 
+    def configure_commands(self, object, object_id):
+        for name in object.commands:
+            command = object.commands[name]
+            command.set_multi_stub(self.multi_stub)
+            result_type = command.result_type
+            id_command = self.multi_stub.object_call(utils.create_command_definer(str(result_type)), 'id',
+                                                     id=object_id, name=name)
+            command.id = id_command
+            for arg in command.arguments:
+                name_arg = arg
+                value_arg = command.arguments[arg]
+                command.set_argument(name_arg, value_arg)
+            self.list_commands[id_command] = command
+
     def configure_events(self, object, object_id):
         list_events_name = filter(lambda attr: type(getattr(object, attr)) is Event, dir(object))
         for name in list_events_name:
