@@ -43,9 +43,8 @@ class MultiStub(object):
 
     @staticmethod
     def dict_create_helper(service):
-        obj_fun_list = [fun for fun in dir(service)
-              if callable(getattr(service, fun))]
-        return set(filter(lambda fun : fun[0:2]!='__', obj_fun_list)) # получить методы Service, исключая служебные
+        is_callable = lambda x: callable(getattr(service, x)) and not x.startswith('_')  # получить методы Service, исключая служебные
+        return set(filter(is_callable, dir(service)))
 
     def object_call(self, *args, **kwargs):
         obj_w = ObjectRequest(**kwargs)
@@ -86,9 +85,7 @@ class MultiStub(object):
     def call_helper(self, function_name, *args, **kwargs):
         if function_name in kwargs['fun_set']: # function_name -название функции, проверка на допустимость
             answer = getattr(kwargs['stub'], function_name)(kwargs['request'])
-            for attr_name in args:
-                answer = getattr(answer, attr_name)
-            return answer
+            return reduce(lambda acc, x: getattr(answer, x), args, answer)  # рекурсивный поиск
         else:
             raise Exception('{0} not found in {1}'.format(function_name, kwargs['fun_set']))
 
