@@ -92,11 +92,12 @@ class AbstractCommand(object):
         return answer.owner
 
 class Command(AbstractCommand):
-    def __init__(self, function):
+    def __init__(self, device, function):
         self.function = function
         self.result_type = function.result_type
         self.arguments = function.arguments
         self.arguments_type = function.arguments_type
+        self.device = device
 
     def set_multi_stub(self, multi_stub):
         self.multi_stub = multi_stub
@@ -107,7 +108,7 @@ class Command(AbstractCommand):
         for name_arg in arg_list:
             type_arg = self.arguments_type[name_arg]
             function_dict[name_arg] = self.argument(name_arg, utils.value_type_field_definer(type_arg))
-        self.function(self, **function_dict)
+        self.function(self.device, **function_dict)
 
 
 def command_preparation(wrapped, func, **kwargs_c): #В этой функции задаются возвращаемое значение команды и ее аргументы
@@ -116,15 +117,16 @@ def command_preparation(wrapped, func, **kwargs_c): #В этой функции 
     bias = 1 if 'self' in args else 0 # если первый аргумент self, то нужно рассматривать со второго элемента
     wrapped.__dict__['arguments'] = {}
     wrapped.__dict__['arguments_type'] = {}
+    wrapped.__dict__['function_name'] = func.__name__
     for index, name in enumerate(args[bias:]):
         wrapped.arguments[name] = defaults[index]
         wrapped.arguments_type[name] = utils.get_command_argument_type(defaults[index])
 
 def command(*argv_c, **kwargs_c):
     def decorator(func):
-        def wrapped(this_command, *argv, **kwargs):
-            result = func(this_command, *argv, **kwargs)
-            this_command.set_result(result)
+        def wrapped(device, *argv, **kwargs):
+            result = func(device, *argv, **kwargs)
+            device.commands[wrapped.function_name].set_result(result)
             return result
         command_preparation(wrapped, func, **kwargs_c)
         return wrapped

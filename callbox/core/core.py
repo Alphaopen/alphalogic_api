@@ -30,7 +30,7 @@ import callbox.core.utils as utils
 class Manager(object):
     dict_type_objects = {} #По type_when_create можно определить тип узла
     list_objects = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
-    list_commands = {} #По словарю можно обратиться к командам
+    list_commands = {} #По id команды можно обратиться к командам
 
     @staticmethod
     def add_object_to_list(object_id, device):
@@ -45,17 +45,17 @@ class Manager(object):
     def prepare_root_node(self, root_device, id_root, type_device_str):
         Manager.dict_type_objects[type_device_str] = type(root_device)
         Manager.add_object_to_list(id_root, root_device)
-
+        '''
         list_parameters_name = filter(lambda attr: type(getattr(root_device, attr)) is Parameter, dir(root_device))
         for name in list_parameters_name:
             root_device.__dict__[name] = type(root_device).__dict__[name]
 
         list_command_name = filter(lambda attr: callable(getattr(root_device, attr)) and attr[0:2] != '__'
                                                 and hasattr(getattr(root_device, attr), 'result_type'), dir(root_device))
+        
         for name in list_command_name:
-            root_device.__dict__['command_'+name] = Command(type(root_device).__dict__[name])
-
-
+            root_device.commands[name] = Command(root_device, type(root_device).__dict__[name])
+        '''
         self.configure_parameters(root_device, id_root)
         self.configure_commands(root_device, id_root)
 
@@ -63,8 +63,8 @@ class Manager(object):
     def create_object(self, object_id):
         parent_id = self.multi_stub.object_call('parent', id=object_id).id
         parent = Manager.list_objects[parent_id] if (parent_id in Manager.list_objects) else None
-        id_parameter = self.multi_stub.object_call('parameter', id=object_id, name='type_when_create').id
-        type_device_str = self.multi_stub.parameter_call('get', id=id_parameter).value.string_value
+        id_parameter = self.multi_stub.object_call('parameter', 'id', id=object_id, name='type_when_create')
+        type_device_str = self.multi_stub.parameter_call('get', 'value', 'string_value', id=id_parameter)
         Device_type = Manager.dict_type_objects[type_device_str]
         object = Device_type(parent, type_device_str, object_id)
         Manager.add_object_to_list(object_id, object)
@@ -113,9 +113,8 @@ class Manager(object):
             parameter.val = values
 
     def configure_commands(self, object, object_id):
-        list_command_name = filter(lambda attr: type(getattr(object, attr)) is Command, dir(object))
-        for name in list_command_name:
-            command = object.__dict__[name]
+        for name in object.commands:
+            command = object.commands[name]
             command.set_multi_stub(self.multi_stub)
             result_type = command.result_type
             id_command = self.multi_stub.object_call(utils.create_command_definer(str(result_type)), 'id',
@@ -135,11 +134,11 @@ class Device(object):
     manager = Manager()
 
     def __init__(self, parent, type_device, id_device):
-        self.__dict__["parent"] = parent
-        self.__dict__["type_device"] = type_device
-        self.__dict__["parameters"] = []
-        self.__dict__["events"] = []
-        self.__dict__["commands"] = []
+        #self.__dict__["parent"] = parent
+        #self.__dict__["type_device"] = type_device
+        #self.__dict__["parameters"] = []
+        #self.__dict__["events"] = []
+        self.__dict__["commands"] = {}
         list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
         for name in list_parameters_name:
             self.__dict__[name] = type(self).__dict__[name]
@@ -147,11 +146,7 @@ class Device(object):
         list_command_name = filter(lambda attr: callable(getattr(self, attr)) and attr[0:2] != '__'
                                                 and hasattr(getattr(self, attr), 'result_type'), dir(self))
         for name in list_command_name:
-            self.__dict__['command_'+name] = Command(type(self).__dict__[name])
-
-        #Device.add_device_to_list(id_device, self)
-        #if parent != None:
-        #    Device.add_to_connection_diag(parent.type_device, type_device)
+            self.commands[name] = Command(self, type(self).__dict__[name])
 
     def __getattr__(self, name):
         return self.__dict__[name]
@@ -181,8 +176,8 @@ class Root(Device):
     def __init__(self, address):
         self.manager.configure_multi_stub(address)
         id_root, type_device = self.manager.root_id_and_type()
-        self.manager.prepare_root_node(self, id_root, type_device)
         super(Root, self).__init__(None, type_device, id_root)
+        self.manager.prepare_root_node(self, id_root, type_device)
 
 
 class Event(object):

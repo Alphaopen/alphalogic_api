@@ -89,6 +89,7 @@ class MyRoot(Root):
 
     @command(result_type=unicode)
     def check(self, where='here'):
+        self.relax(1, 2, 3, 4)
         return 'abc'
 
     @command(result_type=bool)

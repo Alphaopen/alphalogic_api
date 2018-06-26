@@ -25,7 +25,10 @@ def value_type_field_definer(value_type):
     elif 'list' in str(value_type):
         return 'list'
 
-
+'''
+to do :
+Можно сократить
+'''
 def value_field_definer(value):
     if 'unicode' in str(type(value)):
         return 'string_value'
