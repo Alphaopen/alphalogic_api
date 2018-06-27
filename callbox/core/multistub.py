@@ -49,14 +49,6 @@ class MultiStub(object):
     def object_call(self, *args, **kwargs):
         obj_w = ObjectRequest(**kwargs)
         return self.call_helper(*args, fun_set=MultiStub.object_fun_set,  request=obj_w, stub=self.stub_object)
-        '''
-        if argv[0] in MultiStub.object_fun_set:
-            obj_w = rpc_pb2.ObjectRequest()
-            answer = getattr(self.stub_object, argv[0])(obj_w)
-            return getattr(answer.object, argv[1])
-        else:
-            raise Exception('{} not found in object_fun_set'.format(argv[0]))
-        '''
 
     def parameter_call(self, *args, **kwargs):
         par_w = ParameterRequest(**kwargs)

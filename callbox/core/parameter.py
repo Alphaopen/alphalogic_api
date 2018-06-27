@@ -12,8 +12,8 @@ from callbox.core import utils
 
 class AbstractParameter(object):
 
-    def _call(self, name, *args, **kwargs):
-        return self.multi_stub.parameter_call(name, id=self.id, *args, **kwargs)
+    def _call(self, func_name, *args, **kwargs):
+        return self.multi_stub.parameter_call(func_name, id=self.id, *args, **kwargs)
 
     def name(self):
         answer = self._call('name')

@@ -8,8 +8,8 @@ import datetime
 
 class AbstractEvent(object):
 
-    def _call(self, name, *args, **kwargs):
-        return self.multi_stub.event_call(name, id=self.id, *args, **kwargs)
+    def _call(self, func_name, *args, **kwargs):
+        return self.multi_stub.event_call(func_name, id=self.id, *args, **kwargs)
 
     def get_name(self):
         return self._call('name').name
@@ -85,9 +85,7 @@ class AbstractEvent(object):
         value_type = utils.value_field_definer(value)
         if value_type != 'list' and value_type != 'tuple':
             setattr(value_rpc, value_type, value)
-            answer = self.multi_stub.event_call('set_argument', id=self.id,
-                                                  argument=name_arg, value=value_rpc)
-
+            answer = self._call('set_argument', argument=name_arg, value=value_rpc)
 
 
 class Event(AbstractEvent):

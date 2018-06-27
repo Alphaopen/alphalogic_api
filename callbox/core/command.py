@@ -10,57 +10,60 @@ import callbox.core.utils as utils
 
 class AbstractCommand(object):
 
+    def _call(self, func_name, *args, **kwargs):
+        return self.multi_stub.command_call(func_name, id=self.id, *args, **kwargs)
+
     def get_name(self):
-        answer = self.multi_sub.command_call('name', id=self.id)
+        answer = self._call('name')
         return answer.name
 
     def get_display_name(self):
-        answer = self.multi_sub.command_call('display_name', id=self.id)
+        answer = self._call('display_name')
         return answer.display_name
 
     def get_desc(self):
-        answer = self.multi_sub.command_call('desc', id=self.id)
+        answer = self._call('desc')
         return answer.desc
 
     def set_display_name(self, display_name):
-        answer = self.multi_stub.command_call('set_display_name', id=self.id, display_name=display_name)
+        answer = self._call('set_display_name', display_name=display_name)
 
     def set_desc(self, desc):
-        answer = self.multi_stub.command_call('set_desc', id=self.id, desc=desc)
+        answer = self._call('set_desc', desc=desc)
 
     def is_string(self):
-        answer = self.multi_sub.command_call('is_string', id=self.id)
+        answer = self._call('is_string')
         return answer.yes
 
     def is_int(self):
-        answer = self.multi_sub.command_call('is_int', id=self.id)
+        answer = self._call('is_int')
         return answer.yes
 
     def is_double(self):
-        answer = self.multi_sub.command_call('is_double', id=self.id)
+        answer = self._call('is_double')
         return answer.yes
 
     def is_datetime(self):
-        answer = self.multi_sub.command_call('is_datetime', id=self.id)
+        answer = self._call('is_datetime')
         return answer.yes
 
     def is_bool(self):
-        answer = self.multi_sub.command_call('is_bool', id=self.id)
+        answer = self._call('is_bool')
         return answer.yes
 
     def set_result(self, value):
         value_rpc = utils.get_rpc_value(type(value), value)
-        answer = self.multi_stub.command_call('set_result', id=self.id, value=value_rpc)
+        answer = self._call('set_result', value=value_rpc)
 
     def clear(self):
-        answer = self.multi_stub.command_call('clear', id=self.id)
+        answer = self._call('clear')
 
     def argument_list(self):
-        answer = self.multi_stub.command_call('argument_list', id=self.id)
+        answer = self._call('argument_list')
         return answer.names
 
     def argument(self, name_argument, type_argument):
-        answer = self.multi_stub.command_call('argument', id=self.id, argument=name_argument)
+        answer = self._call('argument', argument=name_argument)
         return getattr(answer.value, type_argument)
 
     def set_argument(self, name_arg, value):
@@ -68,8 +71,7 @@ class AbstractCommand(object):
         value_type = utils.value_field_definer(value)
         if value_type != 'list' and value_type != 'tuple':
             setattr(value_rpc, value_type, value)
-            answer = self.multi_stub.command_call('set_argument', id=self.id,
-                                                  argument=name_arg, value=value_rpc)
+            answer = self._call('set_argument', argument=name_arg, value=value_rpc)
         else:
             req = rpc_pb2.CommandRequest(id=self.id, argument=name_arg)
             for index, val in enumerate(value):
@@ -88,7 +90,7 @@ class AbstractCommand(object):
                                                  request=req, stub=self.multi_stub.stub_command)
 
     def owner(self):
-        answer = self.multi_stub.command_call('owner', id=self.id)
+        answer = self._call('owner')
         return answer.owner
 
 class Command(AbstractCommand):

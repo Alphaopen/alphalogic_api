@@ -46,6 +46,7 @@ class MyRoot(Root):
     param_int = ParameterInt(value=2, visible=runtime, access=read_only)
     param_double = ParameterDouble(value=2.3, access=read_write)
     param_timestamp = ParameterDatetime(value=datetime.datetime.now())
+    param_hid = ParameterDouble(access=hidden)
     param_vect = ParameterInt(value=(0, 1, 2, 3))
 
     simple_event = Event()
