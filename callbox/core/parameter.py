@@ -107,8 +107,7 @@ class AbstractParameter(object):
 
     def get(self):
         answer = self._call('get')
-        value_type_proto = utils.value_type_field_definer(self.value_type)
-        return getattr(answer.value, value_type_proto)
+        return utils.value_from_rpc(answer.value, self.value_type)
 
     def set(self, value):
         value_rpc = utils.get_rpc_value(self.value_type, value)
@@ -154,6 +153,10 @@ class Parameter(AbstractParameter):
 
         self.visible = kwargs.get('visible', runtime)
         self.access = kwargs.get('access', read_write)
+
+        def after_set_value():
+            return
+        self.callback = kwargs.get('callback', after_set_value)
 
         if not ('value_type' in kwargs):
             raise Exception('value_type not found in Parameter')

@@ -72,20 +72,16 @@ class AbstractEvent(object):
             if key not in self.args.keys():
                 raise Exception('Incorrect argument name of event {0}'.format(self.name))
 
-                value_rpc = utils.get_rpc_value(self.args[key], value)
-                self._call('set_argument', argument=key, value=value_rpc)
+            value_rpc = utils.get_rpc_value(self.args[key], value)
+            self._call('set_argument', argument=key, value=value_rpc)
 
         self._call('emit')
 
     def clear(self):
         self._call('clear')
 
-    def set_argument(self, name_arg, value):
-        value_rpc = rpc_pb2.Value()
-        value_type = utils.value_field_definer(value)
-        if value_type != 'list' and value_type != 'tuple':
-            setattr(value_rpc, value_type, value)
-            answer = self._call('set_argument', argument=name_arg, value=value_rpc)
+    def set_argument(self, name, value_rpc):
+        self._call('set_argument', argument=name, value=value_rpc)
 
 
 class Event(AbstractEvent):

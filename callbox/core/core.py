@@ -66,10 +66,13 @@ class Device(object):
     def handle_get_available_children(self):
         return []
 
+    def handle_before_remove_device(self):
+        pass
+
 
 class Root(Device):
-    def __init__(self, address):
-        self.manager.configure_multi_stub(address)
+    def __init__(self, host, port):
+        self.manager.configure_multi_stub(host + ':' + str(port))
         id_root, type_device = self.manager.root_id_and_type()
         super(Root, self).__init__(None, type_device, id_root)
         self.manager.prepare_root_node(self, id_root, type_device)

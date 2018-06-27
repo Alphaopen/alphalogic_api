@@ -121,3 +121,23 @@ def get_rpc_value(value_type, value=None):
         value_rpc.string_value = value
 
     return value_rpc
+
+
+def value_from_rpc(value_rpc, value_type):
+
+    if 'unicode' in str(value_type):
+        return value_rpc.string_value
+    elif 'int' in str(value_type):
+        return value_rpc.int64_value
+    elif 'float' in str(value_type):
+        return value_rpc.double_value
+    elif 'datetime' in str(value_type):
+        return datetime.datetime.utcfromtimestamp(value_rpc.datetime_value / 1000) \
+                    + datetime.timedelta(milliseconds=value_rpc.datetime_value % 1000)
+    elif 'bool' in str(value_type):
+        return value_rpc.bool_value
+    elif 'list' in str(value_type):
+        pass   # TODO return value_rpc.list
+    elif 'tuple' in str(value_type):
+        pass   # TODO
+

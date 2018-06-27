@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from callbox.core.type_attributes import runtime, setup, hidden, common
-from callbox.core.type_attributes import read_only, read_write
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
 
 import inspect
 import callbox.core.utils as utils
+
 
 class AbstractCommand(object):
 
@@ -93,6 +92,7 @@ class AbstractCommand(object):
         answer = self._call('owner')
         return answer.owner
 
+
 class Command(AbstractCommand):
     def __init__(self, device, function):
         self.function = function
@@ -123,6 +123,7 @@ def command_preparation(wrapped, func, **kwargs_c): #В этой функции 
     for index, name in enumerate(args[bias:]):
         wrapped.arguments[name] = defaults[index]
         wrapped.arguments_type[name] = utils.get_command_argument_type(defaults[index])
+
 
 def command(*argv_c, **kwargs_c):
     def decorator(func):

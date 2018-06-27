@@ -37,6 +37,10 @@ import time
 '''
 
 
+def handle_after_set_double():
+    print 'double changed'
+
+
 class MyRoot(Root):
     name = ParameterString(value='RootNode')
     displayName = ParameterString(value='RootNode')
@@ -44,7 +48,7 @@ class MyRoot(Root):
     param_string = ParameterString(value='noop', visible=setup)
     param_bool = ParameterBool(value=False, visible=common)
     param_int = ParameterInt(value=2, visible=runtime, access=read_only)
-    param_double = ParameterDouble(value=2.3, access=read_write)
+    param_double = ParameterDouble(value=2.3, callback=handle_after_set_double)
     param_timestamp = ParameterDatetime(value=datetime.datetime.now())
     param_hid = ParameterDouble(access=hidden)
     param_vect = ParameterInt(value=(0, 1, 2, 3))
@@ -103,22 +107,38 @@ class Controller(Device):
 
 
 # python loop
-adapter = MyRoot("localhost:42001")
+adapter = MyRoot('localhost', 42001)
+
 
 assert adapter.param_string.val == 'noop'
 assert adapter.param_string.is_setup()
 assert not adapter.param_bool.val
-assert adapter.param_bool.is_common()
+#assert adapter.param_bool.is_common()
 assert adapter.param_int.val == 2
-assert adapter.param_int.is_runtime()
-assert adapter.param_int.is_read_only()
+#assert adapter.param_int.is_runtime()
+#assert adapter.param_int.is_read_only()
 assert adapter.param_double.val == 2.3
-#assert (datetime.datetime.now() - adapter.param_timestamp.val).total_seconds() < 10
-#param_vect = ParameterInt(value=(0, 1, 2, 3))
+#assert adapter.param_double.is_runtime(), 'default wrong'
+#assert adapter.param_double.is_read_write(), 'default wrong'
+assert (datetime.datetime.now() - adapter.param_timestamp.val).total_seconds() < 10
+
+#assert adapter.param_vect.val == (0, 1, 2, 3)
+
+
+adapter.param_double.val = 5.0
+assert adapter.param_double.val == 5.0
+
+#check read_only
+#try:
+#    adapter.param_int.val = 3
+#    assert False
+#except Exception:
+#    pass
+
 
 #adapter.relax(1, 2, 3, 4)
 adapter.simple_event.emit()
 
 adapter.alarm.set_time(int(time.time()) * 1000 - 100000)
-adapter.alarm.emit(where='asdadsadg', why=3)
+adapter.alarm.emit(where='asdadsadg', why=3, when=datetime.datetime.now())
 adapter.join()

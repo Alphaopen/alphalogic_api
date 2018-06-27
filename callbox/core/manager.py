@@ -140,10 +140,11 @@ class AbstractManager(object):
     def state_ok(self, id_object, reason):
         answer = self._call('state_ok', id_object)
 
+
 class Manager(AbstractManager):
     dict_type_objects = {} #По type_when_create можно определить тип узла
     list_objects = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
-    list_commands = {} #По id команды можно обратиться к командам
+    components = {} #По id команды можно обратиться к командам
 
     def __init__(self):
         pass
@@ -218,7 +219,7 @@ class Manager(AbstractManager):
                 name_arg = arg
                 value_arg = command.arguments[arg]
                 command.set_argument(name_arg, value_arg)
-            self.list_commands[id_command] = command
+            self.components[id_command] = command
 
     def configure_events(self, object, object_id):
         list_events = filter(lambda attr: type(getattr(object, attr)) is Event, dir(object))
@@ -232,20 +233,7 @@ class Manager(AbstractManager):
             event.clear()
 
             for key, val in event.args.iteritems():
-                if val == int:
-                    event.set_argument(key, 0)
-                elif val == str:
-                    event.set_argument(key, '')
-                elif val == float:
-                    event.set_argument(key, 0.0)
-                elif val == datetime.datetime:
-                    event.set_argument(key, 0)
-                elif val == bool:
-                    event.set_argument(key, True)
-                elif val == tuple:
-                    pass
-                elif val == list:
-                    pass
+                event.set_argument(key, utils.get_rpc_value(val))
 
     def join(self):
         for r in self.multi_stub.stub_adapter.states(rpc_pb2.Empty()):
@@ -257,16 +245,23 @@ class Manager(AbstractManager):
                 # req = ParameterRequest(id=r.id)
                 # r = root.multi_stub.stub_parameter.get(req)
                 # print('type_when_create:', r.value.string_value)
+            elif r.state == rpc_pb2.AdapterStream.BEFORE_REMOVING_OBJECT:
+                if r.id in self.list_objects:
+                    self.list_objects[r.id].handle_before_remove_device()
+                    del self.list_objects[r.id]
+                    # TODO удалить компоненты из self.components
 
-            elif r.state ==rpc_pb2.AdapterStream.GETTING_AVAILABLE_CHILDREN:
-                print "id={0}".format(r.id)
+            elif r.state == rpc_pb2.AdapterStream.GETTING_AVAILABLE_CHILDREN:
                 self.get_available_children(r.id)
+
+            elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
+                self.components[r.id].callback()
 
             elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
                 # simulate executing command
-                time.sleep(1.0)
-                print(rpc_pb2.AdapterStream.AdapterState.Name(r.state))
-                self.list_commands[r.id].call_function()
+                #time.sleep(1.0)
+                #print(rpc_pb2.AdapterStream.AdapterState.Name(r.state))
+                self.components[r.id].call_function()
 
             self.multi_stub.stub_adapter.ack(ack)
 
