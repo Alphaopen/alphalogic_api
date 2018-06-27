@@ -109,10 +109,10 @@ class Manager(object):
             parameter.id = id_parameter
 
             visible_type = parameter.visible
-            getattr(parameter, utils.set_visible_definer(visible_type))
+            getattr(parameter, utils.set_visible_definer(visible_type))()
 
             access_type = parameter.access
-            getattr(parameter, utils.set_access_definer(access_type))
+            getattr(parameter, utils.set_access_definer(access_type))()
 
             values = getattr(parameter, 'value', None)
             parameter.val = values
