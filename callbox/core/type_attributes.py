@@ -3,27 +3,47 @@ from __future__ import unicode_literals
 from enum import Enum
 import datetime
 
+
 class runtime(object):
-    pass
+    create_func = 'set_runtime'
+
 
 class setup(object):
-    pass
+    create_func = 'set_setup'
+
 
 class hidden(object):
-    pass
+    create_func = 'set_hidden'
+
 
 class common(object):
-    pass
+    create_func = 'set_common'
+
 
 class read_only(object):
-    pass
+    create_func = 'set_read_only'
+
 
 class read_write(object):
-    pass
+    create_func = 'set_read_write'
 
-class EventPriority(object):
-    TRIVIAL = 'set_trivial'
-    MINOR = 'set_minor'
-    MAJOR = 'set_major'
-    CRITICAL = 'set_critical'
-    BLOCKER = 'set_blocker'
+
+class trivial(object):
+    create_func = 'set_trivial'
+
+
+class minor(object):
+    create_func = 'set_minor'
+
+
+class major(object):
+    create_func = 'set_major'
+
+
+class critical(object):
+    create_func = 'set_critical'
+
+
+class blocker(object):
+    create_func = 'set_blocker'
+

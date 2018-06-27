@@ -66,7 +66,7 @@ class AbstractCommand(object):
     def set_argument(self, name_arg, value):
         value_rpc = rpc_pb2.Value()
         value_type = utils.value_field_definer(value)
-        if value_type!='list' and value_type!='tuple':
+        if value_type != 'list' and value_type != 'tuple':
             setattr(value_rpc, value_type, value)
             answer = self.multi_stub.command_call('set_argument', id=self.id,
                                                   argument=name_arg, value=value_rpc)
@@ -76,16 +76,16 @@ class AbstractCommand(object):
                 if isinstance(val, dict):  # два поля в листе
                     val_type = utils.value_field_definer(val.values()[0])
                     setattr(req.enums[val.keys()[0]], val_type, val.values()[0])
-                    if index==0:
+                    if index == 0:
                         setattr(req.value, val_type, val.values()[0])
                 else:
                     val_type = utils.value_field_definer(val)
                     setattr(req.enums[str(val)], val_type, val)
-                    if index==0:
+                    if index == 0:
                         setattr(req.value, val_type, val)
 
-            answer = self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set, request=req,
-                            stub=self.multi_stub.stub_command)
+            answer = self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set,
+                                                 request=req, stub=self.multi_stub.stub_command)
 
     def owner(self):
         answer = self.multi_stub.command_call('owner', id=self.id)

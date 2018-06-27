@@ -7,10 +7,6 @@ from callbox.core.type_attributes import read_only, read_write
 import locale
 
 
-def milliseconds_from_epoch(dt):
-    return int((dt - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000)
-
-
 def value_type_field_definer(value_type):
     if 'unicode' in str(value_type):
         return 'string_value'
@@ -72,24 +68,6 @@ def create_parameter_definer(result_type_str):
         return 'create_bool_parameter'
 
 
-def set_visible_definer(visible_type):
-    if visible_type==runtime:
-        return 'set_runtime'
-    elif visible_type==setup:
-        return 'set_setup'
-    elif visible_type==hidden:
-        return 'set_hidden'
-    elif visible_type==common:
-        return 'set_common'
-
-
-def set_access_definer(access_type):
-    if access_type==read_only:
-        return 'set_read_only'
-    elif access_type==read_write:
-        return 'set_read_write'
-
-
 def get_command_argument_type(arg):
     if type(arg) == tuple:
         for val_type in arg:
@@ -116,6 +94,10 @@ def decode_string(s):
             pass
     # Если ничего не осталось
     return unicode(s)
+
+
+def milliseconds_from_epoch(dt):
+    return int((dt - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000)
 
 
 def get_rpc_value(value_type, value=None):

@@ -111,10 +111,8 @@ class AbstractParameter(object):
         return getattr(answer.value, value_type_proto)
 
     def set(self, value):
-        value_type_proto = utils.value_type_field_definer(self.value_type)
-        value_rpc = rpc_pb2.Value()
-        setattr(value_rpc, value_type_proto, value)
-        answer = self._call('set', value=value_rpc)
+        value_rpc = utils.get_rpc_value(self.value_type, value)
+        self._call('set', value=value_rpc)
 
     def enums(self):
         answer = self._call('enums')
@@ -154,21 +152,16 @@ class Parameter(AbstractParameter):
         for arg in kwargs:
             self.__dict__[arg] = kwargs[arg]
 
-        if not('visible' in kwargs):
-            self.visible = runtime
-        if not('access' in kwargs):
-            self.access = read_write
+        self.visible = kwargs.get('visible', runtime)
+        self.access = kwargs.get('access', read_write)
+
         if not ('value_type' in kwargs):
             raise Exception('value_type not found in Parameter')
 
         if kwargs['value_type'] not in [bool, int, float, datetime.datetime, unicode]:
             raise Exception('value_type={0} is unknown'.format(kwargs['value_type']))
 
-        if 'value' in kwargs:
-            self.value = kwargs['value']
-
-        if 'default' in kwargs:
-            self.value = kwargs['default']
+        self.value = kwargs.get('value')
 
     def set_multi_stub(self, multi_stub):
         self.multi_stub = multi_stub
