@@ -142,8 +142,8 @@ class AbstractManager(object):
 
 
 class Manager(AbstractManager):
-    dict_type_objects = {} #По type_when_create можно определить тип узла
-    list_objects = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
+    factories = {}  # По type_when_create можно определить тип узла
+    nodes = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
     components = {} #По id команды можно обратиться к командам
 
     def __init__(self):
@@ -152,31 +152,36 @@ class Manager(AbstractManager):
     def configure_multi_stub(self, address):
         self.multi_stub = MultiStub(address)
 
-    def prepare_root_node(self, root_device, id_root, type_device_str):
-        Manager.dict_type_objects[type_device_str] = type(root_device)
-        Manager.list_objects[id_root] = root_device
+    def prepare_for_work(self, object, id):
+        self.configure_parameters(object, id)
+        self.configure_commands(object, id)
+        self.configure_events(object, id)
 
-        self.configure_parameters(root_device, id_root)
-        self.configure_commands(root_device, id_root)
-        self.configure_events(root_device, id_root)
+    def prepare_root_node(self, root_device, id_root, type_device_str):
+        #Manager.factory[type_device_str] = type(root_device)  # TODO нужно ли?
+        Manager.nodes[id_root] = root_device
+        self.prepare_for_work(root_device, id_root)
 
     def create_object(self, object_id):
         parent_id = self.parent(object_id)
-        parent = Manager.list_objects[parent_id] if (parent_id in Manager.list_objects) else None
-        id_parameter = self.parameter(object_id, name='type_when_create')
-        type_device_str = self.multi_stub.parameter_call('get', id=id_parameter).value.string_value
-        Device_type = Manager.dict_type_objects[type_device_str]
-        object = Device_type(parent, type_device_str, object_id)
-        Manager.list_objects[object_id] = object
-        self.configure_parameters(object, object_id)
+        parent = Manager.nodes[parent_id] if (parent_id in Manager.nodes) else None
+        type_when_create = self.get_type_when_create(object_id)
+        class_name = self.factories[parent_id][type_when_create]
+        object = class_name(parent, type_when_create, object_id)
+        Manager.nodes[object_id] = object
+        self.prepare_for_work(object, object_id)
 
     def get_available_children(self, id_device):
-        device = Manager.list_objects[id_device]
+        device = Manager.nodes[id_device]
         available_devices = device.handle_get_available_children()
         self.unregister_all_makers(id_object=id_device) # можно будет переписать вызвав у объекта функцию unregister_makers
-        for device_type, name in available_devices:
-            self.register_maker(id_object=id_device, name=name)
-            Manager.dict_type_objects[name] = device_type
+
+        for class_name, type_when_create in available_devices:
+            self.register_maker(id_object=id_device, name=type_when_create)
+
+            if id_device not in self.factories:
+                self.factories[id_device] = {}
+            self.factories[id_device][type_when_create] = class_name
 
     '''
     Конфигурирование узла по заготовленной схеме
@@ -186,11 +191,10 @@ class Manager(AbstractManager):
         object = self.root.list_devices[type_object]
         self.configure_parameters(object, object_id)
     '''
-    def root_id_and_type(self):
-        id_root = self.root()
-        id_parameter = self.parameter(id_object=id_root, name='type_when_create')
-        type_device_str = self.multi_stub.parameter_call('get', id=id_parameter).value.string_value
-        return id_root, type_device_str
+    def get_type_when_create(self, node_id):
+        id = self.parameter(id_object=node_id, name='type_when_create')
+        answer = self.multi_stub.parameter_call('get', id=id)
+        return utils.value_from_rpc(answer.value, unicode)
 
     def configure_parameters(self, object, object_id):
         list_parameters_name = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
@@ -236,32 +240,34 @@ class Manager(AbstractManager):
                 event.set_argument(key, utils.get_rpc_value(val))
 
     def join(self):
+        """
+        Бесконечный цикл: получаем состояние от адаптера.
+        :return:
+        """
         for r in self.multi_stub.stub_adapter.states(rpc_pb2.Empty()):
             ack = r
-            if r.state == rpc_pb2.AdapterStream.AFTER_CREATING_OBJECT:
-                self.create_object(r.id)
-                # req = ObjectRequest(id=r.id, name='type_when_create')
-                # r = root.multi_stub.stub_object.parameter(req)
-                # req = ParameterRequest(id=r.id)
-                # r = root.multi_stub.stub_parameter.get(req)
-                # print('type_when_create:', r.value.string_value)
-            elif r.state == rpc_pb2.AdapterStream.BEFORE_REMOVING_OBJECT:
-                if r.id in self.list_objects:
-                    self.list_objects[r.id].handle_before_remove_device()
-                    del self.list_objects[r.id]
-                    # TODO удалить компоненты из self.components
+            try:
+                if r.state == rpc_pb2.AdapterStream.AFTER_CREATING_OBJECT:
+                    self.create_object(r.id)
 
-            elif r.state == rpc_pb2.AdapterStream.GETTING_AVAILABLE_CHILDREN:
-                self.get_available_children(r.id)
+                elif r.state == rpc_pb2.AdapterStream.BEFORE_REMOVING_OBJECT:
+                    if r.id in self.nodes:
+                        self.nodes[r.id].handle_before_remove_device()
+                        del self.nodes[r.id]
+                        # TODO удалить компоненты из self.components
 
-            elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
-                self.components[r.id].callback()
+                elif r.state == rpc_pb2.AdapterStream.GETTING_AVAILABLE_CHILDREN:
+                    self.get_available_children(r.id)
 
-            elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
-                # simulate executing command
-                #time.sleep(1.0)
-                #print(rpc_pb2.AdapterStream.AdapterState.Name(r.state))
-                self.components[r.id].call_function()
+                elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
+                    if r.id in self.components:  # есть параметры, которые по умолчанию в адаптере
+                        self.components[r.id].callback()
+
+                elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
+                    self.components[r.id].call_function()
+
+            except Exception, err:
+                print str(err) + '\nstate=' + str(r.state)
 
             self.multi_stub.stub_adapter.ack(ack)
 

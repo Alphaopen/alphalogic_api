@@ -89,12 +89,13 @@ class MyRoot(Root):
 
 class Controller(Device):
     # Parameters:
-    name = ParameterString(value='Controller')
-    displayName = ParameterString(value='Controller')
+    name = ParameterString(value='Controller_name')
+    displayName = ParameterString(value='Controller_displayName')
+
     hostname = ParameterString(visible=setup, access=read_write, value=('1', '2'))
     mode = ParameterBool(visible=setup, value=({'On': True}, {'Off': False}))
-    version = Parameter(value_type=int)
-    counter = ParameterDouble(default=1.0)
+    version = Parameter(value_type=int, visible=common)
+    counter = ParameterDouble(default=1.0, access=read_only)
 
     '''
     @command(result_type=bool)
@@ -113,14 +114,14 @@ adapter = MyRoot('localhost', 42001)
 assert adapter.param_string.val == 'noop'
 assert adapter.param_string.is_setup()
 assert not adapter.param_bool.val
-#assert adapter.param_bool.is_common()
+assert adapter.param_bool.is_common()
 assert adapter.param_int.val == 2
-#assert adapter.param_int.is_runtime()
-#assert adapter.param_int.is_read_only()
+assert adapter.param_int.is_runtime()
+assert adapter.param_int.is_read_only()
 assert adapter.param_double.val == 2.3
-#assert adapter.param_double.is_runtime(), 'default wrong'
-#assert adapter.param_double.is_read_write(), 'default wrong'
-assert (datetime.datetime.now() - adapter.param_timestamp.val).total_seconds() < 10
+assert adapter.param_double.is_runtime(), 'default wrong'
+assert adapter.param_double.is_read_write(), 'default wrong'
+#assert (datetime.datetime.now() - adapter.param_timestamp.val).total_seconds() < 10
 
 #assert adapter.param_vect.val == (0, 1, 2, 3)
 

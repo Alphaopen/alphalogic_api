@@ -73,7 +73,8 @@ class Device(object):
 class Root(Device):
     def __init__(self, host, port):
         self.manager.configure_multi_stub(host + ':' + str(port))
-        id_root, type_device = self.manager.root_id_and_type()
+        id_root = self.manager.root()
+        type_device = self.manager.get_type_when_create(id_root)
         super(Root, self).__init__(None, type_device, id_root)
         self.manager.prepare_root_node(self, id_root, type_device)
 
