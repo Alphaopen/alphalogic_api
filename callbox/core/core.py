@@ -12,21 +12,11 @@
 
 '''
 from __future__ import unicode_literals
-from callbox.core.type_attributes import runtime, setup, hidden, common
-from callbox.core.type_attributes import read_only, read_write
 
-from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
-    ParameterDouble, ParameterDatetime, ParameterString
+from callbox.core.parameter import Parameter
 from callbox.core.event import Event
-from callbox.core.multistub import MultiStub
-from callbox.core.command import command, Command
-import callbox.protocol.rpc_pb2 as rpc_pb2
+from callbox.core.command import Command
 from callbox.core.manager import Manager
-
-import time
-import datetime
-import inspect
-import callbox.core.utils as utils
 
 
 class Device(object):
@@ -40,6 +30,8 @@ class Device(object):
         #self.__dict__["type_device"] = type_device
         #self.__dict__["parameters"] = []
         #self.__dict__["events"] = []
+        self.__dict__['type'] = type_device
+        self.__dict__['id'] = id_device
         self.__dict__["commands"] = {}
         list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
         for name in list_parameters_name:
