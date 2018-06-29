@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import time
-import datetime
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
 from callbox.core.parameter import Parameter
 from callbox.core.event import Event
 from callbox.core import utils
-
+from callbox.logger import log
 
 class AbstractManager(object):
 
@@ -114,7 +112,7 @@ class AbstractManager(object):
         return answer.yes
 
     def unregister_all_makers(self, id_object):
-        answer = self._call('unregister_all_makers', id_object)
+        self._call('unregister_all_makers', id_object)
 
     def is_connected(self, id_object):
         answer = self._call('is_connected', id_object)
@@ -129,16 +127,16 @@ class AbstractManager(object):
         return answer.yes
 
     def state_no_connection(self, id_object, reason):
-        answer = self._call('state_no_connection', id_object)
+        self._call('state_no_connection', id_object, reason=reason)
 
     def state_connected(self, id_object, reason):
-        answer = self._call('state_connected', id_object)
+        self._call('state_connected', id_object, reason=reason)
 
     def state_error(self, id_object, reason):
-        answer = self._call('state_error', id_object)
+        self._call('state_error', id_object, reason=reason)
 
     def state_ok(self, id_object, reason):
-        answer = self._call('state_ok', id_object)
+        self._call('state_ok', id_object, reason=reason)
 
 
 class Manager(AbstractManager):
@@ -248,15 +246,21 @@ class Manager(AbstractManager):
             ack = r
             try:
                 if r.state == rpc_pb2.AdapterStream.AFTER_CREATING_OBJECT:
+                    log.info('Create device {0}'.format(r.id))
                     self.create_object(r.id)
 
                 elif r.state == rpc_pb2.AdapterStream.BEFORE_REMOVING_OBJECT:
+                    log.info('Remove device {0}'.format(r.id))
                     if r.id in self.nodes:
                         self.nodes[r.id].handle_before_remove_device()
                         del self.nodes[r.id]
                         # TODO удалить компоненты из self.components
+                        log.info('Device {0} removed'.format(r.id))
+                    else:
+                        log.warn('Device {0} not found'.format(r.id))
 
                 elif r.state == rpc_pb2.AdapterStream.GETTING_AVAILABLE_CHILDREN:
+                    log.info('Get available children of {0}'.format(r.id))
                     self.get_available_children(r.id)
 
                 elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
@@ -264,10 +268,13 @@ class Manager(AbstractManager):
                         self.components[r.id].callback()
 
                 elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
-                    self.components[r.id].call_function()
+                    if r.id in self.components:
+                        self.components[r.id].call_function()
+                    else:
+                        log.warn('Command {0} not found'.format(r.id))
 
             except Exception, err:
-                print str(err) + '\nstate=' + str(r.state)
+                log.error(str(err) + '\nstate=' + str(r.state))
 
             self.multi_stub.stub_adapter.ack(ack)
 

@@ -5,6 +5,7 @@ from callbox.core.multistub import MultiStub
 
 import inspect
 import callbox.core.utils as utils
+from callbox.logger import log
 
 
 class AbstractCommand(object):
@@ -25,10 +26,10 @@ class AbstractCommand(object):
         return answer.desc
 
     def set_display_name(self, display_name):
-        answer = self._call('set_display_name', display_name=display_name)
+        self._call('set_display_name', display_name=display_name)
 
     def set_desc(self, desc):
-        answer = self._call('set_desc', desc=desc)
+        self._call('set_desc', desc=desc)
 
     def is_string(self):
         answer = self._call('is_string')
@@ -52,10 +53,10 @@ class AbstractCommand(object):
 
     def set_result(self, value):
         value_rpc = utils.get_rpc_value(type(value), value)
-        answer = self._call('set_result', value=value_rpc)
+        self._call('set_result', value=value_rpc)
 
     def clear(self):
-        answer = self._call('clear')
+        self._call('clear')
 
     def argument_list(self):
         answer = self._call('argument_list')
@@ -70,7 +71,7 @@ class AbstractCommand(object):
         value_type = utils.value_field_definer(value)
         if value_type != 'list' and value_type != 'tuple':
             setattr(value_rpc, value_type, value)
-            answer = self._call('set_argument', argument=name_arg, value=value_rpc)
+            self._call('set_argument', argument=name_arg, value=value_rpc)
         else:
             req = rpc_pb2.CommandRequest(id=self.id, argument=name_arg)
             for index, val in enumerate(value):
@@ -85,8 +86,8 @@ class AbstractCommand(object):
                     if index == 0:
                         setattr(req.value, val_type, val)
 
-            answer = self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set,
-                                                 request=req, stub=self.multi_stub.stub_command)
+            self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set,
+                                        request=req, stub=self.multi_stub.stub_command)
 
     def owner(self):
         answer = self._call('owner')
@@ -107,16 +108,21 @@ class Command(AbstractCommand):
     def call_function(self):
         arg_list = self.argument_list()
         function_dict = {}
+        info = []
         for name_arg in arg_list:
             type_arg = self.arguments_type[name_arg]
             function_dict[name_arg] = self.argument(name_arg, utils.value_type_field_definer(type_arg))
+            info.append('{0}({1}): {2}'.format(name_arg, type_arg, function_dict[name_arg]))
+
+        log.info('Execute command \'{0}\' with arguments [{1}] from device \'{2}\''
+                 .format(self.get_name(), '; '.join(info), self.device.id))
         self.function(self.device, **function_dict)
 
 
 def command_preparation(wrapped, func, **kwargs_c): #В этой функции задаются возвращаемое значение команды и ее аргументы
     wrapped.result_type = kwargs_c['result_type']
     (args, varargs, keywords, defaults) = inspect.getargspec(func)
-    bias = 1 if 'self' in args else 0 # если первый аргумент self, то нужно рассматривать со второго элемента
+    bias = 1 if 'self' in args else 0  # если первый аргумент self, то нужно рассматривать со второго элемента
     wrapped.__dict__['arguments'] = {}
     wrapped.__dict__['arguments_type'] = {}
     wrapped.__dict__['function_name'] = func.__name__
