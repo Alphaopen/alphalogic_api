@@ -14,7 +14,7 @@ from callbox.core.event import Event
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
 import time
-
+from callbox.core.queue_tasks import run
 
 '''
 Не забыть важные моменты:
@@ -80,6 +80,10 @@ class MyRoot(Root):
         print which2
         return True
 
+    @run(period=30)
+    def run(self):
+        print 'a_run'
+
     '''
     @command(result_type=int)
     def affair(self, where):
@@ -102,9 +106,6 @@ class Controller(Device):
     def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
         return True
     '''
-
-    def run(self):
-        pass
 
 
 # python loop
