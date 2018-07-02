@@ -26,12 +26,12 @@ AdapterServiceServicer
 class MultiStub(object):
 
     def __init__(self, target):
-        channel = grpc.insecure_channel(target)
-        self.stub_object = ObjectServiceStub(channel)
-        self.stub_parameter = ParameterServiceStub(channel)
-        self.stub_event = EventServiceStub(channel)
-        self.stub_command = CommandServiceStub(channel)
-        self.stub_adapter = AdapterServiceStub(channel)
+        self.channel = grpc.insecure_channel(target)
+        self.stub_object = ObjectServiceStub(self.channel)
+        self.stub_parameter = ParameterServiceStub(self.channel)
+        self.stub_event = EventServiceStub(self.channel)
+        self.stub_command = CommandServiceStub(self.channel)
+        self.stub_adapter = AdapterServiceStub(self.channel)
 
     @staticmethod
     def static_initialization():

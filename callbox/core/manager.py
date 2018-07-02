@@ -1,11 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import signal
+import time
+from threading import Thread
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
 from callbox.core.parameter import Parameter
 from callbox.core.event import Event
 from callbox.core import utils
 from callbox.logger import log
+from callbox.core.tasks_pool import TasksPool
+
+class Exit(Exception):
+    pass
+
+def shutdown(signum, frame):
+    log.info("Shutdown. Signal is {0}".format(signum))
+    raise Exit
 
 class AbstractManager(object):
 
@@ -145,7 +156,9 @@ class Manager(AbstractManager):
     components = {} #По id команды можно обратиться к командам
 
     def __init__(self):
-        pass
+        signal.signal(signal.SIGTERM, shutdown)
+        signal.signal(signal.SIGINT, shutdown)
+        self.tasks_pool = TasksPool()
 
     def configure_multi_stub(self, address):
         self.multi_stub = MultiStub(address)
@@ -238,43 +251,60 @@ class Manager(AbstractManager):
                 event.set_argument(key, utils.get_rpc_value(val))
 
     def join(self):
+        try:
+            g_thread = Thread(target=self.grpc_thread)
+            g_thread.start()
+            while True: #главный тред, который нужен для того, чтобы можно было завершит остальные
+                time.sleep(0.1) # цикл прерывается при посылке сигнала SIGINT
+
+        except Exit:
+            self.tasks_pool.shutdown_flag.set()
+            self.tasks_pool.operation_thread.join()
+            self.multi_stub.channel.close()
+            g_thread.join()
+
+    def grpc_thread(self):
         """
         Бесконечный цикл: получаем состояние от адаптера.
         :return:
         """
-        for r in self.multi_stub.stub_adapter.states(rpc_pb2.Empty()):
-            ack = r
-            try:
-                if r.state == rpc_pb2.AdapterStream.AFTER_CREATING_OBJECT:
-                    log.info('Create device {0}'.format(r.id))
-                    self.create_object(r.id)
+        try:
+            for r in self.multi_stub.stub_adapter.states(rpc_pb2.Empty()):
+                ack = r
+                try:
+                    if r.state == rpc_pb2.AdapterStream.AFTER_CREATING_OBJECT:
+                        log.info('Create device {0}'.format(r.id))
+                        self.create_object(r.id)
 
-                elif r.state == rpc_pb2.AdapterStream.BEFORE_REMOVING_OBJECT:
-                    log.info('Remove device {0}'.format(r.id))
-                    if r.id in self.nodes:
-                        self.nodes[r.id].handle_before_remove_device()
-                        del self.nodes[r.id]
-                        # TODO удалить компоненты из self.components
-                        log.info('Device {0} removed'.format(r.id))
-                    else:
-                        log.warn('Device {0} not found'.format(r.id))
+                    elif r.state == rpc_pb2.AdapterStream.BEFORE_REMOVING_OBJECT:
+                        log.info('Remove device {0}'.format(r.id))
+                        if r.id in self.nodes:
+                            self.nodes[r.id].handle_before_remove_device()
+                            del self.nodes[r.id]
+                            # TODO удалить компоненты из self.components
+                            log.info('Device {0} removed'.format(r.id))
+                        else:
+                            log.warn('Device {0} not found'.format(r.id))
 
-                elif r.state == rpc_pb2.AdapterStream.GETTING_AVAILABLE_CHILDREN:
-                    log.info('Get available children of {0}'.format(r.id))
-                    self.get_available_children(r.id)
+                    elif r.state == rpc_pb2.AdapterStream.GETTING_AVAILABLE_CHILDREN:
+                        log.info('Get available children of {0}'.format(r.id))
+                        self.get_available_children(r.id)
 
-                elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
-                    if r.id in self.components:  # есть параметры, которые по умолчанию в адаптере
-                        self.components[r.id].callback()
+                    elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
+                        if r.id in self.components:  # есть параметры, которые по умолчанию в адаптере
+                            self.components[r.id].callback()
 
-                elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
-                    if r.id in self.components:
-                        self.components[r.id].call_function()
-                    else:
-                        log.warn('Command {0} not found'.format(r.id))
+                    elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
+                        if r.id in self.components:
+                            self.components[r.id].call_function()
+                        else:
+                            log.warn('Command {0} not found'.format(r.id))
 
-            except Exception, err:
-                log.error(str(err) + '\nstate=' + str(r.state))
+                except Exception, err:
+                    log.error(str(err) + '\nstate=' + str(r.state))
 
-            self.multi_stub.stub_adapter.ack(ack)
+                self.multi_stub.stub_adapter.ack(ack)
+
+        except Exception, err:
+            log.error(str(err))
 

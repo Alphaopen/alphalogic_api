@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
-import grpc
 import datetime
+import time
 
-from callbox.core.type_attributes import runtime, setup, hidden, common
-from callbox.core.type_attributes import read_only, read_write
-from callbox.core.type_attributes import major
-
-from core.core import  Root, Device
-from core.command import command
 from callbox.core.event import Event
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
-import time
-from callbox.core.queue_tasks import run
+from callbox.core.type_attributes import major
+from callbox.core.type_attributes import read_only, read_write
+from callbox.core.type_attributes import runtime, setup, hidden, common
+from core.command import command
+from core.core import Root, Device
 
 '''
 Не забыть важные моменты:
@@ -80,7 +76,6 @@ class MyRoot(Root):
         print which2
         return True
 
-    @run(period=30)
     def run(self):
         print 'a_run'
 
