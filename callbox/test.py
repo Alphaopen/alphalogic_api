@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import grpc
 import datetime
 import time
 
+from core.core import  Root, Device
+from core.command import command
 from callbox.core.event import Event
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
 from callbox.core.type_attributes import major
-from callbox.core.type_attributes import read_only, read_write
 from callbox.core.type_attributes import runtime, setup, hidden, common
 from core.command import command
 from core.core import Root, Device
+
 
 '''
 Не забыть важные моменты:
@@ -69,6 +73,22 @@ class MyRoot(Root):
         return 'abc'
 
     @command(result_type=bool)
+    def failed_cmd(self):
+        self.log.info("failed cmd start")
+        raise Exception("command failed")
+        return False
+
+    @command(result_type=int)
+    def seconds_from_epoch(self):
+        ret = int(utils.milliseconds_from_epoch(datetime.datetime.now()) / 1000.0)
+        return ret
+
+    @command(result_type=float)
+    def milliseconds(self):
+        ret = int(utils.milliseconds_from_epoch(datetime.datetime.now()) % 1000.0) / 1000.0
+        return ret
+
+    @command(result_type=bool)
     def relax(self, where='room', why=42, which=(1, 2, 3), which2=({'On': True}, {'Off': False})):
         print where
         print why
@@ -101,6 +121,9 @@ class Controller(Device):
     def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
         return True
     '''
+
+    def run(self):
+        pass
 
 
 # python loop

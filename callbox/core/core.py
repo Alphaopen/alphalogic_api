@@ -17,7 +17,7 @@ from callbox.core.parameter import Parameter
 from callbox.core.event import Event
 from callbox.core.command import Command
 from callbox.core.manager import Manager
-
+from callbox.logger import log
 
 class Device(object):
     """
@@ -30,6 +30,7 @@ class Device(object):
         #self.__dict__["type_device"] = type_device
         #self.__dict__["parameters"] = []
         #self.__dict__["events"] = []
+        self.__dict__['log'] = log
         self.__dict__['type'] = type_device
         self.__dict__['id'] = id_device
         self.__dict__["commands"] = {}
