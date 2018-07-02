@@ -8,12 +8,14 @@ from callbox.core.type_attributes import runtime, setup, hidden, common
 from callbox.core.type_attributes import read_only, read_write
 from callbox.core.type_attributes import major
 
-from core.core import  Root, Device
-from core.command import command
+from callbox.core.core import Root, Device
+from callbox.core.command import command
 from callbox.core.event import Event
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
 import time
+from callbox.core import utils
+
 
 
 '''
@@ -71,6 +73,22 @@ class MyRoot(Root):
     def check(self, where='here'):
         #self.relax(1, 2, 3, 4)
         return 'abc'
+
+    @command(result_type=bool)
+    def failed_cmd(self):
+        self.log.info("failed cmd start")
+        raise Exception("command failed")
+        return False
+
+    @command(result_type=int)
+    def seconds_from_epoch(self):
+        ret = int(utils.milliseconds_from_epoch(datetime.datetime.now()) / 1000.0)
+        return ret
+
+    @command(result_type=float)
+    def milliseconds(self):
+        ret = int(utils.milliseconds_from_epoch(datetime.datetime.now()) % 1000.0) / 1000.0
+        return ret
 
     @command(result_type=bool)
     def relax(self, where='room', why=42, which=(1, 2, 3), which2=({'On': True}, {'Off': False})):
