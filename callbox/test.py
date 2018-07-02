@@ -15,7 +15,7 @@ from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
 import time
 from callbox.core import utils
-
+from callbox.core.queue_tasks import run
 
 
 '''
@@ -97,6 +97,10 @@ class MyRoot(Root):
         print which
         print which2
         return True
+
+    @run(period=30)
+    def run(self):
+        print 'a_run'
 
     '''
     @command(result_type=int)
