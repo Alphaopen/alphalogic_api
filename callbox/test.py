@@ -3,17 +3,18 @@ from __future__ import unicode_literals
 
 import grpc
 import datetime
-import time
 
-from core.core import  Root, Device
-from core.command import command
+from callbox.core.type_attributes import runtime, setup, hidden, common
+from callbox.core.type_attributes import read_only, read_write
+from callbox.core.type_attributes import major
+
+from callbox.core.core import Root, Device
+from callbox.core.command import command
 from callbox.core.event import Event
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
-from callbox.core.type_attributes import major
-from callbox.core.type_attributes import runtime, setup, hidden, common
-from core.command import command
-from core.core import Root, Device
+import time
+from callbox.core import utils
 
 
 '''

@@ -27,7 +27,7 @@ class TasksPool(object):
 
     def run_operation_thread(self):
         while not self.shutdown_flag.is_set():
-            #TODO:
+            a =1 #TODO:
             #проверяет есть ли подешедшии задачи в queue_timers
             #распределяет подошеднии задачи между потоками, queue_tasks
             #заснуть в конце на миллисекунду
