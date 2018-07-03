@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import grpc
 import datetime
+import time
 
 from callbox.core.type_attributes import runtime, setup, hidden, common
 from callbox.core.type_attributes import read_only, read_write
@@ -13,8 +14,8 @@ from callbox.core.command import command
 from callbox.core.event import Event
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
-import time
 from callbox.core import utils
+from callbox.core.tasks_pool import run
 
 
 '''
@@ -36,7 +37,6 @@ from callbox.core import utils
 
 4) Как сделать выбор некоторых параметров по умолчанию?
 '''
-
 
 def handle_after_set_double():
     print 'double changed'
@@ -97,8 +97,10 @@ class MyRoot(Root):
         print which2
         return True
 
-    def run(self):
+    @run(period=10)
+    def run_one(self):
         print 'a_run'
+
 
     '''
     @command(result_type=int)

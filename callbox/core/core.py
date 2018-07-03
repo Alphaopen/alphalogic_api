@@ -47,6 +47,10 @@ class Device(object):
         for name in filter(lambda attr: type(getattr(self, attr)) is Event, dir(self)):
             self.__dict__[name] = type(self).__dict__[name]
 
+        is_runable = lambda x: callable(getattr(self, x)) and not x.startswith('_') and\
+                                hasattr(getattr(self, x), 'runable')
+        self.__dict__['run_function_names'] = filter(is_runable, dir(self))
+
     def __getattr__(self, name):
         return self.__dict__[name]
 

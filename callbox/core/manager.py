@@ -167,6 +167,7 @@ class Manager(AbstractManager):
         self.configure_parameters(object, id)
         self.configure_commands(object, id)
         self.configure_events(object, id)
+        self.configure_run_function(object, id)
 
     def prepare_root_node(self, root_device, id_root, type_device_str):
         #Manager.factory[type_device_str] = type(root_device)  # TODO нужно ли?
@@ -185,7 +186,7 @@ class Manager(AbstractManager):
     def get_available_children(self, id_device):
         device = Manager.nodes[id_device]
         available_devices = device.handle_get_available_children()
-        self.unregister_all_makers(id_object=id_device) # можно будет переписать вызвав у объекта функцию unregister_makers
+        self.unregister_all_makers(id_object=id_device)
 
         for class_name, type_when_create in available_devices:
             self.register_maker(id_object=id_device, name=type_when_create)
@@ -194,14 +195,6 @@ class Manager(AbstractManager):
                 self.factories[id_device] = {}
             self.factories[id_device][type_when_create] = class_name
 
-    '''
-    Конфигурирование узла по заготовленной схеме
-    '''
-    '''
-    def configure_device_from_scheme(self, type_object, object_id):
-        object = self.root.list_devices[type_object]
-        self.configure_parameters(object, object_id)
-    '''
     def get_type_when_create(self, node_id):
         id = self.parameter(id_object=node_id, name='type_when_create')
         answer = self.multi_stub.parameter_call('get', id=id)
@@ -249,6 +242,12 @@ class Manager(AbstractManager):
 
             for key, val in event.args.iteritems():
                 event.set_argument(key, utils.get_rpc_value(val))
+
+    def configure_run_function(self, object, object_id):
+        for name in object.run_function_names:
+            time_stamp = time.time()
+            period = getattr(object, name).runable
+            self.tasks_pool.add_task(time_stamp+period, getattr(object, name))
 
     def join(self):
         try:
