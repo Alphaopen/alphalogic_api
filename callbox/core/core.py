@@ -26,10 +26,6 @@ class Device(object):
     manager = Manager()
 
     def __init__(self, parent, type_device, id_device):
-        #self.__dict__["parent"] = parent
-        #self.__dict__["type_device"] = type_device
-        #self.__dict__["parameters"] = []
-        #self.__dict__["events"] = []
         self.__dict__['log'] = log
         self.__dict__['type'] = type_device
         self.__dict__['id'] = id_device
@@ -47,9 +43,9 @@ class Device(object):
         for name in filter(lambda attr: type(getattr(self, attr)) is Event, dir(self)):
             self.__dict__[name] = type(self).__dict__[name]
 
-        is_runable = lambda x: callable(getattr(self, x)) and not x.startswith('_') and\
-                                hasattr(getattr(self, x), 'runable')
-        self.__dict__['run_function_names'] = filter(is_runable, dir(self))
+        is_runnable = lambda x: callable(getattr(self, x)) and not x.startswith('_') and\
+                                hasattr(getattr(self, x), 'runnable')
+        self.__dict__['run_function_names'] = filter(is_runnable, dir(self))
 
     def __getattr__(self, name):
         return self.__dict__[name]

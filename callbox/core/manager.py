@@ -246,7 +246,7 @@ class Manager(AbstractManager):
     def configure_run_function(self, object, object_id):
         for name in object.run_function_names:
             time_stamp = time.time()
-            period = getattr(object, name).runable
+            period = getattr(object, name).runnable
             self.tasks_pool.add_task(time_stamp+period, getattr(object, name))
 
     def join(self):

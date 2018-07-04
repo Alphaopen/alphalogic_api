@@ -98,8 +98,12 @@ class MyRoot(Root):
         return True
 
     @run(period=10)
+    def run_two(self):
+        print str(self.id) + ' a_run'
+
+    @run(period=24)
     def run_one(self):
-        print 'a_run'
+        print str(self.id) + ' b_run'
 
 
     '''
@@ -117,21 +121,19 @@ class Controller(Device):
     hostname = ParameterString(visible=setup, access=read_write, value=('1', '2'))
     mode = ParameterBool(visible=setup, value=({'On': True}, {'Off': False}))
     version = Parameter(value_type=int, visible=common)
-    counter = ParameterDouble(default=1.0, access=read_only)
+    counter = ParameterDouble(value=1.0, access=read_only)
 
-    '''
     @command(result_type=bool)
     def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
         return True
-    '''
 
-    def run(self):
-        pass
+    @run(period=20)
+    def run_third(self):
+        print str(self.id)+' c_run'
 
 
 # python loop
 adapter = MyRoot('localhost', 42001)
-
 
 assert adapter.param_string.val == 'noop'
 assert adapter.param_string.is_setup()

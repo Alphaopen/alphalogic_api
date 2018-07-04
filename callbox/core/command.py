@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import inspect
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.multistub import MultiStub
-
-import inspect
 import callbox.core.utils as utils
 from callbox.logger import log
 
@@ -67,10 +66,9 @@ class AbstractCommand(object):
         return getattr(answer.value, type_argument)
 
     def set_argument(self, name_arg, value):
-        value_rpc = rpc_pb2.Value()
         value_type = utils.value_field_definer(value)
         if value_type != 'list' and value_type != 'tuple':
-            setattr(value_rpc, value_type, value)
+            value_rpc = utils.get_rpc_value(type(value), value)
             self._call('set_argument', argument=name_arg, value=value_rpc)
         else:
             req = rpc_pb2.CommandRequest(id=self.id, argument=name_arg)

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from multiprocessing.dummy import Pool as ThreadPool
-from multiprocessing import Pool as ProcessPool
 from threading import Thread, Timer, Event, Lock
 from Queue import Queue, PriorityQueue
 import time
@@ -58,9 +57,9 @@ class TasksPool(object):
     '''
     Распределяет задачи по пулу потоков
     '''
-    def __init__(self, is_thread=True, num_thread=None):
-        self.thread_pool = ThreadPool(processes=num_thread) if is_thread else ProcessPool(processes=num_thread)
-        # если processes=None, то количество поток подбирается автоматически
+    def __init__(self, num_thread=None):
+        self.thread_pool = ThreadPool(processes=num_thread)
+        # если processes=None, то количество потоков подбирается автоматически
         self.operation_thread = Thread(target=self.run_operation_thread)
         self.shutdown_flag = Event()
         self.queue_tasks = PriorityTasks() # здесь задачи с временными отметками
@@ -75,7 +74,6 @@ class TasksPool(object):
         log.info('run_operation_thread close')
 
     def add_task(self, time_stamp, task):
-        print 'add_task'
         self.queue_tasks.put((time_stamp, task))
 
 
@@ -85,14 +83,15 @@ def run(period=60):
             time_start = time.time()
             func(device)
             time_finish = time.time()
-            if (time_finish-time_start) < wrapped.runable:
-                print 'A case {0}\n'.format(time_finish-time_start)
-                device.manager.tasks_pool.add_task(time_finish+period-(time_finish-time_start),
+            time_spend = time_finish-time_start
+            log.info('run function {0} of device {2} was executed for {1} seconds'.
+                     format(func.func_name, time_spend, device.id))
+            if time_spend < wrapped.runnable:
+                device.manager.tasks_pool.add_task(time_finish+period-time_spend,
                                                    getattr(device, func.func_name))
             else:
-                print 'B case {0}\n'.format(time_finish - time_start)
                 device.manager.tasks_pool.add_task(time_finish, getattr(device, func.func_name))
-        wrapped.runable = decorator.period
+        wrapped.runnable = decorator.period
         return wrapped
     decorator.period = period
     return decorator

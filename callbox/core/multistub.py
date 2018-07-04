@@ -62,18 +62,6 @@ class MultiStub(object):
         command_w = CommandRequest(**kwargs)
         return self.call_helper(*args, fun_set=MultiStub.command_fun_set, request=command_w, stub=self.stub_command)
 
-    '''
-    def adapter_call(self, *args):
-        adapter_w = rpc_pb2.AdapterRequest()
-        return self.call_helper(*args, fun_set=MultiStub.object_fun_set, request=adapter_w, stub=self.stub_adapter)
-    '''
-    '''
-       Подумать над схемой:
-       Первый член в *argv - это название функции для вызова
-       Остальные - это разный уровень вложенности обращения : obj.argv[1].argv[2].argv[3] и т.д.
-
-       Как можно проинспектировать тип переменной, которую надо создать чтобы передать в stub?
-    '''
     def call_helper(self, function_name, *args, **kwargs):
         if function_name in kwargs['fun_set']:  # function_name - название функции, проверка на допустимость
             answer = getattr(kwargs['stub'], function_name)(kwargs['request'])
