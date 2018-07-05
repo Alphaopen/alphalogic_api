@@ -10,6 +10,8 @@ from callbox.core.event import Event
 from callbox.core import utils
 from callbox.logger import log
 from callbox.core.tasks_pool import TasksPool
+from callbox.core.parameter import ParameterDouble
+from callbox.core.type_attributes import setup
 
 class Exit(Exception):
     pass
@@ -151,7 +153,7 @@ class AbstractManager(object):
 
 
 class Manager(AbstractManager):
-    factories = {}  # По type_when_create можно определить тип узла
+    dict_type_objects = {}  # По type_when_create можно определить тип узла
     nodes = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
     components = {} #По id команды можно обратиться к командам
 
@@ -163,6 +165,12 @@ class Manager(AbstractManager):
     def configure_multi_stub(self, address):
         self.multi_stub = MultiStub(address)
 
+    def update_dict_type_objects(self, list_types):
+        if len(list_types) > 0:
+            for class_name, type_str in list_types:
+                if not(type_str in Manager.dict_type_objects):
+                    Manager.dict_type_objects[type_str] = class_name
+
     def prepare_for_work(self, object, id):
         self.configure_parameters(object, id)
         self.configure_commands(object, id)
@@ -170,7 +178,6 @@ class Manager(AbstractManager):
         self.configure_run_function(object, id)
 
     def prepare_root_node(self, root_device, id_root, type_device_str):
-        #Manager.factory[type_device_str] = type(root_device)  # TODO нужно ли?
         Manager.nodes[id_root] = root_device
         self.prepare_for_work(root_device, id_root)
 
@@ -178,7 +185,7 @@ class Manager(AbstractManager):
         parent_id = self.parent(object_id)
         parent = Manager.nodes[parent_id] if (parent_id in Manager.nodes) else None
         type_when_create = self.get_type_when_create(object_id)
-        class_name = self.factories[parent_id][type_when_create]
+        class_name = self.dict_type_objects[type_when_create]
         object = class_name(parent, type_when_create, object_id)
         Manager.nodes[object_id] = object
         self.prepare_for_work(object, object_id)
@@ -191,62 +198,68 @@ class Manager(AbstractManager):
         for class_name, type_when_create in available_devices:
             self.register_maker(id_object=id_device, name=type_when_create)
 
-            if id_device not in self.factories:
-                self.factories[id_device] = {}
-            self.factories[id_device][type_when_create] = class_name
-
     def get_type_when_create(self, node_id):
         id = self.parameter(id_object=node_id, name='type_when_create')
         answer = self.multi_stub.parameter_call('get', id=id)
         return utils.value_from_rpc(answer.value, unicode)
 
-    def configure_parameters(self, object, object_id):
-        list_parameters_name = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
-        for name in list_parameters_name:
-            parameter = object.__dict__[name]
-            parameter.set_multi_stub(self.multi_stub)
-            value_type = parameter.value_type
-            id_parameter = getattr(self, utils.create_parameter_definer(str(value_type)))\
-                (id_object=object_id, name=name)
-            parameter.id = id_parameter
-
-            getattr(parameter, parameter.visible.create_func)()
-            getattr(parameter, parameter.access.create_func)()
-
+    def create_parameter(self, name, parameter, object_id, list_id_parameters_already_exists):
+        parameter.set_multi_stub(self.multi_stub)
+        value_type = parameter.value_type
+        id_parameter = getattr(self, utils.create_parameter_definer(str(value_type))) \
+            (id_object=object_id, name=name)
+        parameter.id = id_parameter
+        getattr(parameter, parameter.visible.create_func)()
+        getattr(parameter, parameter.access.create_func)()
+        if not(id_parameter in list_id_parameters_already_exists):
             parameter.val = getattr(parameter, 'value', None)
+
+    def configure_parameters(self, object, object_id):
+        list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
+        list_id_parameters_already_exists = self.parameters(object_id)
+        for name in list_parameters_name_should_exists:
+            parameter = object.__dict__[name]
+            self.create_parameter(name, parameter, object_id, list_id_parameters_already_exists)
+
+    def create_command(self, name, command, object_id):
+        command.set_multi_stub(self.multi_stub)
+        result_type = command.result_type
+        id_command = getattr(self, utils.create_command_definer(str(result_type)))\
+            (id_object=object_id, name=name)
+        command.id = id_command
+        for arg in command.arguments:
+            name_arg = arg
+            value_arg = command.arguments[arg]
+            command.set_argument(name_arg, value_arg)
+        self.components[id_command] = command
 
     def configure_commands(self, object, object_id):
         for name in object.commands:
             command = object.commands[name]
-            command.set_multi_stub(self.multi_stub)
-            result_type = command.result_type
-            id_command = getattr(self, utils.create_command_definer(str(result_type)))\
-                (id_object=object_id, name=name)
-            command.id = id_command
-            for arg in command.arguments:
-                name_arg = arg
-                value_arg = command.arguments[arg]
-                command.set_argument(name_arg, value_arg)
-            self.components[id_command] = command
+            self.create_command(name, command, object_id)
+
+    def configure_single_event(self, name, event, object_id):
+        event.set_multi_stub(self.multi_stub)
+        event.id = self.create_event(id_object=object_id, name=name)
+        getattr(event, event.priority.create_func)()
+        event.clear()
+        for key, val in event.args.iteritems():
+            event.set_argument(key, utils.get_rpc_value(val))
 
     def configure_events(self, object, object_id):
         list_events = filter(lambda attr: type(getattr(object, attr)) is Event, dir(object))
         for name in list_events:
             event = object.__dict__[name]
-            event.set_multi_stub(self.multi_stub)
-
-            event.id = self.create_event(id_object=object_id, name=name)
-
-            getattr(event, event.priority.create_func)()
-            event.clear()
-
-            for key, val in event.args.iteritems():
-                event.set_argument(key, utils.get_rpc_value(val))
+            self.configure_single_event(name, event, object_id)
 
     def configure_run_function(self, object, object_id):
         for name in object.run_function_names:
             time_stamp = time.time()
-            period = getattr(object, name).runnable
+            period_name = getattr(object, name).period_name
+            period = getattr(object, name).period_default_value
+            parameter_period = ParameterDouble(value=period, visible=setup)
+            object.__dict__[period_name] = parameter_period
+            self.create_parameter(period_name, parameter_period, object.id)
             self.tasks_pool.add_task(time_stamp+period, getattr(object, name))
 
     def join(self):

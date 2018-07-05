@@ -43,8 +43,8 @@ def handle_after_set_double():
 
 
 class MyRoot(Root):
-    name = ParameterString(value='RootNode')
-    displayName = ParameterString(value='RootNode')
+    #name = ParameterString(value='RootNode')
+    #displayName = ParameterString(value='RootNode')
 
     param_string = ParameterString(value='noop', visible=setup)
     param_bool = ParameterBool(value=False, visible=common)
@@ -97,11 +97,11 @@ class MyRoot(Root):
         print which2
         return True
 
-    @run(period=10)
+    @run(period_a=10)
     def run_two(self):
         print str(self.id) + ' a_run'
 
-    @run(period=24)
+    @run(period_b=24)
     def run_one(self):
         print str(self.id) + ' b_run'
 
@@ -115,8 +115,7 @@ class MyRoot(Root):
 
 class Controller(Device):
     # Parameters:
-    name = ParameterString(value='Controller_name')
-    displayName = ParameterString(value='Controller_displayName')
+    displayName = ParameterString()
 
     hostname = ParameterString(visible=setup, access=read_write, value=('1', '2'))
     mode = ParameterBool(visible=setup, value=({'On': True}, {'Off': False}))
@@ -130,6 +129,11 @@ class Controller(Device):
     @run(period=20)
     def run_third(self):
         print str(self.id)+' c_run'
+
+    def handle_get_available_children(self):
+        return [
+            (Controller, 'Controller')
+        ]
 
 
 # python loop
