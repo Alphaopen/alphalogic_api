@@ -4,7 +4,7 @@ from callbox.core import utils
 from callbox.core.type_attributes import major
 import callbox.protocol.rpc_pb2 as rpc_pb2
 import datetime
-
+import inspect
 
 class AbstractEvent(object):
 
@@ -68,12 +68,12 @@ class AbstractEvent(object):
         Если время требуется не текущее, то вызовите set_time
         :param kwargs: аргументы
         """
-        for key, value in kwargs.iteritems():
-            if key not in self.args.keys():
+        for arg_name, arg_type in self.arguments:
+            if arg_name not in kwargs:
                 raise Exception('Incorrect argument name of event {0}'.format(self.name))
 
-            value_rpc = utils.get_rpc_value(self.args[key], value)
-            self._call('set_argument', argument=key, value=value_rpc)
+            value_rpc = utils.get_rpc_value(arg_type, kwargs[arg_name])
+            self._call('set_argument', argument=arg_name, value=value_rpc)
 
         self._call('emit')
 
@@ -85,10 +85,11 @@ class AbstractEvent(object):
 
 
 class Event(AbstractEvent):
-    def __init__(self, **kwargs):
-        self.priority = kwargs.get('priority', major)
-        self.args = kwargs.get('args', {})
+
+    def __init__(self, *args):
+        self.arguments = args
         self.id = None
+        self.priority = major
         self.multi_stub = None
 
     def set_multi_stub(self, multi_stub):

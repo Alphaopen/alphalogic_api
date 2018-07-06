@@ -50,12 +50,14 @@ class MyRoot(Root):
     param_bool = ParameterBool(value=False, visible=common)
     param_int = ParameterInt(value=2, visible=runtime, access=read_only)
     param_double = ParameterDouble(value=2.3, callback=handle_after_set_double)
-    param_timestamp = ParameterDatetime(value=datetime.datetime.now())
-    param_hid = ParameterDouble(access=hidden)
+    param_timestamp = ParameterDatetime(value=datetime.datetime.utcnow())
+    param_hid = ParameterDouble(value=2.2, access=hidden)
     param_vect = ParameterInt(value=(0, 1, 2, 3))
 
+    alarm = Event(('where', str),
+                  ('when', datetime.datetime),
+                  ('why', int))
     simple_event = Event()
-    alarm = Event(priority=major, args=dict(where=str, when=datetime.datetime, why=int))
 
     def handle_create(self):
         pass
@@ -68,6 +70,22 @@ class MyRoot(Root):
             (Controller, 'Controller')
         ]
 
+    @command(result_type=bool)
+    def cmd_simple_event(self):
+        self.simple_event.emit()
+        return True
+
+    @command(result_type=bool)
+    def cmd_simple_event_manual_time(self, timestamp=0):
+        self.simple_event.set_time(timestamp)
+        self.simple_event.emit()
+        return True
+
+    @command(result_type=bool)
+    def cmd_alarm(self, where='here', when=datetime.datetime.now(), why=2):
+        self.alarm.emit(where=where, when=when, why=why)
+        return True
+
     @command(result_type=unicode)
     def check(self, where='here'):
         #self.relax(1, 2, 3, 4)
@@ -79,15 +97,27 @@ class MyRoot(Root):
         raise Exception("command failed")
         return False
 
+    # Проверка возвращаемых значений
+
     @command(result_type=int)
-    def seconds_from_epoch(self):
-        ret = int(utils.milliseconds_from_epoch(datetime.datetime.now()) / 1000.0)
+    def cmd_return_int(self):
+        ret = int(utils.milliseconds_from_epoch(datetime.datetime.utcnow()) / 1000.0)
         return ret
 
     @command(result_type=float)
-    def milliseconds(self):
-        ret = int(utils.milliseconds_from_epoch(datetime.datetime.now()) % 1000.0) / 1000.0
+    def cmd_return_float(self):
+        ret = int(utils.milliseconds_from_epoch(datetime.datetime.utcnow()) % 1000.0) / 1000.0
         return ret
+
+    @command(result_type=unicode)
+    def cmd_return_unicode(self):
+        return 'некоторый текст'
+
+    @command(result_type=datetime.datetime)
+    def cmd_return_datetime(self):
+        return datetime.datetime.utcnow()
+
+    #
 
     @command(result_type=bool)
     def relax(self, where='room', why=42, which=(1, 2, 3), which2=({'On': True}, {'Off': False})):
@@ -105,12 +135,6 @@ class MyRoot(Root):
     def run_one(self):
         print str(self.id) + ' b_run'
 
-
-    '''
-    @command(result_type=int)
-    def affair(self, where):
-        return 1
-    '''
 
 
 class Controller(Device):

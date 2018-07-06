@@ -63,7 +63,7 @@ class AbstractCommand(object):
 
     def argument(self, name_argument, type_argument):
         answer = self._call('argument', argument=name_argument)
-        return getattr(answer.value, type_argument)
+        return utils.value_from_rpc(answer.value, type_argument)
 
     def set_argument(self, name_arg, value):
         value_type = utils.value_field_definer(value)
@@ -109,7 +109,7 @@ class Command(AbstractCommand):
         info = []
         for name_arg in arg_list:
             type_arg = self.arguments_type[name_arg]
-            function_dict[name_arg] = self.argument(name_arg, utils.value_type_field_definer(type_arg))
+            function_dict[name_arg] = self.argument(name_arg, type_arg)
             info.append('{0}({1}): {2}'.format(name_arg, type_arg, function_dict[name_arg]))
 
         log.info('Execute command \'{0}\' with arguments [{1}] from device \'{2}\''
@@ -120,12 +120,12 @@ class Command(AbstractCommand):
 def command_preparation(wrapped, func, **kwargs_c): #В этой функции задаются возвращаемое значение команды и ее аргументы
     wrapped.result_type = kwargs_c['result_type']
     (args, varargs, keywords, defaults) = inspect.getargspec(func)
-    bias = 1 if 'self' in args else 0  # если первый аргумент self, то нужно рассматривать со второго элемента
-    wrapped.__dict__['arguments'] = {}
+    wrapped.__dict__['arguments'] = []
     wrapped.__dict__['arguments_type'] = {}
     wrapped.__dict__['function_name'] = func.__name__
+    bias = 1 if 'self' in args else 0  # если первый аргумент self, то нужно рассматривать со второго элемента
     for index, name in enumerate(args[bias:]):
-        wrapped.arguments[name] = defaults[index]
+        wrapped.arguments.append((name, defaults[index]))
         wrapped.arguments_type[name] = utils.get_command_argument_type(defaults[index])
 
 

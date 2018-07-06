@@ -224,8 +224,7 @@ class Manager(AbstractManager):
                 (id_object=object_id, name=name)
             command.id = id_command
             for arg in command.arguments:
-                name_arg = arg
-                value_arg = command.arguments[arg]
+                name_arg, value_arg = arg
                 command.set_argument(name_arg, value_arg)
             self.components[id_command] = command
 
@@ -240,8 +239,8 @@ class Manager(AbstractManager):
             getattr(event, event.priority.create_func)()
             event.clear()
 
-            for key, val in event.args.iteritems():
-                event.set_argument(key, utils.get_rpc_value(val))
+            for arg_name, arg_type in event.arguments:
+                event.set_argument(arg_name, utils.get_rpc_value(arg_type))
 
     def configure_run_function(self, object, object_id):
         for name in object.run_function_names:
