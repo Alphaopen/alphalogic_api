@@ -43,8 +43,8 @@ def handle_after_set_double():
 
 
 class MyRoot(Root):
-    name = ParameterString(value='RootNode')
-    displayName = ParameterString(value='RootNode')
+    #name = ParameterString(value='RootNode')
+    #displayName = ParameterString(value='RootNode')
 
     param_string = ParameterString(value='noop', visible=setup)
     param_bool = ParameterBool(value=False, visible=common)
@@ -127,11 +127,11 @@ class MyRoot(Root):
         print which2
         return True
 
-    @run(period=10)
+    @run(period_a=10)
     def run_two(self):
         print str(self.id) + ' a_run'
 
-    @run(period=24)
+    @run(period_b=24)
     def run_one(self):
         print str(self.id) + ' b_run'
 
@@ -139,8 +139,7 @@ class MyRoot(Root):
 
 class Controller(Device):
     # Parameters:
-    name = ParameterString(value='Controller_name')
-    displayName = ParameterString(value='Controller_displayName')
+    displayName = ParameterString()
 
     hostname = ParameterString(visible=setup, access=read_write, value=('1', '2'))
     mode = ParameterBool(visible=setup, value=({'On': True}, {'Off': False}))
@@ -155,10 +154,17 @@ class Controller(Device):
     def run_third(self):
         print str(self.id)+' c_run'
 
+    def handle_get_available_children(self):
+        return [
+            (Controller, 'Controller')
+        ]
+
 
 # python loop
 adapter = MyRoot('localhost', 42001)
 
+
+'''
 assert adapter.param_string.val == 'noop'
 assert adapter.param_string.is_setup()
 assert not adapter.param_bool.val
@@ -169,6 +175,7 @@ assert adapter.param_int.is_read_only()
 assert adapter.param_double.val == 2.3
 assert adapter.param_double.is_runtime(), 'default wrong'
 assert adapter.param_double.is_read_write(), 'default wrong'
+'''
 #assert (datetime.datetime.now() - adapter.param_timestamp.val).total_seconds() < 10
 
 #assert adapter.param_vect.val == (0, 1, 2, 3)

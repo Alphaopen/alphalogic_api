@@ -34,11 +34,6 @@ class ObjectServiceStub(object):
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
         response_deserializer=rpc__pb2.ObjectReply.FromString,
         )
-    self.set_type = channel.unary_unary(
-        '/adapter.rpc.ObjectService/set_type',
-        request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
-        response_deserializer=rpc__pb2.ObjectReply.FromString,
-        )
     self.create_string_parameter = channel.unary_unary(
         '/adapter.rpc.ObjectService/create_string_parameter',
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
@@ -207,13 +202,6 @@ class ObjectServiceServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def type(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def set_type(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -436,11 +424,6 @@ def add_ObjectServiceServicer_to_server(servicer, server):
       ),
       'type': grpc.unary_unary_rpc_method_handler(
           servicer.type,
-          request_deserializer=rpc__pb2.ObjectRequest.FromString,
-          response_serializer=rpc__pb2.ObjectReply.SerializeToString,
-      ),
-      'set_type': grpc.unary_unary_rpc_method_handler(
-          servicer.set_type,
           request_deserializer=rpc__pb2.ObjectRequest.FromString,
           response_serializer=rpc__pb2.ObjectReply.SerializeToString,
       ),

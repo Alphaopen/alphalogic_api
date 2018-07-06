@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import locale
 import datetime
 import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.type_attributes import runtime, setup, hidden, common
 from callbox.core.type_attributes import read_only, read_write
-import locale
+from callbox.logger import log
 
 
 def value_type_field_definer(value_type):
@@ -141,3 +142,11 @@ def value_from_rpc(value_rpc, value_type):
     elif 'tuple' in str(value_type):
         pass   # TODO
 
+
+class Exit(Exception):
+    pass
+
+
+def shutdown(signum, frame):
+    log.info("Shutdown. Signal is {0}".format(signum))
+    raise Exit

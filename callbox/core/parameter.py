@@ -8,6 +8,8 @@ import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.type_attributes import runtime, setup, hidden, common, read_only, read_write
 from callbox.core.multistub import MultiStub
 from callbox.core import utils
+from callbox.logger import log
+from callbox.core.utils import Exit, shutdown
 
 
 class AbstractParameter(object):
@@ -177,7 +179,11 @@ class Parameter(AbstractParameter):
             return self.get()
 
     def __setattr__(self, attr, value):
-        if attr in ['value_type', 'visible', 'access', 'value', 'name', 'multi_stub', 'id']:
+        if self.parameter_name == 'name' and attr == 'val':#недопущение изменения значения у name
+            log.error('Attempt to change name of device')
+            raise Exit
+
+        if attr in ['value_type', 'visible', 'access', 'value', 'multi_stub', 'id', 'parameter_name']:
             self.__dict__[attr] = value
         elif attr == 'val':
             if value is not None:
