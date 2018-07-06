@@ -172,10 +172,11 @@ class Manager(AbstractManager):
                     Manager.dict_type_objects[type_str] = class_name
 
     def prepare_for_work(self, object, id):
-        self.configure_parameters(object, id)
+        list_id_parameters_already_exists = self.parameters(id)
+        self.configure_parameters(object, id, list_id_parameters_already_exists)
         self.configure_commands(object, id)
         self.configure_events(object, id)
-        self.configure_run_function(object, id)
+        self.configure_run_function(object, id, list_id_parameters_already_exists)
 
     def prepare_root_node(self, root_device, id_root, type_device_str):
         Manager.nodes[id_root] = root_device
@@ -214,9 +215,8 @@ class Manager(AbstractManager):
         if not(id_parameter in list_id_parameters_already_exists):
             parameter.val = getattr(parameter, 'value', None)
 
-    def configure_parameters(self, object, object_id):
+    def configure_parameters(self, object, object_id, list_id_parameters_already_exists):
         list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
-        list_id_parameters_already_exists = self.parameters(object_id)
         for name in list_parameters_name_should_exists:
             parameter = object.__dict__[name]
             self.create_parameter(name, parameter, object_id, list_id_parameters_already_exists)
@@ -252,14 +252,14 @@ class Manager(AbstractManager):
             event = object.__dict__[name]
             self.configure_single_event(name, event, object_id)
 
-    def configure_run_function(self, object, object_id):
+    def configure_run_function(self, object, object_id, list_id_parameters_already_exists):
         for name in object.run_function_names:
             time_stamp = time.time()
             period_name = getattr(object, name).period_name
             period = getattr(object, name).period_default_value
             parameter_period = ParameterDouble(value=period, visible=setup)
             object.__dict__[period_name] = parameter_period
-            self.create_parameter(period_name, parameter_period, object.id)
+            self.create_parameter(period_name, parameter_period, object.id, list_id_parameters_already_exists)
             self.tasks_pool.add_task(time_stamp+period, getattr(object, name))
 
     def join(self):
