@@ -80,8 +80,14 @@ class AbstractEvent(object):
     def clear(self):
         self._call('clear')
 
-    def set_argument(self, name, value_rpc):
-        self._call('set_argument', argument=name, value=value_rpc)
+    def set_argument(self, name_arg, value):
+        value_type = utils.value_field_definer(value)
+
+        if value_type != 'list' and value_type != 'tuple':
+            value_rpc = utils.get_rpc_value(type(value), value)
+            self._call('set_argument', argument=name_arg, value=value_rpc)
+        else:
+            raise Exception('Event argument type not supported')
 
 
 class Event(AbstractEvent):

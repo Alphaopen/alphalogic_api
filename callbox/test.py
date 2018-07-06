@@ -54,7 +54,7 @@ class MyRoot(Root):
     param_hid = ParameterDouble(value=2.2, access=hidden)
     param_vect = ParameterInt(value=(0, 1, 2, 3))
 
-    alarm = Event(('where', str),
+    alarm = Event(('where', unicode),
                   ('when', datetime.datetime),
                   ('why', int))
     simple_event = Event()
