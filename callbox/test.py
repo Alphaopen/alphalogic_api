@@ -139,6 +139,8 @@ class Controller(Device):
 # python loop
 adapter = MyRoot('localhost', 42001)
 
+
+'''
 assert adapter.param_string.val == 'noop'
 assert adapter.param_string.is_setup()
 assert not adapter.param_bool.val
@@ -149,6 +151,7 @@ assert adapter.param_int.is_read_only()
 assert adapter.param_double.val == 2.3
 assert adapter.param_double.is_runtime(), 'default wrong'
 assert adapter.param_double.is_read_write(), 'default wrong'
+'''
 #assert (datetime.datetime.now() - adapter.param_timestamp.val).total_seconds() < 10
 
 #assert adapter.param_vect.val == (0, 1, 2, 3)

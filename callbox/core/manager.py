@@ -12,13 +12,8 @@ from callbox.logger import log
 from callbox.core.tasks_pool import TasksPool
 from callbox.core.parameter import ParameterDouble
 from callbox.core.type_attributes import setup
+from callbox.core.utils import Exit, shutdown
 
-class Exit(Exception):
-    pass
-
-def shutdown(signum, frame):
-    log.info("Shutdown. Signal is {0}".format(signum))
-    raise Exit
 
 class AbstractManager(object):
 
@@ -219,6 +214,7 @@ class Manager(AbstractManager):
         list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
         for name in list_parameters_name_should_exists:
             parameter = object.__dict__[name]
+            parameter.parameter_name = name
             self.create_parameter(name, parameter, object_id, list_id_parameters_already_exists)
 
     def create_command(self, name, command, object_id):
@@ -268,6 +264,8 @@ class Manager(AbstractManager):
             g_thread.start()
             while True: #главный тред, который нужен для того, чтобы можно было завершит остальные
                 time.sleep(0.1) # цикл прерывается при посылке сигнала SIGINT
+                if not(g_thread.is_alive()):
+                    break
 
         except Exit:
             self.tasks_pool.shutdown_flag.set()
@@ -312,10 +310,15 @@ class Manager(AbstractManager):
                         else:
                             log.warn('Command {0} not found'.format(r.id))
 
+                    self.multi_stub.stub_adapter.ack(ack)
+
+                except Exit:
+                    self.tasks_pool.shutdown_flag.set()
+                    self.tasks_pool.operation_thread.join()
+                    self.multi_stub.channel.close()
+
                 except Exception, err:
                     log.error(str(err) + '\nstate=' + str(r.state))
-
-                self.multi_stub.stub_adapter.ack(ack)
 
         except Exception, err:
             log.error(str(err))
