@@ -186,7 +186,7 @@ class Manager(AbstractManager):
         parent_id = self.parent(object_id)
         parent = Manager.nodes[parent_id] if (parent_id in Manager.nodes) else None
         type_when_create = self.get_type_when_create(object_id)
-        class_name = self.dict_type_objects[type_when_create]
+        class_name = Manager.dict_type_objects[type_when_create]
         object = class_name(parent, type_when_create, object_id)
         Manager.nodes[object_id] = object
         self.prepare_for_work(object, object_id)

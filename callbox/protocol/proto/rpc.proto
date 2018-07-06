@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-option cc_enable_arenas = true;
-
 package adapter.rpc;
 
 
@@ -26,7 +24,6 @@ service ObjectService {
     rpc parent(ObjectRequest) returns (ObjectReply) {}
 
     rpc type(ObjectRequest) returns (ObjectReply) {}
-    rpc set_type(ObjectRequest) returns (ObjectReply) {}
 
     rpc create_string_parameter(ObjectRequest) returns (ObjectReply) {}
     rpc create_int_parameter(ObjectRequest) returns (ObjectReply) {}
@@ -69,7 +66,7 @@ service ObjectService {
 
 message ObjectRequest {
     uint64 id = 1; // rpc all
-    string type = 2; // rpc set_type
+    string type = 2; // rpc register_maker
     string name = 3; // rpc create_X_parameter, create_event, create_X_command, register_maker, parameter, event, command
     string reason = 4; // optional for rpc state_no_connection, state_connected, state_error, state_ok
 }
