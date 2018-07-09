@@ -227,8 +227,7 @@ class Manager(AbstractManager):
             (id_object=object_id, name=name)
         command.id = id_command
         for arg in command.arguments:
-            name_arg = arg
-            value_arg = command.arguments[arg]
+            name_arg, value_arg = arg
             command.set_argument(name_arg, value_arg)
         self.components[id_command] = command
 
@@ -242,8 +241,9 @@ class Manager(AbstractManager):
         event.id = self.create_event(id_object=object_id, name=name)
         getattr(event, event.priority.create_func)()
         event.clear()
-        for key, val in event.args.iteritems():
-            event.set_argument(key, utils.get_rpc_value(val))
+        for name_arg, value_type in event.arguments:
+            value_arg = utils.value_from_rpc(utils.get_rpc_value(value_type), value_type)
+            event.set_argument(name_arg, value_arg)
         self.components[event.id] = event
 
     def configure_events(self, object, object_id):

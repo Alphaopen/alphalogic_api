@@ -107,8 +107,6 @@ def get_rpc_value(value_type, value=None):
 
     if value_type == int:
         value_rpc.int64_value = value if value else 0
-    elif value_type == str:
-        value_rpc.string_value = value if value else ''
     elif value_type == float:
         value_rpc.double_value = value if value else 0.0
     elif value_type == datetime.datetime:
@@ -120,7 +118,9 @@ def get_rpc_value(value_type, value=None):
     elif value_type == bool:
         value_rpc.bool_value = value if value else False
     elif value_type == unicode:
-        value_rpc.string_value = value
+        value_rpc.string_value = value if value else ''
+    elif value_type == str:
+        raise Exception('\'str\' type using is prohibited')
 
     return value_rpc
 

@@ -4,6 +4,7 @@
 *.pyd
 *.idea
 *.log
+*.log.*
 build
 venv
 logs/
