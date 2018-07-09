@@ -158,6 +158,7 @@ class Parameter(AbstractParameter):
 
         def after_set_value():
             return
+
         self.callback = kwargs.get('callback', after_set_value)
 
         if not ('value_type' in kwargs):
@@ -178,12 +179,15 @@ class Parameter(AbstractParameter):
         if item == 'val':
             return self.get()
 
+        if item == 'callback':
+            return self.__dict__['callback']
+
     def __setattr__(self, attr, value):
         if self.parameter_name == 'name' and attr == 'val':#недопущение изменения значения у name
             log.error('Attempt to change name of device')
             raise Exit
 
-        if attr in ['value_type', 'visible', 'access', 'value', 'multi_stub', 'id', 'parameter_name']:
+        if attr in ['value_type', 'visible', 'access', 'value', 'multi_stub', 'id', 'parameter_name', 'callback']:
             self.__dict__[attr] = value
         elif attr == 'val':
             if value is not None:

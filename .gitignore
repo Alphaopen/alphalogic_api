@@ -6,3 +6,4 @@
 *.log
 build
 venv
+logs/

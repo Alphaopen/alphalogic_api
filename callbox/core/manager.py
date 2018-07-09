@@ -34,7 +34,7 @@ class AbstractManager(object):
 
     def type(self, id_object):
         answer = self._call('type', id_object)
-        return answer.yes
+        return answer.type
 
     def set_type(self, id_object, type_value):
         answer = self._call('set_type', id_object, type=type_value)
@@ -115,8 +115,8 @@ class AbstractManager(object):
         answer = self._call('is_removed', id_object)
         return answer.yes
 
-    def register_maker(self, id_object, name):
-        answer = self._call('register_maker', id_object, name=name)
+    def register_maker(self, id_object, name, type_str):
+        answer = self._call('register_maker', id_object, name=name, type=type_str)
         return answer.yes
 
     def unregister_all_makers(self, id_object):
@@ -148,7 +148,7 @@ class AbstractManager(object):
 
 
 class Manager(AbstractManager):
-    dict_type_objects = {}  # По type_when_create можно определить тип узла
+    dict_type_objects = {}  # По type можно определить соответсвующий класс для создания
     nodes = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
     components = {} #По id команды можно обратиться к командам
 
@@ -160,29 +160,30 @@ class Manager(AbstractManager):
     def configure_multi_stub(self, address):
         self.multi_stub = MultiStub(address)
 
-    def update_dict_type_objects(self, list_types):
-        if len(list_types) > 0:
-            for class_name, type_str in list_types:
-                if not(type_str in Manager.dict_type_objects):
-                    Manager.dict_type_objects[type_str] = class_name
-
     def prepare_for_work(self, object, id):
+        Manager.nodes[id] = object
         list_id_parameters_already_exists = self.parameters(id)
         self.configure_parameters(object, id, list_id_parameters_already_exists)
         self.configure_commands(object, id)
         self.configure_events(object, id)
         self.configure_run_function(object, id, list_id_parameters_already_exists)
 
-    def prepare_root_node(self, root_device, id_root, type_device_str):
-        Manager.nodes[id_root] = root_device
-        self.prepare_for_work(root_device, id_root)
+    def prepare_existing_devices(self, id_parent):
+        for child_id in self.children(id_parent):
+            class_name_str = self.get_type(child_id)
+            if class_name_str not in Manager.dict_type_objects:
+                Manager.dict_type_objects[class_name_str] = self.get_class_name_from_str(class_name_str)
+            class_name = Manager.dict_type_objects[class_name_str]
+            object = class_name(class_name_str, child_id)
+            self.prepare_for_work(object, child_id)
+            self.prepare_existing_devices(child_id)
 
     def create_object(self, object_id):
         parent_id = self.parent(object_id)
         parent = Manager.nodes[parent_id] if (parent_id in Manager.nodes) else None
-        type_when_create = self.get_type_when_create(object_id)
-        class_name = Manager.dict_type_objects[type_when_create]
-        object = class_name(parent, type_when_create, object_id)
+        class_name_str = self.get_type(object_id)
+        class_name = Manager.dict_type_objects[class_name_str]
+        object = class_name(class_name_str, object_id)
         Manager.nodes[object_id] = object
         self.prepare_for_work(object, object_id)
 
@@ -192,12 +193,13 @@ class Manager(AbstractManager):
         self.unregister_all_makers(id_object=id_device)
 
         for class_name, type_when_create in available_devices:
-            self.register_maker(id_object=id_device, name=type_when_create)
+            self.register_maker(id_object=id_device, name=type_when_create, type_str=class_name.__name__)
+            if class_name.__name__ not in Manager.dict_type_objects:
+                Manager.dict_type_objects[class_name.__name__] = class_name
 
-    def get_type_when_create(self, node_id):
-        id = self.parameter(id_object=node_id, name='type_when_create')
-        answer = self.multi_stub.parameter_call('get', id=id)
-        return utils.value_from_rpc(answer.value, unicode)
+    def get_type(self, node_id):
+        type_str = self.type(node_id)[7:] #cut string 'device.'
+        return type_str
 
     def create_parameter(self, name, parameter, object_id, list_id_parameters_already_exists):
         parameter.set_multi_stub(self.multi_stub)
@@ -209,6 +211,7 @@ class Manager(AbstractManager):
         getattr(parameter, parameter.access.create_func)()
         if not(id_parameter in list_id_parameters_already_exists):
             parameter.val = getattr(parameter, 'value', None)
+        self.components[id_parameter] = parameter
 
     def configure_parameters(self, object, object_id, list_id_parameters_already_exists):
         list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
@@ -241,6 +244,7 @@ class Manager(AbstractManager):
         event.clear()
         for key, val in event.args.iteritems():
             event.set_argument(key, utils.get_rpc_value(val))
+        self.components[event.id] = event
 
     def configure_events(self, object, object_id):
         list_events = filter(lambda attr: type(getattr(object, attr)) is Event, dir(object))

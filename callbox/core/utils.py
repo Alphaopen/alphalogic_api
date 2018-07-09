@@ -6,6 +6,7 @@ import callbox.protocol.rpc_pb2 as rpc_pb2
 from callbox.core.type_attributes import runtime, setup, hidden, common
 from callbox.core.type_attributes import read_only, read_write
 from callbox.logger import log
+import inspect
 
 
 def value_type_field_definer(value_type):
@@ -150,3 +151,11 @@ class Exit(Exception):
 def shutdown(signum, frame):
     log.info("Shutdown. Signal is {0}".format(signum))
     raise Exit
+
+def get_class_name_from_str(self, class_name_str):
+    frame = inspect.currentframe()
+    while frame:
+        if class_name_str in frame.f_locals:
+            return frame.f_locals[class_name_str]
+        frame = frame.f_back
+    raise Exception('{0} is not a class of device'.format(class_name_str))

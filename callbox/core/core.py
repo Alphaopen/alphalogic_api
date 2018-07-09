@@ -27,7 +27,7 @@ class Device(object):
     """
     manager = Manager()
 
-    def __init__(self, parent, type_device, id_device):
+    def __init__(self, type_device, id_device):
         self.__dict__['log'] = log
         self.__dict__['type'] = type_device
         self.__dict__['id'] = id_device
@@ -53,9 +53,6 @@ class Device(object):
         is_runnable = lambda x: callable(getattr(self, x)) and not x.startswith('_') and\
                                 hasattr(getattr(self, x), 'runnable')
         self.__dict__['run_function_names'] = filter(is_runnable, dir(self))
-
-        #обновление словаря типа устройств
-        Device.manager.update_dict_type_objects(self.handle_get_available_children())
 
     @classmethod
     def create_default_parameters(cls):
@@ -91,10 +88,10 @@ class Root(Device):
     def __init__(self, host, port):
         self.manager.configure_multi_stub(host + ':' + str(port))
         id_root = self.manager.root()
-        type_device = self.manager.get_type_when_create(id_root)
-        super(Root, self).__init__(None, type_device, id_root)
-        #self.manager.
-        self.manager.prepare_root_node(self, id_root, type_device)
+        type_device = self.manager.get_type(id_root)
+        super(Root, self).__init__(type_device, id_root)
+        self.manager.prepare_for_work(self, id_root)
+        self.manager.prepare_existing_devices(id_root)
 
     def join(self):
         self.manager.join()
