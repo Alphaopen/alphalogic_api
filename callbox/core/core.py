@@ -90,6 +90,7 @@ class Root(Device):
         id_root = self.manager.root()
         type_device = self.manager.get_type(id_root)
         super(Root, self).__init__(type_device, id_root)
+        Manager.components_for_device[id_root] = []
         self.manager.prepare_for_work(self, id_root)
         self.manager.prepare_existing_devices(id_root)
 

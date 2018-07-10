@@ -150,7 +150,8 @@ class AbstractManager(object):
 class Manager(AbstractManager):
     dict_type_objects = {}  # По type можно определить соответсвующий класс для создания
     nodes = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
-    components = {} #По id команды можно обратиться к командам
+    components = {} #По id команды можно обратиться к параметрам, событиям, командам
+    components_for_device = {} #По id устройства можно определить id его компонент
 
     def __init__(self):
         signal.signal(signal.SIGTERM, shutdown)
@@ -175,6 +176,7 @@ class Manager(AbstractManager):
                 Manager.dict_type_objects[class_name_str] = utils.get_class_name_from_str(class_name_str)
             class_name = Manager.dict_type_objects[class_name_str]
             object = class_name(class_name_str, child_id)
+            Manager.components_for_device[child_id] = []
             self.prepare_for_work(object, child_id)
             self.prepare_existing_devices(child_id)
 
@@ -185,6 +187,7 @@ class Manager(AbstractManager):
         class_name = Manager.dict_type_objects[class_name_str]
         object = class_name(class_name_str, object_id)
         Manager.nodes[object_id] = object
+        Manager.components_for_device[object_id] = []
         self.prepare_for_work(object, object_id)
 
     def get_available_children(self, id_device):
@@ -211,7 +214,8 @@ class Manager(AbstractManager):
         getattr(parameter, parameter.access.create_func)()
         if not(id_parameter in list_id_parameters_already_exists):
             parameter.val = getattr(parameter, 'value', None)
-        self.components[id_parameter] = parameter
+        Manager.components[id_parameter] = parameter
+        Manager.components_for_device[object_id].append(id_parameter)
 
     def configure_parameters(self, object, object_id, list_id_parameters_already_exists):
         list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
@@ -229,7 +233,8 @@ class Manager(AbstractManager):
         for arg in command.arguments:
             name_arg, value_arg = arg
             command.set_argument(name_arg, value_arg)
-        self.components[id_command] = command
+        Manager.components[id_command] = command
+        Manager.components_for_device[object_id].append(id_command)
 
     def configure_commands(self, object, object_id):
         for name in object.commands:
@@ -244,7 +249,8 @@ class Manager(AbstractManager):
         for name_arg, value_type in event.arguments:
             value_arg = utils.value_from_rpc(utils.get_rpc_value(value_type), value_type)
             event.set_argument(name_arg, value_arg)
-        self.components[event.id] = event
+        Manager.components[event.id] = event
+        Manager.components_for_device[object_id].append(event.id)
 
     def configure_events(self, object, object_id):
         list_events = filter(lambda attr: type(getattr(object, attr)) is Event, dir(object))
@@ -292,10 +298,13 @@ class Manager(AbstractManager):
 
                     elif r.state == rpc_pb2.AdapterStream.BEFORE_REMOVING_OBJECT:
                         log.info('Remove device {0}'.format(r.id))
-                        if r.id in self.nodes:
-                            self.nodes[r.id].handle_before_remove_device()
-                            del self.nodes[r.id]
-                            # TODO удалить компоненты из self.components
+                        if r.id in Manager.nodes:
+                            Manager.nodes[r.id].handle_before_remove_device()
+                            def delete_id(id):
+                                del Manager.components[id]
+                            map(delete_id, Manager.components_for_device[r.id])
+                            del Manager.components_for_device[r.id]
+                            del Manager.nodes[r.id]
                             log.info('Device {0} removed'.format(r.id))
                         else:
                             log.warn('Device {0} not found'.format(r.id))
@@ -305,12 +314,12 @@ class Manager(AbstractManager):
                         self.get_available_children(r.id)
 
                     elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
-                        if r.id in self.components:  # есть параметры, которые по умолчанию в адаптере
-                            self.components[r.id].callback()
+                        if r.id in Manager.components:  # есть параметры, которые по умолчанию в адаптере
+                            Manager.components[r.id].callback()
 
                     elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
-                        if r.id in self.components:
-                            self.components[r.id].call_function()
+                        if r.id in Manager.components:
+                            Manager.components[r.id].call_function()
                         else:
                             log.warn('Command {0} not found'.format(r.id))
 
