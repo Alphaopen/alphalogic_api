@@ -12,7 +12,7 @@
 
 '''
 from __future__ import unicode_literals
-
+from threading import Lock
 from callbox.core.parameter import Parameter, ParameterString, ParameterBool, ParameterInt
 from callbox.core.type_attributes import runtime, setup, hidden, common
 from callbox.core.type_attributes import read_only, read_write
@@ -31,7 +31,9 @@ class Device(object):
         self.__dict__['log'] = log
         self.__dict__['type'] = type_device
         self.__dict__['id'] = id_device
-        self.__dict__["commands"] = {}
+        self.__dict__['commands'] = {}
+        self.__dict__['flag_removing'] = False
+        self.__dict__['mutex'] = Lock()
 
         #Параметры
         list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
@@ -67,7 +69,7 @@ class Device(object):
         cls.error = ParameterBool(visible=common, access=read_write)
         cls.number_of_errors = ParameterInt(visible=setup, access=read_write)
         cls.status = ParameterString(visible=common, access=read_write)
-
+    '''
     def __getattr__(self, name):
         return self.__dict__[name]
 
@@ -76,7 +78,7 @@ class Device(object):
             self.parameters.append(name)
             value.name = name
             self.__dict__[name] = value
-
+    '''
     def handle_get_available_children(self):
         return []
 

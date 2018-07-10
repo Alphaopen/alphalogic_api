@@ -299,13 +299,15 @@ class Manager(AbstractManager):
                     elif r.state == rpc_pb2.AdapterStream.BEFORE_REMOVING_OBJECT:
                         log.info('Remove device {0}'.format(r.id))
                         if r.id in Manager.nodes:
-                            Manager.nodes[r.id].handle_before_remove_device()
-                            def delete_id(id):
-                                del Manager.components[id]
-                            map(delete_id, Manager.components_for_device[r.id])
-                            del Manager.components_for_device[r.id]
-                            del Manager.nodes[r.id]
-                            log.info('Device {0} removed'.format(r.id))
+                            with Manager.nodes[r.id].mutex:
+                                Manager.nodes[r.id].flag_removing = True
+                                Manager.nodes[r.id].handle_before_remove_device()
+                                def delete_id(id):
+                                    del Manager.components[id]
+                                map(delete_id, Manager.components_for_device[r.id])
+                                del Manager.components_for_device[r.id]
+                                del Manager.nodes[r.id]
+                                log.info('Device {0} removed'.format(r.id))
                         else:
                             log.warn('Device {0} not found'.format(r.id))
 
