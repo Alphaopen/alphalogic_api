@@ -152,7 +152,8 @@ def shutdown(signum, frame):
     log.info("Shutdown. Signal is {0}".format(signum))
     raise Exit
 
-def get_class_name_from_str(self, class_name_str):
+
+def get_class_name_from_str(class_name_str):
     frame = inspect.currentframe()
     while frame:
         if class_name_str in frame.f_locals:

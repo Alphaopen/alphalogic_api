@@ -136,7 +136,6 @@ class MyRoot(Root):
         print str(self.id) + ' b_run'
 
 
-
 class Controller(Device):
     # Parameters:
     displayName = ParameterString()
@@ -175,7 +174,6 @@ assert adapter.param_int.is_read_only()
 assert adapter.param_double.val == 2.3
 assert adapter.param_double.is_runtime(), 'default wrong'
 assert adapter.param_double.is_read_write(), 'default wrong'
-'''
 #assert (datetime.datetime.now() - adapter.param_timestamp.val).total_seconds() < 10
 
 #assert adapter.param_vect.val == (0, 1, 2, 3)
@@ -193,6 +191,8 @@ assert adapter.param_double.val == 5.0
 
 
 #adapter.relax(1, 2, 3, 4)
+'''
+
 adapter.simple_event.emit()
 
 adapter.alarm.set_time(int(time.time()) * 1000 - 100000)

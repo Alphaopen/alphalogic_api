@@ -172,7 +172,7 @@ class Manager(AbstractManager):
         for child_id in self.children(id_parent):
             class_name_str = self.get_type(child_id)
             if class_name_str not in Manager.dict_type_objects:
-                Manager.dict_type_objects[class_name_str] = self.get_class_name_from_str(class_name_str)
+                Manager.dict_type_objects[class_name_str] = utils.get_class_name_from_str(class_name_str)
             class_name = Manager.dict_type_objects[class_name_str]
             object = class_name(class_name_str, child_id)
             self.prepare_for_work(object, child_id)
@@ -314,8 +314,6 @@ class Manager(AbstractManager):
                         else:
                             log.warn('Command {0} not found'.format(r.id))
 
-                    self.multi_stub.stub_adapter.ack(ack)
-
                 except Exit:
                     self.tasks_pool.shutdown_flag.set()
                     self.tasks_pool.operation_thread.join()
@@ -323,6 +321,10 @@ class Manager(AbstractManager):
 
                 except Exception, err:
                     log.error(str(err) + '\nstate=' + str(r.state))
+
+                finally:
+                    self.multi_stub.stub_adapter.ack(ack)
+
 
         except Exception, err:
             log.error(str(err))
