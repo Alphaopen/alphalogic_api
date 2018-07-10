@@ -54,6 +54,9 @@ class AbstractCommand(object):
         value_rpc = utils.get_rpc_value(type(value), value)
         self._call('set_result', value=value_rpc)
 
+    def set_exception(self, reason):
+        self._call('set_exception', exception=reason)
+
     def clear(self):
         self._call('clear')
 
@@ -104,17 +107,23 @@ class Command(AbstractCommand):
         self.multi_stub = multi_stub
 
     def call_function(self):
-        arg_list = self.argument_list()
-        function_dict = {}
-        info = []
-        for name_arg in arg_list:
-            type_arg = self.arguments_type[name_arg]
-            function_dict[name_arg] = self.argument(name_arg, type_arg)
-            info.append('{0}({1}): {2}'.format(name_arg, type_arg, function_dict[name_arg]))
+        try:
+            arg_list = self.argument_list()
+            function_dict = {}
+            info = []
+            for name_arg in arg_list:
+                type_arg = self.arguments_type[name_arg]
+                function_dict[name_arg] = self.argument(name_arg, type_arg)
+                info.append('{0}({1}): {2}'.format(name_arg, type_arg, function_dict[name_arg]))
 
-        log.info('Execute command \'{0}\' with arguments [{1}] from device \'{2}\''
-                 .format(self.get_name(), '; '.join(info), self.device.id))
-        self.function(self.device, **function_dict)
+            log.info('Execute command \'{0}\' with arguments [{1}] from device \'{2}\''
+                     .format(self.get_name(), '; '.join(info), self.device.id))
+            self.function(self.device, **function_dict)
+
+        except Exception, err:
+            reason = utils.decode_string(err)
+            log.info('Command \'{0}\' raise exception: '.format(self.get_name(), reason))
+            self.set_exception(reason)
 
 
 def command_preparation(wrapped, func, **kwargs_c): #В этой функции задаются возвращаемое значение команды и ее аргументы

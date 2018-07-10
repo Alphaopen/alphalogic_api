@@ -225,6 +225,7 @@ service CommandService {
     rpc is_bool(CommandRequest) returns (CommandReply) {}
 
     rpc set_result(CommandRequest) returns (CommandReply) {}
+    rpc set_exception(CommandRequest) returns (CommandReply) {}
 
     // arguments
     rpc clear(CommandRequest) returns (CommandReply) {} // remove command arguments (all or one)
@@ -240,6 +241,7 @@ message CommandRequest {
     uint64 id = 1; // rpc all
     string display_name = 2; // rpc set_display_name
     string desc = 3; // rpc set_desc
+    string exception = 4; // rpc set_exception
 
     string argument = 5; // rpc argument, set_argument, has_argument
     Value value = 6; // prc set_argument, set_result

@@ -334,7 +334,6 @@ class Manager(AbstractManager):
                 finally:
                     self.multi_stub.stub_adapter.ack(ack)
 
-
         except Exception, err:
             log.error(str(err))
 

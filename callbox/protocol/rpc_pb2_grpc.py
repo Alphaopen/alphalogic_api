@@ -1606,6 +1606,11 @@ class CommandServiceStub(object):
         request_serializer=rpc__pb2.CommandRequest.SerializeToString,
         response_deserializer=rpc__pb2.CommandReply.FromString,
         )
+    self.set_exception = channel.unary_unary(
+        '/adapter.rpc.CommandService/set_exception',
+        request_serializer=rpc__pb2.CommandRequest.SerializeToString,
+        response_deserializer=rpc__pb2.CommandReply.FromString,
+        )
     self.clear = channel.unary_unary(
         '/adapter.rpc.CommandService/clear',
         request_serializer=rpc__pb2.CommandRequest.SerializeToString,
@@ -1714,6 +1719,13 @@ class CommandServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def set_exception(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def clear(self, request, context):
     """arguments
     """
@@ -1804,6 +1816,11 @@ def add_CommandServiceServicer_to_server(servicer, server):
       ),
       'set_result': grpc.unary_unary_rpc_method_handler(
           servicer.set_result,
+          request_deserializer=rpc__pb2.CommandRequest.FromString,
+          response_serializer=rpc__pb2.CommandReply.SerializeToString,
+      ),
+      'set_exception': grpc.unary_unary_rpc_method_handler(
+          servicer.set_exception,
           request_deserializer=rpc__pb2.CommandRequest.FromString,
           response_serializer=rpc__pb2.CommandReply.SerializeToString,
       ),
