@@ -134,7 +134,7 @@ class MyRoot(Root):
     @run(period_b=24)
     def run_one(self):
         print str(self.id) + ' b_run'
-
+    
 
 class Controller(Device):
     # Parameters:
@@ -144,6 +144,7 @@ class Controller(Device):
     mode = ParameterBool(visible=setup, value=({'On': True}, {'Off': False}))
     version = Parameter(value_type=int, visible=common)
     counter = ParameterDouble(value=1.0, access=read_only)
+    counter_spec = ParameterDouble(value=1.0, access=read_write)
 
     @command(result_type=bool)
     def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
@@ -152,6 +153,8 @@ class Controller(Device):
     @run(period=20)
     def run_third(self):
         print str(self.id)+' c_run'
+        val = self.counter_spec.val
+        self.counter_spec.val = val+1
 
     def handle_get_available_children(self):
         return [

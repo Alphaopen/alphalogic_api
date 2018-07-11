@@ -220,7 +220,8 @@ class Manager(AbstractManager):
     def configure_parameters(self, object, object_id, list_id_parameters_already_exists):
         list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
         for name in list_parameters_name_should_exists:
-            parameter = object.__dict__[name]
+            parameter = object.__dict__[name].get_copy()
+            object.__dict__[name] = parameter
             parameter.parameter_name = name
             self.create_parameter(name, parameter, object_id, list_id_parameters_already_exists)
 
@@ -266,6 +267,7 @@ class Manager(AbstractManager):
             parameter_period = ParameterDouble(value=period, visible=setup)
             object.__dict__[period_name] = parameter_period
             self.create_parameter(period_name, parameter_period, object.id, list_id_parameters_already_exists)
+            period = parameter_period.val # Если параметр все-таки существует
             self.tasks_pool.add_task(time_stamp+period, getattr(object, name))
 
     def join(self):

@@ -89,7 +89,6 @@ def run(*argv_r, **kwargs_r):
                     log.info('run function {0} of device {2} was executed for {1} seconds'.
                              format(func.func_name, time_spend, device.id))
 
-
                     period = getattr(device, kwargs_r.keys()[0]).val
                     if time_spend < period:
                         device.manager.tasks_pool.add_task(time_finish+period-time_spend,

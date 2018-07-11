@@ -179,8 +179,8 @@ class Parameter(AbstractParameter):
         if item == 'val':
             return self.get()
 
-        if item == 'callback':
-            return self.__dict__['callback']
+        if item in self.__dict__:
+            return self.__dict__[item]
 
     def __setattr__(self, attr, value):
         if self.parameter_name == 'name' and attr == 'val':#недопущение изменения значения у name
@@ -196,6 +196,10 @@ class Parameter(AbstractParameter):
                 else: #для одного значения
                     self.set(value)
             return self
+
+    def get_copy(self):
+        return Parameter(value_type=self.value_type, value=self.value, visible=self.visible,
+                         access=self.access, callback=self.callback)
 
 
 class ParameterBool(Parameter):
