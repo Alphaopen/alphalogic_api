@@ -164,10 +164,17 @@ class Manager(AbstractManager):
     def prepare_for_work(self, object, id):
         Manager.nodes[id] = object
         list_id_parameters_already_exists = self.parameters(id)
-        self.configure_parameters(object, id, list_id_parameters_already_exists)
+        list_parameters_name_already_exists = map(lambda id: self.multi_stub.parameter_call('name', 'name', id=id),
+                                                 list_id_parameters_already_exists)
+        list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
+        list_parameters_name_should_exists = list(set(list_parameters_name_should_exists)
+                                                  - set(list_parameters_name_already_exists))
+        self.configure_run_function(object, id, list_id_parameters_already_exists)
+        self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_should_exists)
+        self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_already_exists)
         self.configure_commands(object, id)
         self.configure_events(object, id)
-        self.configure_run_function(object, id, list_id_parameters_already_exists)
+
 
     def prepare_existing_devices(self, id_parent):
         for child_id in self.children(id_parent):
@@ -217,9 +224,8 @@ class Manager(AbstractManager):
         Manager.components[id_parameter] = parameter
         Manager.components_for_device[object_id].append(id_parameter)
 
-    def configure_parameters(self, object, object_id, list_id_parameters_already_exists):
-        list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
-        for name in list_parameters_name_should_exists:
+    def configure_parameters(self, object, object_id, list_id_parameters_already_exists, list_names):
+        for name in list_names:
             parameter = object.__dict__[name].get_copy()
             object.__dict__[name] = parameter
             parameter.parameter_name = name

@@ -27,6 +27,18 @@ class Device(object):
     """
     manager = Manager()
 
+    name = ParameterString(visible=setup, access=read_only)
+    displayName = ParameterString(visible=setup, access=read_write)
+    desc = ParameterString(visible=setup, access=read_write)
+    type_when_create = ParameterString(visible=hidden, access=read_write)
+    isService = ParameterBool(visible=common, access=read_write)
+    version = ParameterString(visible=setup, access=read_only)
+    connected = ParameterBool(visible=common, access=read_write)
+    ready_to_work = ParameterBool(visible=common, access=read_write)
+    error = ParameterBool(visible=common, access=read_write)
+    number_of_errors = ParameterInt(visible=setup, access=read_write)
+    status = ParameterString(visible=common, access=read_write)
+
     def __init__(self, type_device, id_device):
         self.__dict__['log'] = log
         self.__dict__['type'] = type_device
@@ -56,19 +68,6 @@ class Device(object):
                                 hasattr(getattr(self, x), 'runnable')
         self.__dict__['run_function_names'] = filter(is_runnable, dir(self))
 
-    @classmethod
-    def create_default_parameters(cls):
-        cls.name = ParameterString(visible=setup, access=read_only)
-        cls.displayName = ParameterString(visible=setup, access=read_write)
-        cls.desc = ParameterString(visible=setup, access=read_write)
-        cls.type_when_create = ParameterString(visible=hidden, access=read_write)
-        cls.isService = ParameterBool(visible=common, access=read_write)
-        cls.version = ParameterString(visible=setup, access=read_only)
-        cls.connected = ParameterBool(visible=common, access=read_write)
-        cls.ready_to_work = ParameterBool(visible=common, access=read_write)
-        cls.error = ParameterBool(visible=common, access=read_write)
-        cls.number_of_errors = ParameterInt(visible=setup, access=read_write)
-        cls.status = ParameterString(visible=common, access=read_write)
     '''
     def __getattr__(self, name):
         return self.__dict__[name]
@@ -99,6 +98,3 @@ class Root(Device):
     def join(self):
         self.manager.join()
 
-
-print "Device default values"
-Device.create_default_parameters()

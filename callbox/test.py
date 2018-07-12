@@ -84,6 +84,7 @@ class MyRoot(Root):
     @command(result_type=bool)
     def cmd_alarm(self, where='here', when=datetime.datetime.now(), why=2):
         self.alarm.emit(where=where, when=when, why=why)
+        self.displayName.val = 'asdasd'
         return True
 
     @command(result_type=unicode)
