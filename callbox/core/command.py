@@ -114,6 +114,7 @@ class Command(AbstractCommand):
     def call_function(self):
         try:
             arg_list = self.argument_list()
+            # self.clear() TODO очищать аргументы при подключении стаба? Что если удалили аргумент
             function_dict = {}
             info = []
             for name_arg in arg_list:

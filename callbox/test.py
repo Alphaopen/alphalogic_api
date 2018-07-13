@@ -14,7 +14,7 @@ from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
 from callbox.core import utils
 from callbox.core.run_function import run
-from logger import host, port
+from callbox import host, port
 
 '''
 Не забыть важные моменты:
@@ -113,7 +113,7 @@ class MyRoot(Root):
         return ret
 
     @command(result_type=unicode)
-    def cmd_return_unicode(self, which5=(('On', True), ('Off', False))):
+    def cmd_return_unicode(self):
         return 'некоторый текст'
 
     @command(result_type=datetime.datetime)
