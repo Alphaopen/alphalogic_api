@@ -20,6 +20,7 @@ from callbox.core.command import Command
 from callbox.core.manager import Manager
 from callbox.logger import log
 
+
 class Device(object):
     """
     type - ссылка на реализацию

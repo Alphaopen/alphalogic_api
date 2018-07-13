@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import grpc
+from callbox.logger import log
 
 from callbox.protocol.rpc_pb2 import (
 ObjectRequest,
@@ -63,12 +64,12 @@ class MultiStub(object):
         return self.call_helper(*args, fun_set=MultiStub.command_fun_set, request=command_w, stub=self.stub_command)
 
     def call_helper(self, function_name, *args, **kwargs):
-        if function_name in kwargs['fun_set']:  # function_name - название функции, проверка на допустимость
+        if function_name in kwargs['fun_set']:  # function_name - check availability
             answer = getattr(kwargs['stub'], function_name)(kwargs['request'])
-            return reduce(lambda acc, x: getattr(answer, x), args, answer)  # рекурсивный поиск
+            return reduce(lambda acc, x: getattr(answer, x), args, answer)  # recursive search
         else:
             raise Exception('{0} not found in {1}'.format(function_name, kwargs['fun_set']))
 
 
-print "static MultiStub initialization"
+log.info("static MultiStub initialization")
 MultiStub.static_initialization()
