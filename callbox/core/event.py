@@ -90,11 +90,36 @@ class AbstractEvent(object):
 
 class Event(AbstractEvent):
 
-    def __init__(self, *args):
+    def __init__(self, priority, *args):
         self.arguments = args
         self.id = None
-        self.priority = Priority.major
+        self.priority = priority
         self.multi_stub = None
 
     def set_multi_stub(self, multi_stub):
         self.multi_stub = multi_stub
+
+
+class TrivialEvent(Event):
+    def __new__(cls, *args):
+        return Event(Priority.trivial, *args)
+
+
+class MinorEvent(Event):
+    def __new__(cls, *args):
+        return Event(Priority.minor, *args)
+
+
+class MajorEvent(Event):
+    def __new__(cls, *args):
+        return Event(Priority.major, *args)
+
+
+class CriticalEvent(Event):
+    def __new__(cls, *args):
+        return Event(Priority.critical, *args)
+
+
+class BlokerEvent(Event):
+    def __new__(cls, *args):
+        return Event(Priority.blocker, *args)

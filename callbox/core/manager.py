@@ -11,7 +11,7 @@ from callbox.core import utils
 from callbox.logger import log
 from callbox.core.tasks_pool import TasksPool
 from callbox.core.parameter import ParameterDouble
-from callbox.core.utils import Exit, shutdown
+from callbox.core.utils import Exit, shutdown, decode_string
 from callbox.core.type_attributes import Visible
 
 
@@ -282,7 +282,7 @@ class Manager(AbstractManager):
         try:
             g_thread = Thread(target=self.grpc_thread)
             g_thread.start()
-            while True:  # главный тред, который нужен для того, чтобы можно было завершит остальные
+            while True:   # главный тред, который нужен для того, чтобы можно было завершит остальные
                 time.sleep(0.1)  # цикл прерывается при посылке сигнала SIGINT
                 if not (g_thread.is_alive()):
                     break
@@ -329,10 +329,14 @@ class Manager(AbstractManager):
 
                     elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
                         if r.id in Manager.components:  # есть параметры, которые по умолчанию в адаптере
-                            Manager.components[r.id].callback()
+
+                            param = Manager.components[r.id]  # TODO check
+                            device = Manager.nodes[param.owner()]  # TODO check
+                            Manager.components[r.id].callback(device, param)
 
                     elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
                         if r.id in Manager.components:
+
                             Manager.components[r.id].call_function()
                         else:
                             log.warn('Command {0} not found'.format(r.id))
@@ -343,10 +347,10 @@ class Manager(AbstractManager):
                     self.multi_stub.channel.close()
 
                 except Exception, err:
-                    log.error(str(err) + '\nstate=' + str(r.state))
+                    log.error(decode_string(err) + '\nstate=' + decode_string(r.state))
 
                 finally:
                     self.multi_stub.stub_adapter.ack(ack)
 
         except Exception, err:
-            log.error(str(err))
+            log.error(decode_string(err))

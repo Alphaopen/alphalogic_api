@@ -9,12 +9,11 @@ from callbox.core.type_attributes import Visible, Access, Priority
 
 from callbox.core.core import Root, Device
 from callbox.core.command import command
-from callbox.core.event import Event
+from callbox.core.event import MajorEvent
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
 from callbox.core import utils
 from callbox.core.run_function import run
-
 
 '''
 Не забыть важные моменты:
@@ -37,13 +36,15 @@ from callbox.core.run_function import run
 '''
 
 
-def handle_after_set_double():
-    print 'double changed'
+
+def handle_after_set_double(node, parameter):
+    node.log.info('double changed')
+    node.after_set_value_test_event.emit(value=parameter.val)
 
 
 class MyRoot(Root):
-    #name = ParameterString(value='RootNode')
-    #displayName = ParameterString(value='RootNode')
+    name = ParameterString(value='RootNode')
+    displayName = ParameterString(value='RootNode')
 
     param_string = ParameterString(value='noop', visible=Visible.setup)
     param_bool = ParameterBool(value=False, visible=Visible.common)
@@ -53,10 +54,11 @@ class MyRoot(Root):
     param_hid = ParameterDouble(value=2.2, visible=Visible.hidden)
     param_vect = ParameterInt(value=(0, 1, 2, 3))
 
-    alarm = Event(('where', unicode),
-                  ('when', datetime.datetime),
-                  ('why', int))
-    simple_event = Event()
+    alarm = MajorEvent(('where', unicode),
+                       ('when', datetime.datetime),
+                       ('why', int))
+    simple_event = MajorEvent()
+    after_set_value_test_event = MajorEvent(('value', float))
 
     def handle_create(self):
         pass
@@ -83,7 +85,6 @@ class MyRoot(Root):
     @command(result_type=bool)
     def cmd_alarm(self, where='here', when=datetime.datetime.now(), why=2):
         self.alarm.emit(where=where, when=when, why=why)
-        self.displayName.val = 'asdasd'
         return True
 
     @command(result_type=unicode)
@@ -121,19 +122,17 @@ class MyRoot(Root):
 
     @command(result_type=bool)
     def relax(self, where='room', why=42, which=(1, 2, 3), which2=({'On': True}, {'Off': False})):
-        print where
-        print why
-        print which
-        print which2
+        self.log.info(u'where=' + where + u'; why=' + unicode(why)
+                      + u'; which=' + unicode(which) + u'; which2=' + unicode(which2))
         return True
 
     @run(period_a=10)
     def run_two(self):
-        print str(self.id) + ' a_run'
+        self.log.info(unicode(self.id) + ' a_run')
 
     @run(period_b=24)
     def run_one(self):
-        print str(self.id) + ' b_run'
+        self.log.info(unicode(self.id) + ' b_run')
     
 
 class Controller(Device):
@@ -152,7 +151,7 @@ class Controller(Device):
 
     @run(period=20)
     def run_third(self):
-        print str(self.id)+' c_run'
+        self.log.info(unicode(self.id) + ' c_run')
         val = self.counter_spec.val
         self.counter_spec.val = val+1
 
