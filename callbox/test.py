@@ -14,6 +14,7 @@ from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
 from callbox.core import utils
 from callbox.core.run_function import run
+from logger import host, port
 
 '''
 Не забыть важные моменты:
@@ -163,7 +164,7 @@ class Controller(Device):
 
 
 # python loop
-adapter = MyRoot('localhost', 42001)
+adapter = MyRoot(host, port)
 
 
 '''
