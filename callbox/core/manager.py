@@ -11,8 +11,8 @@ from callbox.core import utils
 from callbox.logger import log
 from callbox.core.tasks_pool import TasksPool
 from callbox.core.parameter import ParameterDouble
-from callbox.core.type_attributes import setup
 from callbox.core.utils import Exit, shutdown
+from callbox.core.type_attributes import Visible
 
 
 class AbstractManager(object):
@@ -169,12 +169,12 @@ class Manager(AbstractManager):
         list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
         list_parameters_name_should_exists = list(set(list_parameters_name_should_exists)
                                                   - set(list_parameters_name_already_exists))
+        #order of call below function is important
         self.configure_run_function(object, id, list_id_parameters_already_exists)
         self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_should_exists)
         self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_already_exists)
         self.configure_commands(object, id)
         self.configure_events(object, id)
-
 
     def prepare_existing_devices(self, id_parent):
         for child_id in self.children(id_parent):
@@ -211,7 +211,11 @@ class Manager(AbstractManager):
         type_str = self.type(node_id)[7:] #cut string 'device.'
         return type_str
 
-    def create_parameter(self, name, parameter, object_id, list_id_parameters_already_exists):
+    def create_parameter(self, name, object, object_id, list_id_parameters_already_exists, is_copy=True, parameter=None):
+        if is_copy:
+            parameter = object.__dict__[name].get_copy()
+        object.__dict__[name] = parameter
+        parameter.parameter_name = name
         parameter.set_multi_stub(self.multi_stub)
         value_type = parameter.value_type
         id_parameter = getattr(self, utils.create_parameter_definer(str(value_type))) \
@@ -226,10 +230,7 @@ class Manager(AbstractManager):
 
     def configure_parameters(self, object, object_id, list_id_parameters_already_exists, list_names):
         for name in list_names:
-            parameter = object.__dict__[name].get_copy()
-            object.__dict__[name] = parameter
-            parameter.parameter_name = name
-            self.create_parameter(name, parameter, object_id, list_id_parameters_already_exists)
+            self.create_parameter(name, object, object_id, list_id_parameters_already_exists)
 
     def create_command(self, name, command, object_id):
         command.set_multi_stub(self.multi_stub)
@@ -270,9 +271,9 @@ class Manager(AbstractManager):
             time_stamp = time.time()
             period_name = getattr(object, name).period_name
             period = getattr(object, name).period_default_value
-            parameter_period = ParameterDouble(value=period, visible=setup)
-            object.__dict__[period_name] = parameter_period
-            self.create_parameter(period_name, parameter_period, object.id, list_id_parameters_already_exists)
+            parameter_period = ParameterDouble(value=period, visible=Visible.setup)
+            self.create_parameter(period_name, object, object.id, list_id_parameters_already_exists,
+                                  is_copy=False, parameter=parameter_period)
             period = parameter_period.val # Если параметр все-таки существует
             self.tasks_pool.add_task(time_stamp+period, getattr(object, name))
 

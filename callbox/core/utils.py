@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 import locale
 import datetime
 import callbox.protocol.rpc_pb2 as rpc_pb2
-from callbox.core.type_attributes import runtime, setup, hidden, common
-from callbox.core.type_attributes import read_only, read_write
+from callbox.core.type_attributes import Visible, Access, Priority
 from callbox.logger import log
 import inspect
 

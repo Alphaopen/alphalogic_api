@@ -5,7 +5,7 @@ import datetime
 
 import callbox.protocol.rpc_pb2 as rpc_pb2
 
-from callbox.core.type_attributes import runtime, setup, hidden, common, read_only, read_write
+from callbox.core.type_attributes import Visible, Access
 from callbox.core.multistub import MultiStub
 from callbox.core import utils
 from callbox.logger import log
@@ -153,8 +153,8 @@ class Parameter(AbstractParameter):
         for arg in kwargs:
             self.__dict__[arg] = kwargs[arg]
 
-        self.visible = kwargs.get('visible', runtime)
-        self.access = kwargs.get('access', read_write)
+        self.visible = kwargs.get('visible', Visible.runtime)
+        self.access = kwargs.get('access', Access.read_write)
 
         def after_set_value():
             return
@@ -183,7 +183,7 @@ class Parameter(AbstractParameter):
             return self.__dict__[item]
 
     def __setattr__(self, attr, value):
-        if self.parameter_name.lower() == 'name' and attr == 'val':#недопущение изменения значения у name
+        if attr == 'val'and self.parameter_name.lower() == 'name':#недопущение изменения значения у name
             log.error('Attempt to change name of device')
             raise Exit
 

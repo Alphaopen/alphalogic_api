@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from callbox.core import utils
-from callbox.core.type_attributes import major
+from callbox.core.type_attributes import Priority
 import callbox.protocol.rpc_pb2 as rpc_pb2
 import datetime
 import inspect
@@ -95,7 +95,7 @@ class Event(AbstractEvent):
     def __init__(self, *args):
         self.arguments = args
         self.id = None
-        self.priority = major
+        self.priority = Priority.major
         self.multi_stub = None
 
     def set_multi_stub(self, multi_stub):

@@ -14,8 +14,7 @@
 from __future__ import unicode_literals
 from threading import Lock
 from callbox.core.parameter import Parameter, ParameterString, ParameterBool, ParameterInt
-from callbox.core.type_attributes import runtime, setup, hidden, common
-from callbox.core.type_attributes import read_only, read_write
+from callbox.core.type_attributes import Visible, Access
 from callbox.core.event import Event
 from callbox.core.command import Command
 from callbox.core.manager import Manager
@@ -27,17 +26,17 @@ class Device(object):
     """
     manager = Manager()
 
-    name = ParameterString(visible=setup, access=read_only)
-    displayName = ParameterString(visible=setup, access=read_write)
-    desc = ParameterString(visible=setup, access=read_write)
-    type_when_create = ParameterString(visible=hidden, access=read_write)
-    isService = ParameterBool(visible=common, access=read_write)
-    version = ParameterString(visible=setup, access=read_only)
-    connected = ParameterBool(visible=common, access=read_write)
-    ready_to_work = ParameterBool(visible=common, access=read_write)
-    error = ParameterBool(visible=common, access=read_write)
-    number_of_errors = ParameterInt(visible=setup, access=read_write)
-    status = ParameterString(visible=common, access=read_write)
+    name = ParameterString(visible=Visible.setup, access=Access.read_only)
+    displayName = ParameterString(visible=Visible.setup, access=Access.read_write)
+    desc = ParameterString(visible=Visible.setup, access=Access.read_write)
+    type_when_create = ParameterString(visible=Visible.hidden, access=Access.read_write)
+    isService = ParameterBool(visible=Visible.common, access=Access.read_write)
+    version = ParameterString(visible=Visible.setup, access=Access.read_only)
+    connected = ParameterBool(visible=Visible.common, access=Access.read_write)
+    ready_to_work = ParameterBool(visible=Visible.common, access=Access.read_write)
+    error = ParameterBool(visible=Visible.common, access=Access.read_write)
+    number_of_errors = ParameterInt(visible=Visible.setup, access=Access.read_write)
+    status = ParameterString(visible=Visible.common, access=Access.read_write)
 
     def __init__(self, type_device, id_device):
         self.__dict__['log'] = log

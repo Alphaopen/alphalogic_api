@@ -5,9 +5,7 @@ import grpc
 import datetime
 import time
 
-from callbox.core.type_attributes import runtime, setup, hidden, common
-from callbox.core.type_attributes import read_only, read_write
-from callbox.core.type_attributes import major
+from callbox.core.type_attributes import Visible, Access, Priority
 
 from callbox.core.core import Root, Device
 from callbox.core.command import command
@@ -46,12 +44,12 @@ class MyRoot(Root):
     #name = ParameterString(value='RootNode')
     #displayName = ParameterString(value='RootNode')
 
-    param_string = ParameterString(value='noop', visible=setup)
-    param_bool = ParameterBool(value=False, visible=common)
-    param_int = ParameterInt(value=2, visible=runtime, access=read_only)
+    param_string = ParameterString(value='noop', visible=Visible.setup)
+    param_bool = ParameterBool(value=False, visible=Visible.common)
+    param_int = ParameterInt(value=2, visible=Visible.runtime, access=Access.read_only)
     param_double = ParameterDouble(value=2.3, callback=handle_after_set_double)
     param_timestamp = ParameterDatetime(value=datetime.datetime.utcnow())
-    param_hid = ParameterDouble(value=2.2, access=hidden)
+    param_hid = ParameterDouble(value=2.2, visible=Visible.hidden)
     param_vect = ParameterInt(value=(0, 1, 2, 3))
 
     alarm = Event(('where', unicode),
@@ -141,11 +139,11 @@ class Controller(Device):
     # Parameters:
     displayName = ParameterString()
 
-    hostname = ParameterString(visible=setup, access=read_write, value=('1', '2'))
-    mode = ParameterBool(visible=setup, value=({'On': True}, {'Off': False}))
-    version = Parameter(value_type=int, visible=common)
-    counter = ParameterDouble(value=1.0, access=read_only)
-    counter_spec = ParameterDouble(value=1.0, access=read_write)
+    hostname = ParameterString(visible=Visible.setup, access=Access.read_write, value=('1', '2'))
+    mode = ParameterBool(visible=Visible.setup, value=({'On': True}, {'Off': False}))
+    version = Parameter(value_type=int, visible=Visible.common)
+    counter = ParameterDouble(value=1.0, access=Access.read_only)
+    counter_spec = ParameterDouble(value=1.0, access=Access.read_write)
 
     @command(result_type=bool)
     def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
