@@ -52,6 +52,7 @@ class MyRoot(Root):
     param_timestamp = ParameterDatetime(value=datetime.datetime.utcnow())
     param_hid = ParameterDouble(value=2.2, visible=Visible.hidden)
     param_vect = ParameterInt(value=(0, 1, 2, 3))
+    param_vect2 = ParameterInt(value=(('str 77', 0), ('str 88', 1), ('str 2', 2), ('str 3', 3)))
 
     alarm = Event(('where', unicode),
                   ('when', datetime.datetime),
@@ -110,7 +111,7 @@ class MyRoot(Root):
         return ret
 
     @command(result_type=unicode)
-    def cmd_return_unicode(self):
+    def cmd_return_unicode(self, which5=(('On', True), ('Off', False))):
         return 'некоторый текст'
 
     @command(result_type=datetime.datetime)
@@ -134,20 +135,20 @@ class MyRoot(Root):
     @run(period_b=24)
     def run_one(self):
         print str(self.id) + ' b_run'
-    
+
 
 class Controller(Device):
     # Parameters:
     displayName = ParameterString()
 
     hostname = ParameterString(visible=Visible.setup, access=Access.read_write, value=('1', '2'))
-    mode = ParameterBool(visible=Visible.setup, value=({'On': True}, {'Off': False}))
+    mode = ParameterBool(visible=Visible.setup, value=(('On', True), ('Off', False)))
     version = Parameter(value_type=int, visible=Visible.common)
     counter = ParameterDouble(value=1.0, access=Access.read_only)
     counter_spec = ParameterDouble(value=1.0, access=Access.read_write)
 
     @command(result_type=bool)
-    def relax(self, where='room', when=datetime.datetime.now(), why=42, which=[{'On': True}, {'Off': False}]):
+    def relax(self, where='room', when=datetime.datetime.now(), why=42, which=({'On': True}, {'Off': False})):
         return True
 
     @run(period=20)

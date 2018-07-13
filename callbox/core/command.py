@@ -81,6 +81,11 @@ class AbstractCommand(object):
                     setattr(req.enums[val.keys()[0]], val_type, val.values()[0])
                     if index == 0:
                         setattr(req.value, val_type, val.values()[0])
+                elif isinstance(val, tuple):
+                    val_type = utils.value_field_definer(val[1])
+                    setattr(req.enums[str(val[0])], val_type, val[1])
+                    if index == 0:
+                        setattr(req.value, val_type, val[1])
                 else:
                     val_type = utils.value_field_definer(val)
                     setattr(req.enums[str(val)], val_type, val)

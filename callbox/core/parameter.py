@@ -131,8 +131,10 @@ class AbstractParameter(object):
         req = rpc_pb2.ParameterRequest(id=self.id)
         attr_type = utils.value_type_field_definer(value_type)
         for val in values:
-            if isinstance(val, dict):  # два поля в листе
+            if isinstance(val, dict):  # два поля в листе, словаре
                 setattr(req.enums[val.keys()[0]], attr_type, val.values()[0])  # проверить
+            elif isinstance(val, tuple):
+                setattr(req.enums[str(val[0])], attr_type, val[1])
             else:
                 setattr(req.enums[str(val)], attr_type, val)
 
