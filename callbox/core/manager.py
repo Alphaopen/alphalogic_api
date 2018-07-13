@@ -150,8 +150,8 @@ class AbstractManager(object):
 class Manager(AbstractManager):
     dict_type_objects = {}  # По type можно определить соответсвующий класс для создания
     nodes = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
-    components = {} #По id команды можно обратиться к параметрам, событиям, командам
-    components_for_device = {} #По id устройства можно определить id его компонент
+    components = {}  # По id команды можно обратиться к параметрам, событиям, командам
+    components_for_device = {}  # По id устройства можно определить id его компонент
 
     def __init__(self):
         signal.signal(signal.SIGTERM, shutdown)
@@ -165,11 +165,11 @@ class Manager(AbstractManager):
         Manager.nodes[id] = object
         list_id_parameters_already_exists = self.parameters(id)
         list_parameters_name_already_exists = map(lambda id: self.multi_stub.parameter_call('name', 'name', id=id),
-                                                 list_id_parameters_already_exists)
+                                                  list_id_parameters_already_exists)
         list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
         list_parameters_name_should_exists = list(set(list_parameters_name_should_exists)
                                                   - set(list_parameters_name_already_exists))
-        #order of call below function is important
+        # order of call below function is important
         self.configure_run_function(object, id, list_id_parameters_already_exists)
         self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_should_exists)
         self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_already_exists)
@@ -208,10 +208,11 @@ class Manager(AbstractManager):
                 Manager.dict_type_objects[class_name.__name__] = class_name
 
     def get_type(self, node_id):
-        type_str = self.type(node_id)[7:] #cut string 'device.'
+        type_str = self.type(node_id)[7:]  # cut string 'device.'
         return type_str
 
-    def create_parameter(self, name, object, object_id, list_id_parameters_already_exists, is_copy=True, parameter=None):
+    def create_parameter(self, name, object, object_id, list_id_parameters_already_exists, is_copy=True,
+                         parameter=None):
         if is_copy:
             parameter = object.__dict__[name].get_copy()
         object.__dict__[name] = parameter
@@ -223,7 +224,7 @@ class Manager(AbstractManager):
         parameter.id = id_parameter
         getattr(parameter, parameter.visible.create_func)()
         getattr(parameter, parameter.access.create_func)()
-        if not(id_parameter in list_id_parameters_already_exists):
+        if not (id_parameter in list_id_parameters_already_exists):
             parameter.val = getattr(parameter, 'value', None)
         Manager.components[id_parameter] = parameter
         Manager.components_for_device[object_id].append(id_parameter)
@@ -235,7 +236,7 @@ class Manager(AbstractManager):
     def create_command(self, name, command, object_id):
         command.set_multi_stub(self.multi_stub)
         result_type = command.result_type
-        id_command = getattr(self, utils.create_command_definer(str(result_type)))\
+        id_command = getattr(self, utils.create_command_definer(str(result_type))) \
             (id_object=object_id, name=name)
         command.id = id_command
         for arg in command.arguments:
@@ -274,16 +275,16 @@ class Manager(AbstractManager):
             parameter_period = ParameterDouble(value=period, visible=Visible.setup)
             self.create_parameter(period_name, object, object.id, list_id_parameters_already_exists,
                                   is_copy=False, parameter=parameter_period)
-            period = parameter_period.val # Если параметр все-таки существует
-            self.tasks_pool.add_task(time_stamp+period, getattr(object, name))
+            period = parameter_period.val  # Если параметр все-таки существует
+            self.tasks_pool.add_task(time_stamp + period, getattr(object, name))
 
     def join(self):
         try:
             g_thread = Thread(target=self.grpc_thread)
             g_thread.start()
-            while True: #главный тред, который нужен для того, чтобы можно было завершит остальные
-                time.sleep(0.1) # цикл прерывается при посылке сигнала SIGINT
-                if not(g_thread.is_alive()):
+            while True:  # главный тред, который нужен для того, чтобы можно было завершит остальные
+                time.sleep(0.1)  # цикл прерывается при посылке сигнала SIGINT
+                if not (g_thread.is_alive()):
                     break
 
         except Exit:
@@ -311,8 +312,10 @@ class Manager(AbstractManager):
                             with Manager.nodes[r.id].mutex:
                                 Manager.nodes[r.id].flag_removing = True
                                 Manager.nodes[r.id].handle_before_remove_device()
+
                                 def delete_id(id):
                                     del Manager.components[id]
+
                                 map(delete_id, Manager.components_for_device[r.id])
                                 del Manager.components_for_device[r.id]
                                 del Manager.nodes[r.id]
@@ -347,4 +350,3 @@ class Manager(AbstractManager):
 
         except Exception, err:
             log.error(str(err))
-

@@ -13,7 +13,7 @@ from callbox.core.event import Event
 from callbox.core.parameter import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
 from callbox.core import utils
-from callbox.core.tasks_pool import run
+from callbox.core.run_function import run
 
 
 '''
@@ -35,6 +35,7 @@ from callbox.core.tasks_pool import run
 
 4) Как сделать выбор некоторых параметров по умолчанию?
 '''
+
 
 def handle_after_set_double():
     print 'double changed'

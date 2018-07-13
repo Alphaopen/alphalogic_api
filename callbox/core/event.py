@@ -2,9 +2,7 @@
 from __future__ import unicode_literals
 from callbox.core import utils
 from callbox.core.type_attributes import Priority
-import callbox.protocol.rpc_pb2 as rpc_pb2
-import datetime
-import inspect
+
 
 class AbstractEvent(object):
 
