@@ -70,27 +70,21 @@ class AbstractCommand(object):
 
     def set_argument(self, name_arg, value):
         value_type = utils.value_field_definer(value)
-        if value_type != 'list' and value_type != 'tuple':
+        cur_choices = self.choices[name_arg] if name_arg in self.choices else None
+        if cur_choices is None:
             value_rpc = utils.get_rpc_value(type(value), value)
             self._call('set_argument', argument=name_arg, value=value_rpc)
         else:
             req = rpc_pb2.CommandRequest(id=self.id, argument=name_arg)
-            for index, val in enumerate(value):
-                if isinstance(val, dict):  # два поля в листе
-                    val_type = utils.value_field_definer(val.values()[0])
-                    setattr(req.enums[val.keys()[0]], val_type, val.values()[0])
-                    if index == 0:
-                        setattr(req.value, val_type, val.values()[0])
-                elif isinstance(val, tuple):
-                    val_type = utils.value_field_definer(val[1])
-                    setattr(req.enums[str(val[0])], val_type, val[1])
-                    if index == 0:
-                        setattr(req.value, val_type, val[1])
+            val_type = utils.value_field_definer(value)
+            setattr(req.value, val_type, value)
+            for index, val in enumerate(cur_choices):
+                if isinstance(val, tuple):
+                    val_type = utils.value_field_definer(val[0])
+                    setattr(req.enums[val[1]], val_type, val[0])
                 else:
                     val_type = utils.value_field_definer(val)
                     setattr(req.enums[str(val)], val_type, val)
-                    if index == 0:
-                        setattr(req.value, val_type, val)
 
             self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set,
                                         request=req, stub=self.multi_stub.stub_command)
@@ -106,6 +100,7 @@ class Command(AbstractCommand):
         self.result_type = function.result_type
         self.arguments = function.arguments
         self.arguments_type = function.arguments_type
+        self.choices = function.choices
         self.device = device
 
     def set_multi_stub(self, multi_stub):
@@ -138,6 +133,9 @@ def command_preparation(wrapped, func, **kwargs_c): #В этой функции 
     wrapped.__dict__['arguments'] = []
     wrapped.__dict__['arguments_type'] = {}
     wrapped.__dict__['function_name'] = func.__name__
+    wrapped.__dict__['choices'] = {}
+    for name_arg in filter(lambda x: x in kwargs_c, args):
+        wrapped.choices[name_arg] = kwargs_c[name_arg]
     bias = 1 if 'self' in args else 0  # если первый аргумент self, то нужно рассматривать со второго элемента
     for index, name in enumerate(args[bias:]):
         wrapped.arguments.append((name, defaults[index]))
