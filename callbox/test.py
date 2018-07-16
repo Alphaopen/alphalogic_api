@@ -37,7 +37,6 @@ from callbox import host, port
 '''
 
 
-
 def handle_after_set_double(node, parameter):
     node.log.info('double changed')
     node.after_set_value_test_event.emit(default=parameter.val)
@@ -138,8 +137,10 @@ class MyRoot(Root):
 
 
 class Controller(Device):
+
     # Parameters:
-    displayName = ParameterString()
+    name = ParameterString(value='Controller')
+    displayName = ParameterString(value='Controller')
 
     hostname = ParameterString(visible=Visible.setup, access=Access.read_write, default='1', choices=('1', '2'))
     mode = ParameterBool(visible=Visible.setup, default=True, choices=((True, 'On'), (False, 'Off')))

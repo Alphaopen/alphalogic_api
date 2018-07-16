@@ -337,14 +337,14 @@ class Manager(AbstractManager):
 
                     elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
                         if r.id in Manager.components:  # есть параметры, которые по умолчанию в адаптере
-
                             param = Manager.components[r.id]  # TODO check
                             device = Manager.nodes[param.owner()]  # TODO check
                             Manager.components[r.id].callback(device, param)
+                        else:
+                            log.warn('Parameter {0} not found'.format(r.id))
 
                     elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
                         if r.id in Manager.components:
-
                             Manager.components[r.id].call_function()
                         else:
                             log.warn('Command {0} not found'.format(r.id))

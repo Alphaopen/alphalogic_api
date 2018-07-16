@@ -7,9 +7,9 @@ import time
 
 
 class PriorityTasks(object):
-    '''
+    """
     This class issues a task that must be executed immediately
-    '''
+    """
     def __init__(self):
         self.peak = None
         self.queue = PriorityQueue()
@@ -49,14 +49,14 @@ class PriorityTasks(object):
 
 
 class TasksPool(object):
-    '''
+    """
     This class distribute tasks with the use thread pool
-    '''
+    """
     def __init__(self, num_thread=None):
-        self.thread_pool = ThreadPool(processes=num_thread)#if processes=None, number of thread define automatically
+        self.thread_pool = ThreadPool(processes=num_thread)  # if processes=None, number of thread define automatically
         self.operation_thread = Thread(target=self.run_operation_thread)
         self.shutdown_flag = Event()
-        self.queue_tasks = PriorityTasks() #tasks with timestamps
+        self.queue_tasks = PriorityTasks()  # tasks with timestamps
         self.operation_thread.start()
 
     def run_operation_thread(self):
