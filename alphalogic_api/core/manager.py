@@ -280,7 +280,7 @@ class Manager(AbstractManager):
             time_stamp = time.time()
             period_name = getattr(object, name).period_name
             period = getattr(object, name).period_default_value
-            parameter_period = ParameterDouble(value=period, visible=Visible.setup)
+            parameter_period = ParameterDouble(default=period, visible=Visible.setup)
             self.create_parameter(period_name, object, object.id, list_id_parameters_already_exists,
                                   is_copy=False, parameter=parameter_period)
             period = parameter_period.val  # Если параметр все-таки существует
@@ -336,10 +336,11 @@ class Manager(AbstractManager):
                         self.get_available_children(r.id)
 
                     elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
-                        if r.id in Manager.components:  # есть параметры, которые по умолчанию в адаптере
-                            param = Manager.components[r.id]  # TODO check
-                            device = Manager.nodes[param.owner()]  # TODO check
-                            Manager.components[r.id].callback(device, param)
+                        if r.id in Manager.components:
+                            if Manager.components[r.id].callback:
+                                param = Manager.components[r.id]  # TODO check
+                                device = Manager.nodes[param.owner()]  # TODO check
+                                Manager.components[r.id].callback(device, param)
                         else:
                             log.warn('Parameter {0} not found'.format(r.id))
 

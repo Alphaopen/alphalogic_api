@@ -39,7 +39,7 @@ from alphalogic_api import host, port
 
 def handle_after_set_double(node, parameter):
     node.log.info('double changed')
-    node.after_set_value_test_event.emit(default=parameter.val)
+    node.after_set_value_test_event.emit(value=parameter.val)
 
 
 class MyRoot(Root):
@@ -120,7 +120,6 @@ class MyRoot(Root):
         return datetime.datetime.utcnow()
 
     #
-
     @command(result_type=bool, which=(1, 2, 3), which2=((True, 'On'), (False, 'Off')))
     def relax(self, where='room', why=42, which=2, which2=False):
         self.log.info(u'where=' + where + u'; why=' + unicode(why)

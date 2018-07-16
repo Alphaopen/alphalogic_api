@@ -149,17 +149,14 @@ class AbstractParameter(object):
 
 
 class Parameter(AbstractParameter):
+
     def __init__(self, *args, **kwargs):
         for arg in kwargs:
             self.__dict__[arg] = kwargs[arg]
 
         self.visible = kwargs.get('visible', Visible.runtime)
         self.access = kwargs.get('access', Access.read_write)
-
-        def after_set_value():
-            return
-
-        self.callback = kwargs.get('callback', after_set_value)
+        self.callback = kwargs.get('callback', None)
 
         if not ('value_type' in kwargs):
             raise Exception('value_type not found in Parameter')
@@ -197,7 +194,6 @@ class Parameter(AbstractParameter):
         if isinstance(self.choices, tuple):
             self.clear()
             self.set_enums(self.choices)
-
 
     def get_copy(self):
         return Parameter(value_type=self.value_type, default=self.default, visible=self.visible,
