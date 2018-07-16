@@ -3,16 +3,16 @@ from __future__ import unicode_literals
 import signal
 import time
 from threading import Thread
-import callbox.protocol.rpc_pb2 as rpc_pb2
-from callbox.core.multistub import MultiStub
-from callbox.core.parameter import Parameter
-from callbox.core.event import Event
-from callbox.core import utils
-from callbox.logger import log
-from callbox.core.tasks_pool import TasksPool
-from callbox.core.parameter import ParameterDouble
-from callbox.core.utils import Exit, shutdown, decode_string
-from callbox.core.type_attributes import Visible
+import alphalogic_api.protocol.rpc_pb2 as rpc_pb2
+from alphalogic_api.core.multistub import MultiStub
+from alphalogic_api.core.parameter import Parameter
+from alphalogic_api.core.event import Event
+from alphalogic_api.core import utils
+from alphalogic_api.logger import log
+from alphalogic_api.core.tasks_pool import TasksPool
+from alphalogic_api.core.parameter import ParameterDouble
+from alphalogic_api.core.utils import Exit, shutdown, decode_string
+from alphalogic_api.core.type_attributes import Visible
 
 
 class AbstractManager(object):

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import inspect
-import callbox.protocol.rpc_pb2 as rpc_pb2
-from callbox.core.multistub import MultiStub
-import callbox.core.utils as utils
-from callbox.logger import log
+import alphalogic_api.protocol.rpc_pb2 as rpc_pb2
+from alphalogic_api.core.multistub import MultiStub
+import alphalogic_api.core.utils as utils
+from alphalogic_api.logger import log
 
 
 class AbstractCommand(object):

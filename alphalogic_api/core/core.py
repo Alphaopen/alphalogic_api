@@ -13,12 +13,12 @@
 '''
 from __future__ import unicode_literals
 from threading import Lock
-from callbox.core.parameter import Parameter, ParameterString, ParameterBool, ParameterInt
-from callbox.core.type_attributes import Visible, Access
-from callbox.core.event import Event
-from callbox.core.command import Command
-from callbox.core.manager import Manager
-from callbox.logger import log
+from alphalogic_api.core.parameter import Parameter, ParameterString, ParameterBool, ParameterInt
+from alphalogic_api.core.type_attributes import Visible, Access
+from alphalogic_api.core.event import Event
+from alphalogic_api.core.command import Command
+from alphalogic_api.core.manager import Manager
+from alphalogic_api.logger import log
 
 
 class Device(object):

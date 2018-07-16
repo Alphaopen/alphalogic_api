@@ -1,1 +1,1 @@
-recursive-include callbox/*.py
+recursive-include alphalogic_api/*.py

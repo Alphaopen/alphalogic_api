@@ -1,5 +1,5 @@
 import time
-from callbox.logger import log
+from alphalogic_api.logger import log
 
 def run(*argv_r, **kwargs_r):
     def decorator(func):

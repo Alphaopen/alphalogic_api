@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from callbox.core import utils
-from callbox.core.type_attributes import Priority
+from alphalogic_api.core import utils
+from alphalogic_api.core.type_attributes import Priority
 
 
 class AbstractEvent(object):

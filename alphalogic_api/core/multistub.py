@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import grpc
-from callbox.logger import log
+from alphalogic_api.logger import log
 
-from callbox.protocol.rpc_pb2 import (
+from alphalogic_api.protocol.rpc_pb2 import (
 ObjectRequest,
 ParameterRequest,
 EventRequest,
 CommandRequest
 )
 
-from callbox.protocol.rpc_pb2_grpc import (
+from alphalogic_api.protocol.rpc_pb2_grpc import (
 ObjectServiceStub,
 ParameterServiceStub,
 EventServiceStub,

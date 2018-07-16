@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 
 import datetime
 
-import callbox.protocol.rpc_pb2 as rpc_pb2
+import alphalogic_api.protocol.rpc_pb2 as rpc_pb2
 
-from callbox.core.type_attributes import Visible, Access
-from callbox.core.multistub import MultiStub
-from callbox.core import utils
-from callbox.logger import log
-from callbox.core.utils import Exit, shutdown
+from alphalogic_api.core.type_attributes import Visible, Access
+from alphalogic_api.core.multistub import MultiStub
+from alphalogic_api.core import utils
+from alphalogic_api.logger import log
+from alphalogic_api.core.utils import Exit, shutdown
 
 
 class AbstractParameter(object):

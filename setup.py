@@ -8,7 +8,6 @@ import sys
 import platform
 from setuptools import setup
 
-#TODO: переименовать callbox
 
 VERSION_MAJOR = 0  # (Версия системы)
 VERSION_MINOR = 0  # (Версия тестов)
@@ -19,23 +18,23 @@ stub_version = '%d.%d.%d' % (VERSION_MAJOR, VERSION_MINOR, BUILD_NUMBER)
 cur = 'win32' if sys.platform == 'win32' else platform.linux_distribution()[0].lower()
 ext = '.zip' if sys.platform == 'win32' else '.tar.gz'
 
-bin_name = 'alphalogic-stub-%s-%s%s' % (cur, stub_version, ext)
+bin_name = 'alphalogic_api-%s-%s%s' % (cur, stub_version, ext)
 
 
 if __name__ == '__main__':
     setup(
-        name='alphalogic-stub',
+        name='alphalogic_api',
         version=stub_version,
         description=__doc__.replace('\n', '').strip(),
         author='Alphaopen LLC',
         author_email='www.alphaopen.com',
         url='http://www.alphaopen.com/',
-        py_modules=['alphalogic-stub'],
+        py_modules=['alphalogic_api'],
         include_package_data=True,
         packages=[
-            'callbox',
-            'callbox.core',
-            'callbox.protocol'
+            'alphalogic_api',
+            'alphalogic_api.core',
+            'alphalogic_api.protocol'
         ],
         license='Commercial',
         platforms=['linux2', 'win32'],

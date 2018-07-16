@@ -4,7 +4,7 @@ import os
 import sys
 from logging import getLogger, StreamHandler, Formatter, getLevelName, CRITICAL
 from logging.handlers import RotatingFileHandler
-from callbox import args
+from alphalogic_api import args
 
 
 class Logger(object):
