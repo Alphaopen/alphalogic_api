@@ -39,21 +39,21 @@ from callbox.core.run_function import run
 
 def handle_after_set_double(node, parameter):
     node.log.info('double changed')
-    node.after_set_value_test_event.emit(value=parameter.val)
+    node.after_set_value_test_event.emit(default=parameter.val)
 
 
 class MyRoot(Root):
-    name = ParameterString(value='RootNode')
-    displayName = ParameterString(value='RootNode')
+    name = ParameterString(default='RootNode')
+    displayName = ParameterString(default='RootNode')
 
-    param_string = ParameterString(value='noop', visible=Visible.setup)
-    param_bool = ParameterBool(value=False, visible=Visible.common)
-    param_int = ParameterInt(value=2, visible=Visible.runtime, access=Access.read_only)
-    param_double = ParameterDouble(value=2.3, callback=handle_after_set_double)
-    param_timestamp = ParameterDatetime(value=datetime.datetime.utcnow())
-    param_hid = ParameterDouble(value=2.2, visible=Visible.hidden)
-    param_vect = ParameterInt(value=(0, 1, 2, 3))
-    param_vect2 = ParameterInt(value=(('str 77', 0), ('str 88', 1), ('str 2', 2), ('str 3', 3)))
+    param_string = ParameterString(default='noop', visible=Visible.setup)
+    param_bool = ParameterBool(default=False, visible=Visible.common)
+    param_int = ParameterInt(default=2, visible=Visible.runtime, access=Access.read_only)
+    param_double = ParameterDouble(default=2.3, callback=handle_after_set_double)
+    param_timestamp = ParameterDatetime(default=datetime.datetime.utcnow())
+    param_hid = ParameterDouble(default=2.2, visible=Visible.hidden)
+    param_vect = ParameterInt(default=1, choices=(0, 1, 2, 3))
+    param_vect2 = ParameterInt(default=2, choices=((0, 'str 77'), (1, 'str 88'), (2, 'str 2'), (3, 'str 3')))
 
     alarm = MajorEvent(('where', unicode),
                        ('when', datetime.datetime),
@@ -121,8 +121,8 @@ class MyRoot(Root):
 
     #
 
-    @command(result_type=bool)
-    def relax(self, where='room', why=42, which=(1, 2, 3), which2=({'On': True}, {'Off': False})):
+    @command(result_type=bool, which=(1, 2, 3), which2=((True, 'On'), (False, 'Off')))
+    def relax(self, where='room', why=42, which=2, which2=False):
         self.log.info(u'where=' + where + u'; why=' + unicode(why)
                       + u'; which=' + unicode(which) + u'; which2=' + unicode(which2))
         return True
@@ -140,14 +140,14 @@ class Controller(Device):
     # Parameters:
     displayName = ParameterString()
 
-    hostname = ParameterString(visible=Visible.setup, access=Access.read_write, value=('1', '2'))
-    mode = ParameterBool(visible=Visible.setup, value=(('On', True), ('Off', False)))
+    hostname = ParameterString(visible=Visible.setup, access=Access.read_write, default='1', choices=('1', '2'))
+    mode = ParameterBool(visible=Visible.setup, default=True, choices=((True, 'On'), (False, 'Off')))
     version = Parameter(value_type=int, visible=Visible.common)
-    counter = ParameterDouble(value=1.0, access=Access.read_only)
-    counter_spec = ParameterDouble(value=1.0, access=Access.read_write)
+    counter = ParameterDouble(default=1.0, access=Access.read_only)
+    counter_spec = ParameterDouble(default=1.0, access=Access.read_write)
 
-    @command(result_type=bool)
-    def relax(self, where='room', when=datetime.datetime.now(), why=42, which=({'On': True}, {'Off': False})):
+    @command(result_type=bool, which=((True, 'On'), (False, 'Off')))
+    def relax(self, where='room', when=datetime.datetime.now(), why=42, which=False):
         return True
 
     @run(period=20)

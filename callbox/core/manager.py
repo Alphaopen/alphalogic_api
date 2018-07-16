@@ -224,8 +224,15 @@ class Manager(AbstractManager):
         parameter.id = id_parameter
         getattr(parameter, parameter.visible.create_func)()
         getattr(parameter, parameter.access.create_func)()
+        if parameter.choices is not None:
+            parameter.set_choices()
         if not (id_parameter in list_id_parameters_already_exists):
-            parameter.val = getattr(parameter, 'value', None)
+            parameter.val = getattr(parameter, 'default', None)
+        elif parameter.choices is not None:
+            is_tuple = type(parameter.choices[0]) is tuple
+            if (is_tuple and not(parameter.val in zip(*parameter.choices)[0]))\
+                    or not is_tuple and not(parameter.val in parameter.choices):
+                parameter.val = getattr(parameter, 'default', None)
         Manager.components[id_parameter] = parameter
         Manager.components_for_device[object_id].append(id_parameter)
 
@@ -239,6 +246,7 @@ class Manager(AbstractManager):
         id_command = getattr(self, utils.create_command_definer(str(result_type))) \
             (id_object=object_id, name=name)
         command.id = id_command
+        command.clear()
         for arg in command.arguments:
             name_arg, value_arg = arg
             command.set_argument(name_arg, value_arg)

@@ -131,10 +131,8 @@ class AbstractParameter(object):
         req = rpc_pb2.ParameterRequest(id=self.id)
         attr_type = utils.value_type_field_definer(value_type)
         for val in values:
-            if isinstance(val, dict):  # два поля в листе, словаре
-                setattr(req.enums[val.keys()[0]], attr_type, val.values()[0])  # проверить
-            elif isinstance(val, tuple):
-                setattr(req.enums[str(val[0])], attr_type, val[1])
+            if isinstance(val, tuple):
+                setattr(req.enums[str(val[1])], attr_type, val[0])
             else:
                 setattr(req.enums[str(val)], attr_type, val)
 
@@ -169,15 +167,13 @@ class Parameter(AbstractParameter):
         if kwargs['value_type'] not in [bool, int, float, datetime.datetime, unicode]:
             raise Exception('value_type={0} is unknown'.format(kwargs['value_type']))
 
-        self.value = kwargs.get('value')
+        self.default = kwargs.get('default')
+        self.choices = kwargs.get('choices', None)
 
     def set_multi_stub(self, multi_stub):
         self.multi_stub = multi_stub
 
     def __getattr__(self, item):
-        if item == 'value':
-            return None
-
         if item == 'val':
             return self.get()
 
@@ -189,19 +185,23 @@ class Parameter(AbstractParameter):
             log.error('Attempt to change name of device')
             raise Exit
 
-        if attr in ['value_type', 'visible', 'access', 'value', 'multi_stub', 'id', 'parameter_name', 'callback']:
-            self.__dict__[attr] = value
-        elif attr == 'val':
+        if attr == 'val':
             if value is not None:
-                if isinstance(value, list) or isinstance(value, tuple):  # для кортежей
-                    self.set_enums(value)
-                else: #для одного значения
-                    self.set(value)
-            return self
+                self.set(value)
+        elif attr in ['value_type', 'visible', 'access', 'default', 'choices', 'multi_stub', 'id',
+                      'parameter_name', 'callback']:
+            self.__dict__[attr] = value
+        return self
+
+    def set_choices(self):
+        if isinstance(self.choices, tuple):
+            self.clear()
+            self.set_enums(self.choices)
+
 
     def get_copy(self):
-        return Parameter(value_type=self.value_type, value=self.value, visible=self.visible,
-                         access=self.access, callback=self.callback)
+        return Parameter(value_type=self.value_type, default=self.default, visible=self.visible,
+                         access=self.access, callback=self.callback, choices=self.choices)
 
 
 class ParameterBool(Parameter):
