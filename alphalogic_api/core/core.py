@@ -23,7 +23,7 @@ from alphalogic_api.logger import log
 
 class Device(object):
     """
-    type - ссылка на реализацию
+    Node with parameters, commands, events and run functions
     """
     manager = Manager()
 
@@ -47,23 +47,23 @@ class Device(object):
         self.__dict__['flag_removing'] = False
         self.__dict__['mutex'] = Lock()
 
-        #Параметры
+        # Parameters
         list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
         for name in list_parameters_name:
             self.__dict__[name] = type(self).__dict__[name] if name in type(self).__dict__ else Device.__dict__[name]
 
-        #Команды
+        # Commands
         is_callable = lambda x: callable(getattr(self, x)) and not x.startswith('_') and\
                                 hasattr(getattr(self, x), 'result_type')
         list_command_name = filter(is_callable, dir(self))
         for name in list_command_name:
             self.commands[name] = Command(self, type(self).__dict__[name])
 
-        #События
+        # Events
         for name in filter(lambda attr: type(getattr(self, attr)) is Event, dir(self)):
             self.__dict__[name] = type(self).__dict__[name]
 
-        #run функции
+        # Run functions
         is_runnable = lambda x: callable(getattr(self, x)) and not x.startswith('_') and\
                                 hasattr(getattr(self, x), 'runnable')
         self.__dict__['run_function_names'] = filter(is_runnable, dir(self))

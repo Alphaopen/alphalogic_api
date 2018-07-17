@@ -178,7 +178,7 @@ class Parameter(AbstractParameter):
             return self.__dict__[item]
 
     def __setattr__(self, attr, value):
-        if attr == 'val'and self.parameter_name.lower() == 'name':#недопущение изменения значения у name
+        if attr == 'val'and self.parameter_name.lower() == 'name':  # exclude change 'name' value
             log.error('Attempt to change name of device')
             raise Exit
 

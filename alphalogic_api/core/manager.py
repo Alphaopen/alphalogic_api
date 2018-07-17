@@ -148,10 +148,10 @@ class AbstractManager(object):
 
 
 class Manager(AbstractManager):
-    dict_type_objects = {}  # По type можно определить соответсвующий класс для создания
-    nodes = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
-    components = {}  # По id команды можно обратиться к параметрам, событиям, командам
-    components_for_device = {}  # По id устройства можно определить id его компонент
+    dict_type_objects = {}  # Dictionary of nodes classes. 'type' as a key
+    nodes = {}  # Nodes dictionary. 'id' as a key
+    components = {}  # All commands, parameters, events dictionary. 'id' as a key
+    components_for_device = {}  # All commands, parameters, events of node. Node 'id' as a key
 
     def __init__(self):
         signal.signal(signal.SIGTERM, shutdown)
@@ -199,7 +199,7 @@ class Manager(AbstractManager):
 
     def get_available_children(self, id_device):
         device = Manager.nodes[id_device]
-        available_devices = device.handle_get_available_children()
+        available_devices = device.handle_get_available_children() # TODO проверить, если нет!
         self.unregister_all_makers(id_object=id_device)
 
         for class_name, type_when_create in available_devices:
@@ -290,8 +290,8 @@ class Manager(AbstractManager):
         try:
             g_thread = Thread(target=self.grpc_thread)
             g_thread.start()
-            while True:   # главный тред, который нужен для того, чтобы можно было завершит остальные
-                time.sleep(0.1)  # цикл прерывается при посылке сигнала SIGINT
+            while True:   # Main thread. Needs for terminate another
+                time.sleep(0.1)  # Break by SIGINT
                 if not (g_thread.is_alive()):
                     break
 
@@ -303,8 +303,7 @@ class Manager(AbstractManager):
 
     def grpc_thread(self):
         """
-        Бесконечный цикл: получаем состояние от адаптера.
-        :return:
+        Infinity loop: get state from adapter
         """
         try:
             for r in self.multi_stub.stub_adapter.states(rpc_pb2.Empty()):

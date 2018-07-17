@@ -22,10 +22,7 @@ def value_type_field_definer(value_type):
     elif 'list' in str(value_type):
         return 'list'
 
-'''
-to do :
-Можно сократить
-'''
+
 def value_field_definer(value):
     if 'unicode' in str(type(value)):
         return 'string_value'
@@ -83,7 +80,7 @@ def get_command_argument_type(arg):
 
 def decode_string(s):
     """
-    Функция создает unicode из s, пытаясь угадать кодировку.
+    Convert 's' to unicode. Try to guess encoding
     """
     if isinstance(s, unicode):
         return s  # Если это не строка вовсе, то ничего не делаем
@@ -93,7 +90,7 @@ def decode_string(s):
             return s.decode(codec)
         except:
             pass
-    # Если ничего не осталось
+    # nothing else
     return unicode(s)
 
 

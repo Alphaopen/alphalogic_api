@@ -4,23 +4,23 @@ import grpc
 from alphalogic_api.logger import log
 
 from alphalogic_api.protocol.rpc_pb2 import (
-ObjectRequest,
-ParameterRequest,
-EventRequest,
-CommandRequest
+    ObjectRequest,
+    ParameterRequest,
+    EventRequest,
+    CommandRequest
 )
 
 from alphalogic_api.protocol.rpc_pb2_grpc import (
-ObjectServiceStub,
-ParameterServiceStub,
-EventServiceStub,
-CommandServiceStub,
-AdapterServiceStub,
-ObjectServiceServicer,
-ParameterServiceServicer,
-EventServiceServicer,
-CommandServiceServicer,
-AdapterServiceServicer
+    ObjectServiceStub,
+    ParameterServiceStub,
+    EventServiceStub,
+    CommandServiceStub,
+    AdapterServiceStub,
+    ObjectServiceServicer,
+    ParameterServiceServicer,
+    EventServiceServicer,
+    CommandServiceServicer,
+    AdapterServiceServicer
 )
 
 
@@ -44,7 +44,10 @@ class MultiStub(object):
 
     @staticmethod
     def dict_create_helper(service):
-        is_callable = lambda x: callable(getattr(service, x)) and not x.startswith('_')  # получить методы Service, исключая служебные
+        """
+        Get Service methods excluded _
+        """
+        is_callable = lambda x: callable(getattr(service, x)) and not x.startswith('_')
         return set(filter(is_callable, dir(service)))
 
     def object_call(self, *args, **kwargs):

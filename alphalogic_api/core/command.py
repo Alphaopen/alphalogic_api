@@ -127,7 +127,10 @@ class Command(AbstractCommand):
             self.set_exception(reason)
 
 
-def command_preparation(wrapped, func, **kwargs_c): #В этой функции задаются возвращаемое значение команды и ее аргументы
+def command_preparation(wrapped, func, **kwargs_c):
+    """
+    Return value and command arguments setup
+    """
     wrapped.result_type = kwargs_c['result_type']
     (args, varargs, keywords, defaults) = inspect.getargspec(func)
     wrapped.__dict__['arguments'] = []
