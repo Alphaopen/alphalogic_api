@@ -7,12 +7,14 @@ import alphalogic_api.protocol.rpc_pb2 as rpc_pb2
 from alphalogic_api.core.multistub import MultiStub
 from alphalogic_api.core.parameter import Parameter
 from alphalogic_api.core.event import Event
+from alphalogic_api.core.command import Command
 from alphalogic_api.core import utils
 from alphalogic_api.logger import log
 from alphalogic_api.core.tasks_pool import TasksPool
 from alphalogic_api.core.parameter import ParameterDouble
 from alphalogic_api.core.utils import Exit, shutdown, decode_string
 from alphalogic_api.core.type_attributes import Visible
+from alphalogic_api.core.exceptions import ComponentNotFound
 
 
 class AbstractManager(object):
@@ -274,6 +276,18 @@ class Manager(AbstractManager):
         for name in list_events:
             event = object.__dict__[name]
             self.configure_single_event(name, event, object_id)
+
+    def get_components(self, object_id, component_type):
+        ids = getattr(self, component_type)(id_object=object_id)
+        #  Component in the adapter, but not in the alphalogic_api is OK. Reject.
+        return list(self.components[id] for id in ids if id in self.components)
+
+    def get_component_by_name(self, name, object_id, component_type):
+        id = getattr(self, component_type)(id_object=object_id, name=name)
+        if id in self.components:
+            return self.components[id]
+        raise ComponentNotFound(u'Can not found \'{}\' in the \'{}\' (id={})'
+                                .format(name, self.nodes[object_id].type, object_id))
 
     def configure_run_function(self, object, object_id, list_id_parameters_already_exists):
         for name in object.run_function_names:

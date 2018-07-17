@@ -68,10 +68,30 @@ class Device(object):
                                 hasattr(getattr(self, x), 'runnable')
         self.__dict__['run_function_names'] = filter(is_runnable, dir(self))
 
+    def parameters(self):
+        return self.manager.get_components(self.id, 'parameters')
+
+    def events(self):
+        return self.manager.get_components(self.id, 'events')
+
+    def commands(self):
+        return self.manager.get_components(self.id, 'commands')
+
+    def parameter(self, name):
+        return self.manager.get_component_by_name(name, self.id, 'parameter')
+
+    def event(self, name):
+        return self.manager.get_component_by_name(name, self.id, 'event')
+
+    def command(self, name):
+        return self.manager.get_component_by_name(name, self.id, 'command')
+
+
+
     '''
     def __getattr__(self, name):
         return self.__dict__[name]
-
+     
     def __setattr__(self, name, value):
         if issubclass(type(value), Parameter):
             self.parameters.append(name)

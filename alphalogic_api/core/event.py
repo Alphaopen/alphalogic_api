@@ -9,13 +9,13 @@ class AbstractEvent(object):
     def _call(self, func_name, *args, **kwargs):
         return self.multi_stub.event_call(func_name, id=self.id, *args, **kwargs)
 
-    def get_name(self):
+    def name(self):
         return self._call('name').name
 
-    def get_display_name(self):
+    def display_name(self):
         return self._call('display_name').display_name
 
-    def get_desc(self):
+    def desc(self):
         return self._call('desc').desc
 
     def set_display_name(self, display_name):

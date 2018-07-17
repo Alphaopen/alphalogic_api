@@ -15,6 +15,7 @@ from alphalogic_api.core.parameter import Parameter, ParameterBool, ParameterInt
 from alphalogic_api.core import utils
 from alphalogic_api.core.run_function import run
 from alphalogic_api import host, port
+from alphalogic_api.core.exceptions import ComponentNotFound, RequestError
 
 '''
 Не забыть важные моменты:
@@ -164,6 +165,52 @@ class Controller(Device):
 # python loop
 root = MyRoot(host, port)
 
+cmds = root.commands()
+# Parameters
+try:
+    root.parameter('asgasdgg')
+    assert False, 'ComponentNotFound doesnt\' works'
+except ComponentNotFound, err:
+    pass
+except RequestError, err: # TODO убрать, как починят адаптеры
+    pass
+
+pars = root.parameters()
+assert list(x.name() == 'param_bool' for x in pars)
+param = root.parameter('param_bool')
+assert not param.val
+param = root.parameter('param_int')
+assert param.val == 2
+
+# Events
+try:
+    root.event('asgasdgg')
+    assert False, 'ComponentNotFound doesnt\' works'
+except ComponentNotFound, err:
+    pass
+except RequestError, err: # TODO убрать, как починят адаптеры
+    pass
+
+events = root.events()
+assert list(x.name() == 'alarm' for x in events)
+ev = root.event('alarm')
+
+# Commands
+
+try:
+    root.command('asgasdgg')
+    assert False, 'ComponentNotFound doesnt\' works'
+except ComponentNotFound, err:
+    pass
+except RequestError, err:  # TODO убрать, как починят адаптеры
+    pass
+
+assert list(x.name() == 'cmd_simple_event' for x in cmds)
+cmd = root.command('cmd_simple_event')
+cmd = root.command('check')
+
+root.join()
+
 
 '''
 assert root.param_string.val == 'noop'
@@ -193,10 +240,9 @@ assert root.param_double.val == 5.0
 
 
 #adapter.relax(1, 2, 3, 4)
+
+root.simple_event.emit()
+
+root.alarm.set_time(int(time.time()) * 1000 - 100000)
+root.alarm.emit(where='asdadsadg', why=3, when=datetime.datetime.now())
 '''
-
-adapter.simple_event.emit()
-
-adapter.alarm.set_time(int(time.time()) * 1000 - 100000)
-adapter.alarm.emit(where='asdadsadg', why=3, when=datetime.datetime.now())
-adapter.join()

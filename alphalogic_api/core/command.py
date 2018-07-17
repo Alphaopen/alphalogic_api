@@ -12,15 +12,15 @@ class AbstractCommand(object):
     def _call(self, func_name, *args, **kwargs):
         return self.multi_stub.command_call(func_name, id=self.id, *args, **kwargs)
 
-    def get_name(self):
+    def name(self):
         answer = self._call('name')
         return answer.name
 
-    def get_display_name(self):
+    def display_name(self):
         answer = self._call('display_name')
         return answer.display_name
 
-    def get_desc(self):
+    def desc(self):
         answer = self._call('desc')
         return answer.desc
 
@@ -118,12 +118,12 @@ class Command(AbstractCommand):
                 info.append('{0}({1}): {2}'.format(name_arg, type_arg, function_dict[name_arg]))
 
             log.info('Execute command \'{0}\' with arguments [{1}] from device \'{2}\''
-                     .format(self.get_name(), '; '.join(info), self.device.id))
+                     .format(self.name(), '; '.join(info), self.device.id))
             self.function(self.device, **function_dict)
 
         except Exception, err:
             reason = utils.decode_string(err)
-            log.info('Command \'{0}\' raise exception: '.format(self.get_name(), reason))
+            log.info('Command \'{0}\' raise exception: '.format(self.name(), reason))
             self.set_exception(reason)
 
 
