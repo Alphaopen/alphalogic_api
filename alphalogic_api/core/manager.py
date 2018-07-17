@@ -156,6 +156,7 @@ class Manager(AbstractManager):
     def __init__(self):
         signal.signal(signal.SIGTERM, shutdown)
         signal.signal(signal.SIGINT, shutdown)
+        self.g_thread = Thread(target=self.grpc_thread)
         self.tasks_pool = TasksPool()
 
     def configure_multi_stub(self, address):
@@ -166,7 +167,10 @@ class Manager(AbstractManager):
         list_id_parameters_already_exists = self.parameters(id)
         list_parameters_name_already_exists = map(lambda id: self.multi_stub.parameter_call('name', 'name', id=id),
                                                   list_id_parameters_already_exists)
+        list_parameters_name_period = [getattr(object, name).period_name for name in object.run_function_names]
         list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
+        list_parameters_name_should_exists = list(set(list_parameters_name_should_exists)
+                                                  | set(list_parameters_name_period))
         list_parameters_name_should_exists = list(set(list_parameters_name_should_exists)
                                                   - set(list_parameters_name_already_exists))
         # order of call below function is important
@@ -196,6 +200,19 @@ class Manager(AbstractManager):
         Manager.nodes[object_id] = object
         Manager.components_for_device[object_id] = []
         self.prepare_for_work(object, object_id)
+
+    def delete_object(self, object_id):
+        with Manager.nodes[object_id].mutex:
+            Manager.nodes[object_id].flag_removing = True
+            Manager.nodes[object_id].handle_before_remove_device()
+
+            def delete_id(id):
+                del Manager.components[id]
+
+            map(delete_id, Manager.components_for_device[object_id])
+            del Manager.components_for_device[object_id]
+            del Manager.nodes[object_id]
+            log.info('Device {0} removed'.format(object_id))
 
     def get_available_children(self, id_device):
         device = Manager.nodes[id_device]
@@ -230,11 +247,12 @@ class Manager(AbstractManager):
             parameter.val = getattr(parameter, 'default', None)
         elif parameter.choices is not None:
             is_tuple = type(parameter.choices[0]) is tuple
-            if (is_tuple and not(parameter.val in zip(*parameter.choices)[0]))\
-                    or not is_tuple and not(parameter.val in parameter.choices):
+            if (is_tuple and not (parameter.val in zip(*parameter.choices)[0])) \
+                    or not is_tuple and not (parameter.val in parameter.choices):
                 parameter.val = getattr(parameter, 'default', None)
-        Manager.components[id_parameter] = parameter
-        Manager.components_for_device[object_id].append(id_parameter)
+        if is_copy:
+            Manager.components[id_parameter] = parameter
+            Manager.components_for_device[object_id].append(id_parameter)
 
     def configure_parameters(self, object, object_id, list_id_parameters_already_exists, list_names):
         for name in list_names:
@@ -286,20 +304,17 @@ class Manager(AbstractManager):
             period = parameter_period.val  # Если параметр все-таки существует
             self.tasks_pool.add_task(time_stamp + period, getattr(object, name))
 
-    def join(self):
-        try:
-            g_thread = Thread(target=self.grpc_thread)
-            g_thread.start()
-            while True:   # главный тред, который нужен для того, чтобы можно было завершит остальные
-                time.sleep(0.1)  # цикл прерывается при посылке сигнала SIGINT
-                if not (g_thread.is_alive()):
-                    break
+    def get_all_device(self, object_id, result):
+        list_children = self.children(object_id)
+        result.append(object_id)
+        map(lambda x: self.get_all_device(x, result), list_children)
 
-        except Exit:
-            self.tasks_pool.shutdown_flag.set()
-            self.tasks_pool.operation_thread.join()
-            self.multi_stub.channel.close()
-            g_thread.join()
+    def join(self):
+        self.g_thread.start()
+        while True:  # главный тред, который нужен для того, чтобы можно было завершит остальные
+            time.sleep(0.1)  # цикл прерывается при посылке сигнала SIGINT
+            if not (self.g_thread.is_alive()):
+                break
 
     def grpc_thread(self):
         """
@@ -317,17 +332,7 @@ class Manager(AbstractManager):
                     elif r.state == rpc_pb2.AdapterStream.BEFORE_REMOVING_OBJECT:
                         log.info('Remove device {0}'.format(r.id))
                         if r.id in Manager.nodes:
-                            with Manager.nodes[r.id].mutex:
-                                Manager.nodes[r.id].flag_removing = True
-                                Manager.nodes[r.id].handle_before_remove_device()
-
-                                def delete_id(id):
-                                    del Manager.components[id]
-
-                                map(delete_id, Manager.components_for_device[r.id])
-                                del Manager.components_for_device[r.id]
-                                del Manager.nodes[r.id]
-                                log.info('Device {0} removed'.format(r.id))
+                            self.delete_object(r.id)
                         else:
                             log.warn('Device {0} not found'.format(r.id))
 
@@ -349,11 +354,6 @@ class Manager(AbstractManager):
                             Manager.components[r.id].call_function()
                         else:
                             log.warn('Command {0} not found'.format(r.id))
-
-                except Exit:
-                    self.tasks_pool.shutdown_flag.set()
-                    self.tasks_pool.operation_thread.join()
-                    self.multi_stub.channel.close()
 
                 except Exception, err:
                     log.error(decode_string(err) + '\nstate=' + decode_string(r.state))

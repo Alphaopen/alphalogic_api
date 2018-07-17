@@ -68,3 +68,7 @@ class TasksPool(object):
 
     def add_task(self, time_stamp, task):
         self.queue_tasks.put((time_stamp, task))
+
+    def stop_operation_thread(self):
+        self.shutdown_flag.set()
+        self.operation_thread.join()

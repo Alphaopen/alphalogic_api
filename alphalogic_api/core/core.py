@@ -12,13 +12,16 @@
 
 '''
 from __future__ import unicode_literals
-from threading import Lock
+import time
+from threading import Lock, Thread
 from alphalogic_api.core.parameter import Parameter, ParameterString, ParameterBool, ParameterInt
 from alphalogic_api.core.type_attributes import Visible, Access
 from alphalogic_api.core.event import Event
 from alphalogic_api.core.command import Command
 from alphalogic_api.core.manager import Manager
 from alphalogic_api.logger import log
+from alphalogic_api.core.utils import Exit, decode_string
+from alphalogic_api.core.tasks_pool import TasksPool
 
 
 class Device(object):
@@ -87,14 +90,49 @@ class Device(object):
 
 class Root(Device):
     def __init__(self, host, port):
-        self.manager.configure_multi_stub(host + ':' + str(port))
-        id_root = self.manager.root()
-        type_device = self.manager.get_type(id_root)
-        super(Root, self).__init__(type_device, id_root)
+        try:
+            self.joinable = False
+            self.manager.configure_multi_stub(host + ':' + str(port))
+            id_root = self.manager.root()
+            type_device = self.manager.get_type(id_root)
+            super(Root, self).__init__(type_device, id_root)
+            self.init(id_root)
+            self.joinable = True
+        except Exception, err:
+            log.error(decode_string(err))
+            self.manager.tasks_pool.stop_operation_thread()
+
+    def init(self, id_root):
+        list_id_device_exist = []
+        self.manager.get_all_device(id_root, list_id_device_exist)
+        list_need_to_delete = set(Manager.nodes.keys()) - set(list_id_device_exist)
+        map(lambda x: self.manager.delete_object(x), list_need_to_delete)
         Manager.components_for_device[id_root] = []
         self.manager.prepare_for_work(self, id_root)
         self.manager.prepare_existing_devices(id_root)
 
     def join(self):
-        self.manager.join()
+        if self.joinable:
+            is_connected = True
+            while True:
+                try:
+                    if is_connected:
+                        self.manager.join()
+                        is_connected = False
+                        self.manager.tasks_pool.stop_operation_thread()
+                        self.manager.g_thread.join()
+                        self.manager.g_thread = Thread(target=self.manager.grpc_thread)
+                        self.manager.tasks_pool = TasksPool()
+                    time.sleep(1)
+                    id_root = self.manager.root()
+                    self.init(id_root)
+                    is_connected = True
+                except Exit:
+                    self.manager.tasks_pool.stop_operation_thread()
+                    self.manager.multi_stub.channel.close()
+                    if self.manager.g_thread.is_alive():
+                        self.manager.g_thread.join()
+                    break
+                except Exception, err:
+                    log.error(decode_string(err))
 
