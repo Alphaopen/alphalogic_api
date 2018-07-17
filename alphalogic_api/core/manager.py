@@ -256,8 +256,9 @@ class Manager(AbstractManager):
         Manager.components_for_device[object_id].append(id_command)
 
     def configure_commands(self, object, object_id):
-        for name in object.commands:
-            command = object.commands[name]
+        list_commands = filter(lambda attr: type(getattr(object, attr)) is Command, dir(object))
+        for name in list_commands:
+            command = object.__dict__[name]
             self.create_command(name, command, object_id)
 
     def configure_single_event(self, name, event, object_id):

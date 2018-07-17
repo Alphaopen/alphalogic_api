@@ -149,7 +149,7 @@ def command(*argv_c, **kwargs_c):
     def decorator(func):
         def wrapped(device, *argv, **kwargs):
             result = func(device, *argv, **kwargs)
-            device.commands[wrapped.function_name].set_result(result)
+            device.__dict__[wrapped.function_name].set_result(result)
             return result
         command_preparation(wrapped, func, **kwargs_c)
         return wrapped

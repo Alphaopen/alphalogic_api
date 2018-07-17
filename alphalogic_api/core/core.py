@@ -23,7 +23,8 @@ from alphalogic_api.logger import log
 
 class Device(object):
     """
-    Node with parameters, commands, events and run functions
+    Node with parameters, commands, events and run functions.
+    Parameters, commands, events can't be with same name.
     """
     manager = Manager()
 
@@ -43,7 +44,6 @@ class Device(object):
         self.__dict__['log'] = log
         self.__dict__['type'] = type_device
         self.__dict__['id'] = id_device
-        self.__dict__['commands'] = {}
         self.__dict__['flag_removing'] = False
         self.__dict__['mutex'] = Lock()
 
@@ -57,7 +57,7 @@ class Device(object):
                                 hasattr(getattr(self, x), 'result_type')
         list_command_name = filter(is_callable, dir(self))
         for name in list_command_name:
-            self.commands[name] = Command(self, type(self).__dict__[name])
+            self.__dict__[name] = Command(self, type(self).__dict__[name])
 
         # Events
         for name in filter(lambda attr: type(getattr(self, attr)) is Event, dir(self)):
