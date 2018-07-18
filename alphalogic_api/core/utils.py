@@ -6,7 +6,7 @@ import alphalogic_api.protocol.rpc_pb2 as rpc_pb2
 from alphalogic_api.core.type_attributes import Visible, Access, Priority
 from alphalogic_api.logger import log
 import inspect
-
+from alphalogic_api.core.exceptions import Exit
 
 def value_type_field_definer(value_type):
     if 'unicode' in str(value_type):
@@ -138,10 +138,6 @@ def value_from_rpc(value_rpc, value_type):
         pass   # TODO return value_rpc.list
     elif 'tuple' in str(value_type):
         pass   # TODO
-
-
-class Exit(Exception):
-    pass
 
 
 def shutdown(signum, frame):

@@ -1,6 +1,7 @@
 import time
 from alphalogic_api.logger import log
 from alphalogic_api.core.utils import decode_string
+from alphalogic_api.core.exceptions import exception_info
 
 def run(*argv_r, **kwargs_r):
     def decorator(func):
@@ -22,6 +23,7 @@ def run(*argv_r, **kwargs_r):
                         else:
                             device.manager.tasks_pool.add_task(time_finish, getattr(device, func.func_name))
             except Exception, err:
+                exception_info()
                 log.error(decode_string(err))
 
         wrapped.runnable = True

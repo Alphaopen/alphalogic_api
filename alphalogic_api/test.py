@@ -118,6 +118,11 @@ class MyRoot(Root):
     def cmd_return_datetime(self):
         return datetime.datetime.utcnow()
 
+    @command(result_type=bool)
+    def cmd_exception(self):
+        raise Exception('fire!')
+        return True
+
     #
     @command(result_type=bool, which=(1, 2, 3), which2=((True, 'On'), (False, 'Off')))
     def relax(self, where='room', why=42, which=2, which2=False):
@@ -165,14 +170,11 @@ class Controller(Device):
 # python loop
 root = MyRoot(host, port)
 
-cmds = root.commands()
 # Parameters
 try:
     root.parameter('asgasdgg')
     assert False, 'ComponentNotFound doesnt\' works'
 except ComponentNotFound, err:
-    pass
-except RequestError, err: # TODO убрать, как починят адаптеры
     pass
 
 pars = root.parameters()
@@ -188,8 +190,6 @@ try:
     assert False, 'ComponentNotFound doesnt\' works'
 except ComponentNotFound, err:
     pass
-except RequestError, err: # TODO убрать, как починят адаптеры
-    pass
 
 events = root.events()
 assert list(x.name() == 'alarm' for x in events)
@@ -202,9 +202,8 @@ try:
     assert False, 'ComponentNotFound doesnt\' works'
 except ComponentNotFound, err:
     pass
-except RequestError, err:  # TODO убрать, как починят адаптеры
-    pass
 
+cmds = root.commands()
 assert list(x.name() == 'cmd_simple_event' for x in cmds)
 cmd = root.command('cmd_simple_event')
 cmd = root.command('check')

@@ -14,7 +14,7 @@ from alphalogic_api.core.tasks_pool import TasksPool
 from alphalogic_api.core.parameter import ParameterDouble
 from alphalogic_api.core.utils import Exit, shutdown, decode_string
 from alphalogic_api.core.type_attributes import Visible
-from alphalogic_api.core.exceptions import ComponentNotFound
+from alphalogic_api.core.exceptions import ComponentNotFound, exception_info
 
 
 class AbstractManager(object):
@@ -352,15 +352,19 @@ class Manager(AbstractManager):
                     elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
                         if r.id in Manager.components:
                             if Manager.components[r.id].callback:
-                                param = Manager.components[r.id]  # TODO check
-                                device = Manager.nodes[param.owner()]  # TODO check
-                                Manager.components[r.id].callback(device, param)
+                                try:
+                                    param = Manager.components[r.id]  # TODO check
+                                    device = Manager.nodes[param.owner()]  # TODO check
+                                    Manager.components[r.id].callback(device, param)
+                                except Exception, err:
+                                    exception_info()
+                                    log.error('After set parameter value callback error' + decode_string(err))
                         else:
                             log.warn('Parameter {0} not found'.format(r.id))
 
                     elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
                         if r.id in Manager.components:
-                            Manager.components[r.id].call_function()
+                            Manager.components[r.id].call_function()  # try except inside
                         else:
                             log.warn('Command {0} not found'.format(r.id))
 
@@ -370,10 +374,12 @@ class Manager(AbstractManager):
                     self.multi_stub.channel.close()
 
                 except Exception, err:
+                    exception_info()
                     log.error(decode_string(err) + '\nstate=' + decode_string(r.state))
 
                 finally:
                     self.multi_stub.stub_adapter.ack(ack)
 
         except Exception, err:
+            exception_info()
             log.error(decode_string(err))
