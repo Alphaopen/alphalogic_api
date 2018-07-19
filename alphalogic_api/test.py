@@ -152,6 +152,13 @@ class MyRoot(Root):
             raise Exception('exception in run')
         self.run2_event.emit()
 
+    run4_event = MajorEvent()
+
+    @run(period_d=1)
+    def run_four(self):
+        time.sleep(5)
+        self.run4_event.emit()
+
 
 class Controller(Device):
 
