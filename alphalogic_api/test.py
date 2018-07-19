@@ -56,6 +56,7 @@ class MyRoot(Root):
     param_vect = ParameterInt(default=1, choices=(0, 1, 2, 3))
     param_vect2 = ParameterInt(default=2, choices=((0, 'str 77'), (1, 'str 88'), (2, 'str 2'), (3, 'str 3')))
 
+
     alarm = MajorEvent(('where', unicode),
                        ('when', datetime.datetime),
                        ('why', int))
@@ -130,13 +131,26 @@ class MyRoot(Root):
                       + u'; which=' + unicode(which) + u'; which2=' + unicode(which2))
         return True
 
-    @run(period_a=10)
-    def run_two(self):
-        self.log.info(unicode(self.id) + ' a_run')
+    counter = ParameterInt(default=0)
 
-    @run(period_b=24)
+    @run(period_a=1)
     def run_one(self):
-        self.log.info(unicode(self.id) + ' b_run')
+        self.counter.val += 1
+
+    run_event = MajorEvent()
+
+    @run(period_b=2)
+    def run_two(self):
+        self.run_event.emit()
+
+    run2_event = MajorEvent()
+    param_run_exception = ParameterBool(default=False)
+
+    @run(period_c=2)
+    def run_three(self):
+        if self.param_run_exception.val:
+            raise Exception('exception in run')
+        self.run2_event.emit()
 
 
 class Controller(Device):

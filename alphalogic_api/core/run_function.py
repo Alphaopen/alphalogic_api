@@ -10,7 +10,12 @@ def run(*argv_r, **kwargs_r):
                 with device.mutex:
                     if not device.flag_removing:
                         time_start = time.time()
-                        func(device)
+
+                        try:
+                            func(device)
+                        except Exception, err:
+                            log.error(u'Run function exception: ' + decode_string(err))
+
                         time_finish = time.time()
                         time_spend = time_finish-time_start
                         log.info('run function {0} of device {2} was executed for {1} seconds'.
