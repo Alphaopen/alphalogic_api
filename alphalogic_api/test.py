@@ -133,20 +133,20 @@ class MyRoot(Root):
 
     counter = ParameterInt(default=0)
 
-    @run(period_a=1)
+    @run(period_one=1)
     def run_one(self):
         self.counter.val += 1
 
     run_event = MajorEvent()
 
-    @run(period_b=2)
+    @run(period_two=2)
     def run_two(self):
         self.run_event.emit()
 
     run2_event = MajorEvent()
     param_run_exception = ParameterBool(default=False)
 
-    @run(period_c=2)
+    @run(period_three=2)
     def run_three(self):
         if self.param_run_exception.val:
             raise Exception('exception in run')
@@ -154,9 +154,10 @@ class MyRoot(Root):
 
     run4_event = MajorEvent()
 
-    @run(period_d=1)
+    @run(period_four=1)
     def run_four(self):
-        time.sleep(5)
+        # Тормозит все остальные run
+        #time.sleep(5)
         self.run4_event.emit()
 
 
