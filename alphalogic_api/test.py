@@ -15,6 +15,7 @@ from alphalogic_api.core.parameter import Parameter, ParameterBool, ParameterInt
 from alphalogic_api.core import utils
 from alphalogic_api.core.run_function import run
 from alphalogic_api import host, port
+from alphalogic_api.core.exceptions import ComponentNotFound, RequestError
 
 '''
 Не забыть важные моменты:
@@ -54,6 +55,7 @@ class MyRoot(Root):
     param_hid = ParameterDouble(default=2.2, visible=Visible.hidden)
     param_vect = ParameterInt(default=1, choices=(0, 1, 2, 3))
     param_vect2 = ParameterInt(default=2, choices=((0, 'str 77'), (1, 'str 88'), (2, 'str 2'), (3, 'str 3')))
+
 
     alarm = MajorEvent(('where', unicode),
                        ('when', datetime.datetime),
@@ -99,17 +101,15 @@ class MyRoot(Root):
         raise Exception("command failed")
         return False
 
-    # Проверка возвращаемых значений
+    # Check Command return
 
     @command(result_type=int)
     def cmd_return_int(self):
-        ret = int(utils.milliseconds_from_epoch(datetime.datetime.utcnow()) / 1000.0)
-        return ret
+        return int(utils.milliseconds_from_epoch(datetime.datetime.utcnow()) / 1000.0)
 
     @command(result_type=float)
     def cmd_return_float(self):
-        ret = int(utils.milliseconds_from_epoch(datetime.datetime.utcnow()) % 1000.0) / 1000.0
-        return ret
+        return int(utils.milliseconds_from_epoch(datetime.datetime.utcnow()) % 1000.0) / 1000.0
 
     @command(result_type=unicode)
     def cmd_return_unicode(self):
@@ -119,6 +119,11 @@ class MyRoot(Root):
     def cmd_return_datetime(self):
         return datetime.datetime.utcnow()
 
+    @command(result_type=bool)
+    def cmd_exception(self):
+        raise Exception('fire!')
+        return True
+
     #
     @command(result_type=bool, which=(1, 2, 3), which2=((True, 'On'), (False, 'Off')))
     def relax(self, where='room', why=42, which=2, which2=False):
@@ -126,13 +131,26 @@ class MyRoot(Root):
                       + u'; which=' + unicode(which) + u'; which2=' + unicode(which2))
         return True
 
-    @run(period_a=10)
-    def run_two(self):
-        self.log.info(unicode(self.id) + ' a_run')
+    counter = ParameterInt(default=0)
 
-    @run(period_b=24)
+    @run(period_a=1)
     def run_one(self):
-        self.log.info(unicode(self.id) + ' b_run')
+        self.counter.val += 1
+
+    run_event = MajorEvent()
+
+    @run(period_b=2)
+    def run_two(self):
+        self.run_event.emit()
+
+    run2_event = MajorEvent()
+    param_run_exception = ParameterBool(default=False)
+
+    @run(period_c=2)
+    def run_three(self):
+        if self.param_run_exception.val:
+            raise Exception('exception in run')
+        self.run2_event.emit()
 
 
 class Controller(Device):
@@ -164,41 +182,80 @@ class Controller(Device):
 
 
 # python loop
-adapter = MyRoot(host, port)
+root = MyRoot(host, port)
+
+# Parameters
+try:
+    root.parameter('asgasdgg')
+    assert False, 'ComponentNotFound doesnt\' works'
+except ComponentNotFound, err:
+    pass
+
+pars = root.parameters()
+assert list(x.name() == 'param_bool' for x in pars)
+param = root.parameter('param_bool')
+assert not param.val
+param = root.parameter('param_int')
+assert param.val == 2
+
+# Events
+try:
+    root.event('asgasdgg')
+    assert False, 'ComponentNotFound doesnt\' works'
+except ComponentNotFound, err:
+    pass
+
+events = root.events()
+assert list(x.name() == 'alarm' for x in events)
+ev = root.event('alarm')
+
+# Commands
+
+try:
+    root.command('asgasdgg')
+    assert False, 'ComponentNotFound doesnt\' works'
+except ComponentNotFound, err:
+    pass
+
+cmds = root.commands()
+assert list(x.name() == 'cmd_simple_event' for x in cmds)
+cmd = root.command('cmd_simple_event')
+cmd = root.command('check')
+
+root.join()
 
 
 '''
-assert adapter.param_string.val == 'noop'
-assert adapter.param_string.is_setup()
-assert not adapter.param_bool.val
-assert adapter.param_bool.is_common()
-assert adapter.param_int.val == 2
-assert adapter.param_int.is_runtime()
-assert adapter.param_int.is_read_only()
-assert adapter.param_double.val == 2.3
-assert adapter.param_double.is_runtime(), 'default wrong'
-assert adapter.param_double.is_read_write(), 'default wrong'
-#assert (datetime.datetime.now() - adapter.param_timestamp.val).total_seconds() < 10
+assert root.param_string.val == 'noop'
+assert root.param_string.is_setup()
+assert not root.param_bool.val
+assert root.param_bool.is_common()
+assert root.param_int.val == 2
+assert root.param_int.is_runtime()
+assert root.param_int.is_read_only()
+assert root.param_double.val == 2.3
+assert root.param_double.is_runtime(), 'default wrong'
+assert root.param_double.is_read_write(), 'default wrong'
+#assert (datetime.datetime.now() - root.param_timestamp.val).total_seconds() < 10
 
-#assert adapter.param_vect.val == (0, 1, 2, 3)
+#assert root.param_vect.val == (0, 1, 2, 3)
 
 
-adapter.param_double.val = 5.0
-assert adapter.param_double.val == 5.0
+root.param_double.val = 5.0
+assert root.param_double.val == 5.0
 
 #check read_only
 #try:
-#    adapter.param_int.val = 3
+#    root.param_int.val = 3
 #    assert False
 #except Exception:
 #    pass
 
 
 #adapter.relax(1, 2, 3, 4)
+
+root.simple_event.emit()
+
+root.alarm.set_time(int(time.time()) * 1000 - 100000)
+root.alarm.emit(where='asdadsadg', why=3, when=datetime.datetime.now())
 '''
-
-adapter.simple_event.emit()
-
-adapter.alarm.set_time(int(time.time()) * 1000 - 100000)
-adapter.alarm.emit(where='asdadsadg', why=3, when=datetime.datetime.now())
-adapter.join()

@@ -12,7 +12,7 @@ class Logger(object):
         log = getLogger('')
 
         if args.log_level == 'off':
-            log.setLevel(CRITICAL)  # иначе сообщение, что нет хэндлеров
+            log.setLevel(CRITICAL)  # otherwise warning message 'no handlers'
         else:
             log.setLevel(getLevelName(args.log_level.upper()))
 
@@ -31,10 +31,10 @@ class Logger(object):
 
             log.addHandler(fh)
 
-            # Задействовать консоль для вывода лога
+            # Use console for log output
             console = sys.stderr
             if console is not None:
-                # Вывод лога производится и на консоль и в файл (одновременно)
+                # Logging to console and file both
                 console = StreamHandler(console)
                 console.setLevel(getLevelName(args.log_level.upper()))
                 console.setFormatter(formatter)

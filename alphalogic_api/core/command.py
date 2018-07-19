@@ -5,6 +5,7 @@ import alphalogic_api.protocol.rpc_pb2 as rpc_pb2
 from alphalogic_api.core.multistub import MultiStub
 import alphalogic_api.core.utils as utils
 from alphalogic_api.logger import log
+from alphalogic_api.core.exceptions import exception_info
 
 
 class AbstractCommand(object):
@@ -12,15 +13,15 @@ class AbstractCommand(object):
     def _call(self, func_name, *args, **kwargs):
         return self.multi_stub.command_call(func_name, id=self.id, *args, **kwargs)
 
-    def get_name(self):
+    def name(self):
         answer = self._call('name')
         return answer.name
 
-    def get_display_name(self):
+    def display_name(self):
         answer = self._call('display_name')
         return answer.display_name
 
-    def get_desc(self):
+    def desc(self):
         answer = self._call('desc')
         return answer.desc
 
@@ -118,16 +119,20 @@ class Command(AbstractCommand):
                 info.append('{0}({1}): {2}'.format(name_arg, type_arg, function_dict[name_arg]))
 
             log.info('Execute command \'{0}\' with arguments [{1}] from device \'{2}\''
-                     .format(self.get_name(), '; '.join(info), self.device.id))
+                     .format(self.name(), '; '.join(info), self.device.id))
             self.function(self.device, **function_dict)
 
         except Exception, err:
+            exception_info()
             reason = utils.decode_string(err)
-            log.info('Command \'{0}\' raise exception: '.format(self.get_name(), reason))
+            log.info('Command \'{0}\' raise exception: \'{1}\''.format(self.name(), reason))
             self.set_exception(reason)
 
 
-def command_preparation(wrapped, func, **kwargs_c): #В этой функции задаются возвращаемое значение команды и ее аргументы
+def command_preparation(wrapped, func, **kwargs_c):
+    """
+    Return value and command arguments setup
+    """
     wrapped.result_type = kwargs_c['result_type']
     (args, varargs, keywords, defaults) = inspect.getargspec(func)
     wrapped.__dict__['arguments'] = []
@@ -146,7 +151,7 @@ def command(*argv_c, **kwargs_c):
     def decorator(func):
         def wrapped(device, *argv, **kwargs):
             result = func(device, *argv, **kwargs)
-            device.commands[wrapped.function_name].set_result(result)
+            device.__dict__[wrapped.function_name].set_result(result)
             return result
         command_preparation(wrapped, func, **kwargs_c)
         return wrapped

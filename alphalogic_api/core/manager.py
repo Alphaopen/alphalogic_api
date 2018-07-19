@@ -7,12 +7,14 @@ import alphalogic_api.protocol.rpc_pb2 as rpc_pb2
 from alphalogic_api.core.multistub import MultiStub
 from alphalogic_api.core.parameter import Parameter
 from alphalogic_api.core.event import Event
+from alphalogic_api.core.command import Command
 from alphalogic_api.core import utils
 from alphalogic_api.logger import log
 from alphalogic_api.core.tasks_pool import TasksPool
 from alphalogic_api.core.parameter import ParameterDouble
 from alphalogic_api.core.utils import Exit, shutdown, decode_string
 from alphalogic_api.core.type_attributes import Visible
+from alphalogic_api.core.exceptions import ComponentNotFound, exception_info
 
 
 class AbstractManager(object):
@@ -148,10 +150,10 @@ class AbstractManager(object):
 
 
 class Manager(AbstractManager):
-    dict_type_objects = {}  # По type можно определить соответсвующий класс для создания
-    nodes = {}  # Список всех узлов, по id узла можно обратиться в словаре к узлу
-    components = {}  # По id команды можно обратиться к параметрам, событиям, командам
-    components_for_device = {}  # По id устройства можно определить id его компонент
+    dict_type_objects = {}  # Dictionary of nodes classes. 'type' as a key
+    nodes = {}  # Nodes dictionary. 'id' as a key
+    components = {}  # All commands, parameters, events dictionary. 'id' as a key
+    components_for_device = {}  # All commands, parameters, events of node. Node 'id' as a key
 
     def __init__(self):
         signal.signal(signal.SIGTERM, shutdown)
@@ -272,8 +274,9 @@ class Manager(AbstractManager):
         Manager.components_for_device[object_id].append(id_command)
 
     def configure_commands(self, object, object_id):
-        for name in object.commands:
-            command = object.commands[name]
+        list_commands = filter(lambda attr: type(getattr(object, attr)) is Command, dir(object))
+        for name in list_commands:
+            command = object.__dict__[name]
             self.create_command(name, command, object_id)
 
     def configure_single_event(self, name, event, object_id):
@@ -293,6 +296,18 @@ class Manager(AbstractManager):
             event = object.__dict__[name]
             self.configure_single_event(name, event, object_id)
 
+    def get_components(self, object_id, component_type):
+        ids = getattr(self, component_type)(id_object=object_id)
+        #  Component in the adapter, but not in the alphalogic_api is OK. Reject.
+        return list(self.components[id] for id in ids if id in self.components)
+
+    def get_component_by_name(self, name, object_id, component_type):
+        id = getattr(self, component_type)(id_object=object_id, name=name)
+        if id in self.components:
+            return self.components[id]
+        raise ComponentNotFound(u'Can not found \'{}\' in the \'{}\' (id={})'
+                                .format(name, self.nodes[object_id].type, object_id))
+
     def configure_run_function(self, object, object_id, list_id_parameters_already_exists):
         for name in object.run_function_names:
             time_stamp = time.time()
@@ -311,15 +326,14 @@ class Manager(AbstractManager):
 
     def join(self):
         self.g_thread.start()
-        while True:  # главный тред, который нужен для того, чтобы можно было завершит остальные
-            time.sleep(0.1)  # цикл прерывается при посылке сигнала SIGINT
+        while True:
+            time.sleep(0.1)
             if not (self.g_thread.is_alive()):
                 break
 
     def grpc_thread(self):
         """
-        Бесконечный цикл: получаем состояние от адаптера.
-        :return:
+        Infinity loop: get state from adapter
         """
         try:
             for r in self.multi_stub.stub_adapter.states(rpc_pb2.Empty()):
@@ -343,23 +357,29 @@ class Manager(AbstractManager):
                     elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
                         if r.id in Manager.components:
                             if Manager.components[r.id].callback:
-                                param = Manager.components[r.id]  # TODO check
-                                device = Manager.nodes[param.owner()]  # TODO check
-                                Manager.components[r.id].callback(device, param)
+                                try:
+                                    param = Manager.components[r.id]  # TODO check
+                                    device = Manager.nodes[param.owner()]  # TODO check
+                                    Manager.components[r.id].callback(device, param)
+                                except Exception, err:
+                                    exception_info()
+                                    log.error('After set parameter value callback error' + decode_string(err))
                         else:
                             log.warn('Parameter {0} not found'.format(r.id))
 
                     elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
                         if r.id in Manager.components:
-                            Manager.components[r.id].call_function()
+                            Manager.components[r.id].call_function()  # try except inside
                         else:
                             log.warn('Command {0} not found'.format(r.id))
 
                 except Exception, err:
+                    exception_info()
                     log.error(decode_string(err) + '\nstate=' + decode_string(r.state))
 
                 finally:
                     self.multi_stub.stub_adapter.ack(ack)
 
         except Exception, err:
+            exception_info()
             log.error(decode_string(err))

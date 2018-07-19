@@ -2,25 +2,26 @@
 from __future__ import unicode_literals
 import grpc
 from alphalogic_api.logger import log
+from alphalogic_api.core.exceptions import IncorrectRPCRequest, RequestError, ComponentNotFound
 
 from alphalogic_api.protocol.rpc_pb2 import (
-ObjectRequest,
-ParameterRequest,
-EventRequest,
-CommandRequest
+    ObjectRequest,
+    ParameterRequest,
+    EventRequest,
+    CommandRequest
 )
 
 from alphalogic_api.protocol.rpc_pb2_grpc import (
-ObjectServiceStub,
-ParameterServiceStub,
-EventServiceStub,
-CommandServiceStub,
-AdapterServiceStub,
-ObjectServiceServicer,
-ParameterServiceServicer,
-EventServiceServicer,
-CommandServiceServicer,
-AdapterServiceServicer
+    ObjectServiceStub,
+    ParameterServiceStub,
+    EventServiceStub,
+    CommandServiceStub,
+    AdapterServiceStub,
+    ObjectServiceServicer,
+    ParameterServiceServicer,
+    EventServiceServicer,
+    CommandServiceServicer,
+    AdapterServiceServicer
 )
 
 
@@ -44,7 +45,10 @@ class MultiStub(object):
 
     @staticmethod
     def dict_create_helper(service):
-        is_callable = lambda x: callable(getattr(service, x)) and not x.startswith('_')  # получить методы Service, исключая служебные
+        """
+        Get Service methods excluded _
+        """
+        is_callable = lambda x: callable(getattr(service, x)) and not x.startswith('_')
         return set(filter(is_callable, dir(service)))
 
     def object_call(self, *args, **kwargs):
@@ -65,10 +69,16 @@ class MultiStub(object):
 
     def call_helper(self, function_name, *args, **kwargs):
         if function_name in kwargs['fun_set']:  # function_name - check availability
-            answer = getattr(kwargs['stub'], function_name)(kwargs['request'])
-            return reduce(lambda acc, x: getattr(answer, x), args, answer)  # recursive search
+            try:
+                answer = getattr(kwargs['stub'], function_name)(kwargs['request'])
+                return reduce(lambda acc, x: getattr(answer, x), args, answer)  # recursive search
+
+            except grpc.RpcError, err:
+                if err.code() == grpc.StatusCode.NOT_FOUND:
+                    raise ComponentNotFound(err.message)
+                raise RequestError(u'gRPC request failed (code={}): {}'.format(grpc.StatusCode.UNKNOWN, err.message))
         else:
-            raise Exception('{0} not found in {1}'.format(function_name, kwargs['fun_set']))
+            raise IncorrectRPCRequest('{0} not found in {1}'.format(function_name, kwargs['fun_set']))
 
 
 log.info("static MultiStub initialization")

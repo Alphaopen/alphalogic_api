@@ -26,7 +26,8 @@ from alphalogic_api.core.tasks_pool import TasksPool
 
 class Device(object):
     """
-    type - ссылка на реализацию
+    Node with parameters, commands, events and run functions.
+    Parameters, commands, events can't be with same name.
     """
     manager = Manager()
 
@@ -46,35 +47,54 @@ class Device(object):
         self.__dict__['log'] = log
         self.__dict__['type'] = type_device
         self.__dict__['id'] = id_device
-        self.__dict__['commands'] = {}
         self.__dict__['flag_removing'] = False
         self.__dict__['mutex'] = Lock()
 
-        #Параметры
+        # Parameters
         list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
         for name in list_parameters_name:
             self.__dict__[name] = type(self).__dict__[name] if name in type(self).__dict__ else Device.__dict__[name]
 
-        #Команды
+        # Commands
         is_callable = lambda x: callable(getattr(self, x)) and not x.startswith('_') and\
                                 hasattr(getattr(self, x), 'result_type')
         list_command_name = filter(is_callable, dir(self))
         for name in list_command_name:
-            self.commands[name] = Command(self, type(self).__dict__[name])
+            self.__dict__[name] = Command(self, type(self).__dict__[name])
 
-        #События
+        # Events
         for name in filter(lambda attr: type(getattr(self, attr)) is Event, dir(self)):
             self.__dict__[name] = type(self).__dict__[name]
 
-        #run функции
+        # Run functions
         is_runnable = lambda x: callable(getattr(self, x)) and not x.startswith('_') and\
                                 hasattr(getattr(self, x), 'runnable')
         self.__dict__['run_function_names'] = filter(is_runnable, dir(self))
 
+    def parameters(self):
+        return self.manager.get_components(self.id, 'parameters')
+
+    def events(self):
+        return self.manager.get_components(self.id, 'events')
+
+    def commands(self):
+        return self.manager.get_components(self.id, 'commands')
+
+    def parameter(self, name):
+        return self.manager.get_component_by_name(name, self.id, 'parameter')
+
+    def event(self, name):
+        return self.manager.get_component_by_name(name, self.id, 'event')
+
+    def command(self, name):
+        return self.manager.get_component_by_name(name, self.id, 'command')
+
+
+
     '''
     def __getattr__(self, name):
         return self.__dict__[name]
-
+     
     def __setattr__(self, name, value):
         if issubclass(type(value), Parameter):
             self.parameters.append(name)

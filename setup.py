@@ -9,9 +9,9 @@ import platform
 from setuptools import setup
 
 
-VERSION_MAJOR = 0  # (Версия системы)
-VERSION_MINOR = 0  # (Версия тестов)
-BUILD_NUMBER = 1   # (Версия "заплаток")
+VERSION_MAJOR = 0  # (System version)
+VERSION_MINOR = 0  # (Tests version)
+BUILD_NUMBER = 1   # (Issues version)
 
 stub_version = '%d.%d.%d' % (VERSION_MAJOR, VERSION_MINOR, BUILD_NUMBER)
 
