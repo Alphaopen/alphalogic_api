@@ -118,7 +118,7 @@ class AbstractParameter(object):
     def enums(self):
         answer = self._call('enums')
         value_type_proto = utils.value_type_field_definer(self.value_type)
-        return [(key, getattr(answer.enums[key], value_type_proto)) for key in answer.enums]
+        return [(getattr(answer.enums[key], value_type_proto), key) for key in answer.enums]
 
     def set_enum(self, value, enum_name):
         value_type_proto = utils.value_type_field_definer(self.value_type)

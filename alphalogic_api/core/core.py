@@ -13,6 +13,7 @@
 '''
 from __future__ import unicode_literals
 import time
+import sys
 from threading import Lock, Thread
 from alphalogic_api.core.parameter import Parameter, ParameterString, ParameterBool, ParameterInt
 from alphalogic_api.core.type_attributes import Visible, Access
@@ -34,14 +35,14 @@ class Device(object):
     name = ParameterString(visible=Visible.setup, access=Access.read_only)
     displayName = ParameterString(visible=Visible.setup, access=Access.read_write)
     desc = ParameterString(visible=Visible.setup, access=Access.read_write)
-    type_when_create = ParameterString(visible=Visible.hidden, access=Access.read_write)
+    type_when_create = ParameterString(visible=Visible.hidden, access=Access.read_only)
     isService = ParameterBool(visible=Visible.common, access=Access.read_write)
     version = ParameterString(visible=Visible.setup, access=Access.read_only)
-    connected = ParameterBool(visible=Visible.common, access=Access.read_write)
-    ready_to_work = ParameterBool(visible=Visible.common, access=Access.read_write)
-    error = ParameterBool(visible=Visible.common, access=Access.read_write)
+    connected = ParameterBool(visible=Visible.common, access=Access.read_only)
+    ready_to_work = ParameterBool(visible=Visible.common, access=Access.read_only)
+    error = ParameterBool(visible=Visible.common, access=Access.read_only)
     number_of_errors = ParameterInt(visible=Visible.setup, access=Access.read_write)
-    status = ParameterString(visible=Visible.common, access=Access.read_write)
+    status = ParameterString(visible=Visible.common, access=Access.read_only)
 
     def __init__(self, type_device, id_device):
         self.__dict__['log'] = log
@@ -118,9 +119,13 @@ class Root(Device):
             super(Root, self).__init__(type_device, id_root)
             self.init(id_root)
             self.joinable = True
+        except Exit:
+            self.manager.tasks_pool.stop_operation_thread()
+            sys.exit(2)
         except Exception, err:
             log.error(decode_string(err))
             self.manager.tasks_pool.stop_operation_thread()
+
 
     def init(self, id_root):
         list_id_device_exist = []

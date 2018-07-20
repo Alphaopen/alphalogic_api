@@ -44,9 +44,6 @@ def handle_after_set_double(node, parameter):
 
 
 class MyRoot(Root):
-    name = ParameterString(default='RootNode')
-    displayName = ParameterString(default='RootNode')
-
     param_string = ParameterString(default='noop', visible=Visible.setup)
     param_bool = ParameterBool(default=False, visible=Visible.common)
     param_int = ParameterInt(default=2, visible=Visible.runtime, access=Access.read_only)
@@ -164,9 +161,6 @@ class MyRoot(Root):
 class Controller(Device):
 
     # Parameters:
-    name = ParameterString(value='Controller')
-    displayName = ParameterString(value='Controller')
-
     hostname = ParameterString(visible=Visible.setup, access=Access.read_write, default='1', choices=('1', '2'))
     mode = ParameterBool(visible=Visible.setup, default=True, choices=((True, 'On'), (False, 'Off')))
     version = Parameter(value_type=int, visible=Visible.common)

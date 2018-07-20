@@ -15,6 +15,8 @@ from alphalogic_api.core.parameter import ParameterDouble
 from alphalogic_api.core.utils import Exit, shutdown, decode_string
 from alphalogic_api.core.type_attributes import Visible
 from alphalogic_api.core.exceptions import ComponentNotFound, exception_info
+from alphalogic_api.core.configure_inspector import ConfigureInspector
+from alphalogic_api import args as program_args
 
 
 class AbstractManager(object):
@@ -154,6 +156,7 @@ class Manager(AbstractManager):
     nodes = {}  # Nodes dictionary. 'id' as a key
     components = {}  # All commands, parameters, events dictionary. 'id' as a key
     components_for_device = {}  # All commands, parameters, events of node. Node 'id' as a key
+    inspector = ConfigureInspector()
 
     def __init__(self):
         signal.signal(signal.SIGTERM, shutdown)
@@ -177,7 +180,9 @@ class Manager(AbstractManager):
                                                   - set(list_parameters_name_already_exists))
         # order of call below function is important
         self.configure_run_function(object, id, list_id_parameters_already_exists)
+        list_id_parameters_already_exists = self.parameters(id)
         self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_should_exists)
+        list_id_parameters_already_exists = self.parameters(id)
         self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_already_exists)
         self.configure_commands(object, id)
         self.configure_events(object, id)
@@ -232,29 +237,39 @@ class Manager(AbstractManager):
 
     def create_parameter(self, name, object, object_id, list_id_parameters_already_exists, is_copy=True,
                          parameter=None):
+        list_name_parameters_already_exists = map(lambda id: self.multi_stub.parameter_call('name', 'name', id=id),
+                                                  list_id_parameters_already_exists)
         if is_copy:
             parameter = object.__dict__[name].get_copy()
         object.__dict__[name] = parameter
         parameter.parameter_name = name
         parameter.set_multi_stub(self.multi_stub)
-        value_type = parameter.value_type
-        id_parameter = getattr(self, utils.create_parameter_definer(str(value_type))) \
-            (id_object=object_id, name=name)
-        parameter.id = id_parameter
-        getattr(parameter, parameter.visible.create_func)()
-        getattr(parameter, parameter.access.create_func)()
-        if parameter.choices is not None:
-            parameter.set_choices()
-        if not (id_parameter in list_id_parameters_already_exists):
-            parameter.val = getattr(parameter, 'default', None)
-        elif parameter.choices is not None:
-            is_tuple = type(parameter.choices[0]) is tuple
-            if (is_tuple and not (parameter.val in zip(*parameter.choices)[0])) \
-                    or not is_tuple and not (parameter.val in parameter.choices):
+
+        if not(name in list_name_parameters_already_exists) or program_args.development_mode: # if parameter doesn't exist
+            value_type = parameter.value_type
+            id_parameter = getattr(self, utils.create_parameter_definer(str(value_type))) \
+                (id_object=object_id, name=name)
+            parameter.id = id_parameter
+            getattr(parameter, parameter.visible.create_func)()
+            getattr(parameter, parameter.access.create_func)()
+            if parameter.choices is not None:
+                parameter.set_choices()
+            if not (id_parameter in list_id_parameters_already_exists):
                 parameter.val = getattr(parameter, 'default', None)
+            elif parameter.choices is not None:
+                is_tuple = type(parameter.choices[0]) is tuple
+                if (is_tuple and not (parameter.val in zip(*parameter.choices)[0])) \
+                        or not is_tuple and not (parameter.val in parameter.choices):
+                    parameter.val = getattr(parameter, 'default', None)
+        elif name in list_name_parameters_already_exists and not program_args.development_mode:
+            id_parameter = self.parameter(object_id, name)
+            parameter.id = id_parameter
+            Manager.inspector.check_parameter_accordance(parameter)
+
         if is_copy:
             Manager.components[id_parameter] = parameter
             Manager.components_for_device[object_id].append(id_parameter)
+
 
     def configure_parameters(self, object, object_id, list_id_parameters_already_exists, list_names):
         for name in list_names:
