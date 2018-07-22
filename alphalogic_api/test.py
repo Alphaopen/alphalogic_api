@@ -185,7 +185,7 @@ class Controller(Device):
 
 # python loop
 root = MyRoot(host, port)
-
+root.alarm.emit(where='asdadsadg', why=3, when=datetime.datetime.now())
 # Parameters
 try:
     root.parameter('asgasdgg')

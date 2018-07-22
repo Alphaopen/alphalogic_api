@@ -295,13 +295,21 @@ class Manager(AbstractManager):
             self.create_command(name, command, object_id)
 
     def configure_single_event(self, name, event, object_id):
+        list_name_events_already_exists = map(lambda id: self.multi_stub.event_call('name', 'name', id=id),
+                                                  self.events(object_id))
         event.set_multi_stub(self.multi_stub)
-        event.id = self.create_event(id_object=object_id, name=name)
-        getattr(event, event.priority.create_func)()
-        event.clear()
-        for name_arg, value_type in event.arguments:
-            value_arg = utils.value_from_rpc(utils.get_rpc_value(value_type), value_type)
-            event.set_argument(name_arg, value_arg)
+        if not(name in list_name_events_already_exists) or program_args.development_mode: # if event doesn't exist
+            event.id = self.create_event(id_object=object_id, name=name)
+            getattr(event, event.priority.create_func)()
+            event.clear()
+            for name_arg, value_type in event.arguments:
+                value_arg = utils.value_from_rpc(utils.get_rpc_value(value_type), value_type)
+                event.set_argument(name_arg, value_arg)
+        elif name in list_name_events_already_exists and not program_args.development_mode:
+            id_event = self.event(object_id, name)
+            event.id = id_event
+            Manager.inspector.check_event_accordance(event)
+
         Manager.components[event.id] = event
         Manager.components_for_device[object_id].append(event.id)
 

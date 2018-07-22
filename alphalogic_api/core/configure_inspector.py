@@ -76,3 +76,55 @@ class ConfigureInspector(object):
 
 
         #if parameter_model.has_e
+
+    def is_event_exist(self, name, object):
+        try:
+            event = object.event(name)
+            return event
+        except Exception, err:
+            return None
+
+    def check_event_accordance(self, event_model):
+        try:
+            id_event = event_model.id
+            #1 check priority
+            if event_model.priority == Priority.blocker and not(event_model.is_blocker()):
+                raise Exception('Real and model priority are different')
+            elif event_model.priority == Priority.critical and not(event_model.is_critical()):
+                raise Exception('Real and model priority are different')
+            elif event_model.priority == Priority.major and not(event_model.is_major()):
+                raise Exception('Real and model priority are different')
+            elif event_model.priority == Priority.minor and not(event_model.is_minor()):
+                raise Exception('Real and model priority are different')
+
+
+            #2 enums
+            # Можно проверить только на соотвествие имен
+            model_choices = list(zip(*event_model.arguments)[0])
+            real_choices = event_model.argument_list()
+            if model_choices != real_choices:
+                raise Exception('Real and model arguments are different')
+            '''
+            if model_choices is None and len(real_choices)!=0:
+                raise Exception('Real and model enums are different')
+            elif model_choices is not None:
+                if len(model_choices) != len(real_choices):
+                    raise Exception('Real and model enums are different')
+                else:
+                    if type(model_choices[0]) is not tuple:
+                        model_vals = sorted(model_choices)
+                        real_vals  = sorted(zip(*real_choices)[0])
+                        if model_vals != real_vals:
+                            raise Exception('Real and model enums are different')
+                    else:
+                        model_vals, model_keys = zip(*model_choices)
+                        model_vals, model_keys = sorted(model_vals), sorted(model_keys)
+                        real_vals, real_keys = zip(*real_choices)
+                        real_vals, real_keys = sorted(real_vals), sorted(real_keys)
+                        if model_vals != real_vals or model_keys != real_keys:
+                            raise Exception('Real and model enums are different')
+            '''
+        except Exception, err:
+            exception_info()
+            log.error('Parameter discrepancy {0}'.format(event_model.name()))
+            raise Exit

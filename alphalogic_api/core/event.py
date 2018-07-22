@@ -78,6 +78,10 @@ class AbstractEvent(object):
     def clear(self):
         self._call('clear')
 
+    def argument_list(self):
+        answer = self._call('argument_list')
+        return answer.names
+
     def set_argument(self, name_arg, value):
         value_type = utils.value_field_definer(value)
 
