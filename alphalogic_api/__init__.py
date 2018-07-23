@@ -28,5 +28,10 @@ if args.help:
     print parser.format_help()
     sys.exit(1)
 
+if args.development_mode:
+    print '* * * * * * * * * * * * * * * * * *\n' \
+          '* * * !! DEVELOPMENT MODE !!  * * *\n' \
+          '* * * * * * * * * * * * * * * * * *'
+
 host = args.h
 port = args.p

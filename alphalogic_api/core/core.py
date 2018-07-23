@@ -118,19 +118,17 @@ class Root(Device):
             id_root = self.manager.root()
             type_device = self.manager.get_type(id_root)
             super(Root, self).__init__(type_device, id_root)
-            self.log.info('Root connect to ' + host + ':' + unicode(port))
+            self.log.info('Connecting to ' + host + ':' + unicode(port))
             self.init(id_root)
             self.joinable = True
             self.log.info('Root connected OK')
-
-        except Exit:
-            self.manager.tasks_pool.stop_operation_thread()
-            sys.exit(2)
 
         except Exception, err:
             exception_info()
             log.error(decode_string(err))
             self.manager.tasks_pool.stop_operation_thread()
+            sys.exit(2)
+
 
     def init(self, id_root):
         list_id_device_exist = []
