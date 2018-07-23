@@ -109,7 +109,7 @@ class AbstractParameter(object):
 
     def get(self):
         answer = self._call('get')
-        return utils.value_from_rpc(answer.value, self.value_type)
+        return utils.value_from_rpc(answer.value)
 
     def set(self, value):
         value_rpc = utils.get_rpc_value(self.value_type, value)

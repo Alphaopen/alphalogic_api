@@ -82,6 +82,10 @@ class AbstractEvent(object):
         answer = self._call('argument_list')
         return answer.names
 
+    def argument(self, name_argument):
+        answer = self._call('argument', argument=name_argument)
+        return answer.name, answer.value
+
     def set_argument(self, name_arg, value):
         value_type = utils.value_field_definer(value)
 
@@ -90,6 +94,10 @@ class AbstractEvent(object):
             self._call('set_argument', argument=name_arg, value=value_rpc)
         else:
             raise Exception('Event argument type not supported')
+
+    def owner(self):
+        answer = self._call('owner')
+        return answer.owner
 
 
 class Event(AbstractEvent):

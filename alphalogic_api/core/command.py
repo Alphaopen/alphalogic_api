@@ -65,9 +65,9 @@ class AbstractCommand(object):
         answer = self._call('argument_list')
         return answer.names
 
-    def argument(self, name_argument, type_argument):
+    def argument(self, name_argument):
         answer = self._call('argument', argument=name_argument)
-        return utils.value_from_rpc(answer.value, type_argument)
+        return answer.name, answer.value
 
     def set_argument(self, name_arg, value):
         value_type = utils.value_field_definer(value)

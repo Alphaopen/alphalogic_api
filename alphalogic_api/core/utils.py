@@ -101,7 +101,7 @@ def milliseconds_from_epoch(dt):
 def get_rpc_value(value_type, value=None):
     value_rpc = rpc_pb2.Value()
 
-    if value_type == int:
+    if value_type == int or value_type == long:
         value_rpc.int64_value = value if value else 0
     elif value_type == float:
         value_rpc.double_value = value if value else 0.0
@@ -121,23 +121,18 @@ def get_rpc_value(value_type, value=None):
     return value_rpc
 
 
-def value_from_rpc(value_rpc, value_type):
-
-    if 'unicode' in str(value_type):
-        return value_rpc.string_value
-    elif 'int' in str(value_type):
-        return value_rpc.int64_value
-    elif 'float' in str(value_type):
-        return value_rpc.double_value
-    elif 'datetime' in str(value_type):
-        return datetime.datetime.utcfromtimestamp(value_rpc.datetime_value / 1000) \
-                    + datetime.timedelta(milliseconds=value_rpc.datetime_value % 1000)
-    elif 'bool' in str(value_type):
+def value_from_rpc(value_rpc):
+    if value_rpc.HasField('bool_value'):
         return value_rpc.bool_value
-    elif 'list' in str(value_type):
-        pass   # TODO return value_rpc.list
-    elif 'tuple' in str(value_type):
-        pass   # TODO
+    elif value_rpc.HasField('int64_value'):
+        return value_rpc.int64_value
+    elif value_rpc.HasField('double_value'):
+        return value_rpc.double_value
+    elif value_rpc.HasField('datetime_value'):
+        return datetime.datetime.utcfromtimestamp(value_rpc.datetime_value / 1000) \
+               + datetime.timedelta(milliseconds=value_rpc.datetime_value % 1000)
+    elif value_rpc.HasField('string_value'):
+        return value_rpc.string_value
 
 
 def shutdown(signum, frame):

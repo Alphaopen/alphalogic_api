@@ -276,15 +276,23 @@ class Manager(AbstractManager):
             self.create_parameter(name, object, object_id, list_id_parameters_already_exists)
 
     def create_command(self, name, command, object_id):
+        list_name_commands_already_exists = map(lambda id: self.multi_stub.command_call('name', 'name', id=id),
+                                               self.commands(object_id))
         command.set_multi_stub(self.multi_stub)
-        result_type = command.result_type
-        id_command = getattr(self, utils.create_command_definer(str(result_type))) \
-            (id_object=object_id, name=name)
-        command.id = id_command
-        command.clear()
-        for arg in command.arguments:
-            name_arg, value_arg = arg
-            command.set_argument(name_arg, value_arg)
+        if not (name in list_name_commands_already_exists) or program_args.development_mode:  # if event doesn't exist
+            result_type = command.result_type
+            id_command = getattr(self, utils.create_command_definer(str(result_type))) \
+                (id_object=object_id, name=name)
+            command.id = id_command
+            command.clear()
+            for arg in command.arguments:
+                name_arg, value_arg = arg
+                command.set_argument(name_arg, value_arg)
+        elif name in list_name_commands_already_exists and not program_args.development_mode:
+            id_command = self.command(object_id, name)
+            command.id = id_command
+            Manager.inspector.check_command_accordance(command)
+
         Manager.components[id_command] = command
         Manager.components_for_device[object_id].append(id_command)
 
@@ -303,7 +311,7 @@ class Manager(AbstractManager):
             getattr(event, event.priority.create_func)()
             event.clear()
             for name_arg, value_type in event.arguments:
-                value_arg = utils.value_from_rpc(utils.get_rpc_value(value_type), value_type)
+                value_arg = utils.value_from_rpc(utils.get_rpc_value(value_type))
                 event.set_argument(name_arg, value_arg)
         elif name in list_name_events_already_exists and not program_args.development_mode:
             id_event = self.event(object_id, name)

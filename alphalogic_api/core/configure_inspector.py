@@ -4,10 +4,10 @@ import datetime
 from type_attributes import Visible, Access, Priority
 from alphalogic_api.logger import log
 from alphalogic_api.core.exceptions import exception_info
-from alphalogic_api.core.utils import decode_string, Exit
+from alphalogic_api.core.utils import decode_string, Exit, value_from_rpc
+
 
 class ConfigureInspector(object):
-
 
     def is_parameter_exist(self, name, object):
         try:
@@ -51,7 +51,7 @@ class ConfigureInspector(object):
             # Пока проверка только на соотвествие enums, позже на последовательность enums
             model_choices = parameter_model.choices
             real_choices = parameter_model.enums()
-            if model_choices is None and len(real_choices)!=0:
+            if model_choices is None and len(real_choices) != 0:
                 raise Exception('Real and model enums are different')
             elif model_choices is not None:
                 if len(model_choices) != len(real_choices):
@@ -71,11 +71,8 @@ class ConfigureInspector(object):
                             raise Exception('Real and model enums are different')
         except Exception, err:
             exception_info()
-            log.error('Parameter discrepancy {0}'.format(parameter_model.parameter_name))
+            log.error('Parameter discrepancy ##{0}'.format(parameter_model.parameter_name))
             raise Exit
-
-
-        #if parameter_model.has_e
 
     def is_event_exist(self, name, object):
         try:
@@ -97,34 +94,59 @@ class ConfigureInspector(object):
             elif event_model.priority == Priority.minor and not(event_model.is_minor()):
                 raise Exception('Real and model priority are different')
 
+            #2 check argumaent list and check type in argument_list
+            for arg_name_model, arg_type_model in event_model.arguments:
+                arg_name_real, arg_value = event_model.argument(arg_name_model)
+                arg_type_real = type(value_from_rpc(arg_value))
+                if arg_name_model != arg_name_real or \
+                        not(self.check_value_type_accordance(arg_type_model, arg_type_real)):
+                    raise Exception('Real and model arguments are different')
 
-            #2 enums
-            # Можно проверить только на соотвествие имен
-            model_choices = list(zip(*event_model.arguments)[0])
-            real_choices = event_model.argument_list()
-            if model_choices != real_choices:
-                raise Exception('Real and model arguments are different')
-            '''
-            if model_choices is None and len(real_choices)!=0:
-                raise Exception('Real and model enums are different')
-            elif model_choices is not None:
-                if len(model_choices) != len(real_choices):
-                    raise Exception('Real and model enums are different')
-                else:
-                    if type(model_choices[0]) is not tuple:
-                        model_vals = sorted(model_choices)
-                        real_vals  = sorted(zip(*real_choices)[0])
-                        if model_vals != real_vals:
-                            raise Exception('Real and model enums are different')
-                    else:
-                        model_vals, model_keys = zip(*model_choices)
-                        model_vals, model_keys = sorted(model_vals), sorted(model_keys)
-                        real_vals, real_keys = zip(*real_choices)
-                        real_vals, real_keys = sorted(real_vals), sorted(real_keys)
-                        if model_vals != real_vals or model_keys != real_keys:
-                            raise Exception('Real and model enums are different')
-            '''
         except Exception, err:
             exception_info()
-            log.error('Parameter discrepancy {0}'.format(event_model.name()))
+            log.error('Event discrepancy ##{0}'.format(event_model.name()))
             raise Exit
+
+    def check_command_accordance(self, command_model):
+        try:
+            id_command = command_model.id
+            #1 check return type
+            model_result_type = command_model.result_type
+            if model_result_type is bool and not(command_model.is_bool()):
+                raise Exception('Real and model result type are different')
+            elif model_result_type is int and not(command_model.is_int()):
+                raise Exception('Real and model result type are different')
+            elif model_result_type is float and not(command_model.is_double()):
+                raise Exception('Real and model result type are different')
+            elif model_result_type is datetime.datetime and not(command_model.is_datetime()):
+                raise Exception('Real and model result type are different')
+            elif model_result_type is unicode and not(command_model.is_string()):
+                raise Exception('Real and model result type are different')
+
+            #2 check argument list and check type in argument_list
+            for arg_name_model, _ in command_model.arguments:
+                arg_type_model = command_model.arguments_type[arg_name_model]
+                arg_name_real, arg_value = command_model.argument(arg_name_model)
+                arg_type_real = type(value_from_rpc(arg_value))
+                if arg_name_model != arg_name_real or \
+                        not(self.check_value_type_accordance(arg_type_model, arg_type_real)):
+                    raise Exception('Real and model arguments are different')
+
+        except Exception, err:
+            exception_info()
+            log.error('Command discrepancy ##{0}'.format(command_model.name()))
+            raise Exit
+
+    def check_value_type_accordance(self, arg_type_model, arg_type_real):
+        if arg_type_model is unicode and arg_type_real is unicode:
+            return True
+        elif arg_type_model in [int, long] and arg_type_real in [int, long]:
+            return True
+        elif arg_type_model is float and arg_type_real is float:
+            return True
+        elif arg_type_model is datetime.datetime and arg_type_real is datetime.datetime:
+            return True
+        elif arg_type_model is bool and arg_type_real is bool:
+            return True
+        else:
+            return False
