@@ -119,13 +119,14 @@ class Root(Device):
             super(Root, self).__init__(type_device, id_root)
             self.init(id_root)
             self.joinable = True
+
         except Exit:
             self.manager.tasks_pool.stop_operation_thread()
             sys.exit(2)
+
         except Exception, err:
             log.error(decode_string(err))
             self.manager.tasks_pool.stop_operation_thread()
-
 
     def init(self, id_root):
         list_id_device_exist = []

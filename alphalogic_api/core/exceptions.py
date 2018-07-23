@@ -2,6 +2,7 @@
 import sys
 import linecache
 
+
 class IncorrectRPCRequest(Exception):
 
     def __init__(self, msg):

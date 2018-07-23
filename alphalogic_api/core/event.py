@@ -99,6 +99,10 @@ class AbstractEvent(object):
         answer = self._call('owner')
         return answer.owner
 
+    def argument_list(self):
+        answer = self._call('argument_list')
+        return answer.names
+
 
 class Event(AbstractEvent):
 

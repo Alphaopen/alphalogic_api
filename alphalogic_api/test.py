@@ -84,7 +84,11 @@ class MyRoot(Root):
 
     @command(result_type=bool)
     def cmd_alarm(self, where='here', when=datetime.datetime.now(), why=2):
+
+        assert ['where', 'when', 'why'] == self.alarm.argument_list()
         self.alarm.emit(where=where, when=when, why=why)
+
+        assert ['where', 'when', 'why'] == self.alarm.argument_list()
         return True
 
     @command(result_type=unicode)
