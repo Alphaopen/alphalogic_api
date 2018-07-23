@@ -115,7 +115,7 @@ class Command(AbstractCommand):
             info = []
             for name_arg in arg_list:
                 type_arg = self.arguments_type[name_arg]
-                function_dict[name_arg] = self.argument(name_arg, type_arg)
+                function_dict[name_arg] = utils.value_from_rpc(self.argument(name_arg)[1])
                 info.append('{0}({1}): {2}'.format(name_arg, type_arg, function_dict[name_arg]))
 
             log.info('Execute command \'{0}\' with arguments [{1}] from device \'{2}\''
