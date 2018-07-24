@@ -83,7 +83,7 @@ def decode_string(s):
     Convert 's' to unicode. Try to guess encoding
     """
     if isinstance(s, unicode):
-        return s  # Если это не строка вовсе, то ничего не делаем
+        return s
 
     for codec in [locale.getpreferredencoding(), 'utf8', 'cp1251', 'cp1252']:
         try:

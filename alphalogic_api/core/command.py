@@ -110,7 +110,6 @@ class Command(AbstractCommand):
     def call_function(self):
         try:
             arg_list = self.argument_list()
-            # self.clear() TODO очищать аргументы при подключении стаба? Что если удалили аргумент
             function_dict = {}
             info = []
             for name_arg in arg_list:
@@ -141,7 +140,7 @@ def command_preparation(wrapped, func, **kwargs_c):
     wrapped.__dict__['choices'] = {}
     for name_arg in filter(lambda x: x in kwargs_c, args):
         wrapped.choices[name_arg] = kwargs_c[name_arg]
-    bias = 1 if 'self' in args else 0  # если первый аргумент self, то нужно рассматривать со второго элемента
+    bias = 1 if 'self' in args else 0  # if first arg is self, see from second
     for index, name in enumerate(args[bias:]):
         wrapped.arguments.append((name, defaults[index]))
         wrapped.arguments_type[name] = utils.get_command_argument_type(defaults[index])

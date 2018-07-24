@@ -41,14 +41,13 @@ class ConfigureInspector(object):
             elif parameter_model.visible == Visible.common and not(parameter_model.is_common()):
                 raise Exception('Real and model visible are different')
 
-            #3 check access
+            # 3 check access
             if parameter_model.access == Access.read_only and not(parameter_model.is_read_only()):
                 raise Exception('Real and model access are different')
             elif parameter_model.access == Access.read_write and not(parameter_model.is_read_write()):
                 raise Exception('Real and model access are different')
 
-            #4 enums
-            # Пока проверка только на соотвествие enums, позже на последовательность enums
+            # 4 check enums
             model_choices = parameter_model.choices
             real_choices = parameter_model.enums()
             if model_choices is None and len(real_choices) != 0:
@@ -84,7 +83,7 @@ class ConfigureInspector(object):
     def check_event_accordance(self, event_model):
         try:
             id_event = event_model.id
-            #1 check priority
+            # 1 check priority
             if event_model.priority == Priority.blocker and not(event_model.is_blocker()):
                 raise Exception('Real and model priority are different')
             elif event_model.priority == Priority.critical and not(event_model.is_critical()):
@@ -94,7 +93,7 @@ class ConfigureInspector(object):
             elif event_model.priority == Priority.minor and not(event_model.is_minor()):
                 raise Exception('Real and model priority are different')
 
-            #2 check argumaent list and check type in argument_list
+            # 2 check argument list and check type in argument_list
             for arg_name_model, arg_type_model in event_model.arguments:
                 arg_name_real, arg_value = event_model.argument(arg_name_model)
                 arg_type_real = type(value_from_rpc(arg_value))
@@ -110,7 +109,7 @@ class ConfigureInspector(object):
     def check_command_accordance(self, command_model):
         try:
             id_command = command_model.id
-            #1 check return type
+            # 1 check return type
             model_result_type = command_model.result_type
             if model_result_type is bool and not(command_model.is_bool()):
                 raise Exception('Real and model result type are different')
@@ -123,7 +122,7 @@ class ConfigureInspector(object):
             elif model_result_type is unicode and not(command_model.is_string()):
                 raise Exception('Real and model result type are different')
 
-            #2 check argument list and check type in argument_list
+            # 2 check argument list and check type in argument_list
             for arg_name_model, _ in command_model.arguments:
                 arg_type_model = command_model.arguments_type[arg_name_model]
                 arg_name_real, arg_value = command_model.argument(arg_name_model)

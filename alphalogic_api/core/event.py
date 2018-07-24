@@ -56,15 +56,15 @@ class AbstractEvent(object):
 
     def set_time(self, timestamp):
         """
-        Установить время события
+        Set event time UTC
         :param timestamp: int(time.time() * 1000) (мс)
         """
         self._call('set_time', time=timestamp)
 
     def emit(self, **kwargs):  # TODO
         """
-        Если время требуется не текущее, то вызовите set_time
-        :param kwargs: аргументы
+        Call set_time if need not now UTC
+        :param kwargs: arguments
         """
         for arg_name, arg_type in self.arguments:
             if arg_name not in kwargs:

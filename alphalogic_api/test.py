@@ -17,26 +17,6 @@ from alphalogic_api.core.run_function import run
 from alphalogic_api import host, port
 from alphalogic_api.core.exceptions import ComponentNotFound, RequestError
 
-'''
-Не забыть важные моменты:
-1) Нужно преобразовать type_attributes в более приемлимое
-   Когда создается параметр используется именнованные аргументы.
-   Нужно попробовать отказать от словарей и лямбда функций в таком виде
-
-2) Перед запуском проверять узлы адаптера и в соотвествии с этим менять свое состояние.
-   Чтобы не было несогласованных состояний.
-
-3) В параметрах, событиях
-  присутсвует в описании rpc функции:
-
-  Value value = 4; // rpc set, set_enum
-  map<string, Value> enums = 5; // rpc set_enums
-
-  необходимо вынести их обработку в один код
-
-4) Как сделать выбор некоторых параметров по умолчанию?
-'''
-
 
 def handle_after_set_double(node, parameter):
     node.log.info('double changed')
