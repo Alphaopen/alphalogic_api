@@ -123,7 +123,7 @@ class Root(Device):
         list_id_device_exist = []
         self.manager.get_all_device(id_root, list_id_device_exist)
         list_need_to_delete = set(Manager.nodes.keys()) - set(list_id_device_exist)
-        map(lambda x: self.manager.delete_object(x), list_need_to_delete)
+        map(self.manager.delete_object, list_need_to_delete)
         Manager.components_for_device[id_root] = []
         self.manager.prepare_for_work(self, id_root)
         self.manager.prepare_existing_devices(id_root)

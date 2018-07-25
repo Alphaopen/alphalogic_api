@@ -87,9 +87,9 @@ class AbstractEvent(object):
         return answer.name, answer.value
 
     def set_argument(self, name_arg, value):
-        value_type = utils.value_field_definer(value)
+        value_type = utils.value_type_field_definer(type(value))
 
-        if value_type != 'list' and value_type != 'tuple':
+        if value_type not in ['list', 'tuple']:
             value_rpc = utils.get_rpc_value(type(value), value)
             self._call('set_argument', argument=name_arg, value=value_rpc)
         else:
@@ -136,6 +136,6 @@ class CriticalEvent(Event):
         return Event(Priority.critical, *args)
 
 
-class BlokerEvent(Event):
+class BlockerEvent(Event):
     def __new__(cls, *args):
         return Event(Priority.blocker, *args)

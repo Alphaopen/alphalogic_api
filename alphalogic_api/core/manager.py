@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import signal
 import time
 from threading import Thread
-import alphalogic_api.protocol.rpc_pb2 as rpc_pb2
+from alphalogic_api.protocol import rpc_pb2
 from alphalogic_api.core.multistub import MultiStub
 from alphalogic_api.core.parameter import Parameter
 from alphalogic_api.core.event import Event
@@ -245,21 +245,21 @@ class Manager(AbstractManager):
         parameter.parameter_name = name
         parameter.set_multi_stub(self.multi_stub)
 
-        if not(name in list_name_parameters_already_exists) or program_args.development_mode: # if parameter doesn't exist
+        if name not in list_name_parameters_already_exists or program_args.development_mode: # if parameter doesn't exist
             value_type = parameter.value_type
-            id_parameter = getattr(self, utils.create_parameter_definer(str(value_type))) \
+            id_parameter = getattr(self, utils.create_parameter_definer(value_type)) \
                 (id_object=object_id, name=name)
             parameter.id = id_parameter
             getattr(parameter, parameter.visible.create_func)()
             getattr(parameter, parameter.access.create_func)()
             if parameter.choices is not None:
                 parameter.set_choices()
-            if not (id_parameter in list_id_parameters_already_exists):
+            if id_parameter not in list_id_parameters_already_exists:
                 parameter.val = getattr(parameter, 'default', None)
             elif parameter.choices is not None:
                 is_tuple = type(parameter.choices[0]) is tuple
-                if (is_tuple and not (parameter.val in zip(*parameter.choices)[0])) \
-                        or not is_tuple and not (parameter.val in parameter.choices):
+                if (is_tuple and parameter.val not in zip(*parameter.choices)[0]) \
+                        or not is_tuple and parameter.val not in parameter.choices:
                     parameter.val = getattr(parameter, 'default', None)
         elif name in list_name_parameters_already_exists and not program_args.development_mode:
             id_parameter = self.parameter(object_id, name)
@@ -279,9 +279,9 @@ class Manager(AbstractManager):
         list_name_commands_already_exists = map(lambda id: self.multi_stub.command_call('name', 'name', id=id),
                                                self.commands(object_id))
         command.set_multi_stub(self.multi_stub)
-        if not (name in list_name_commands_already_exists) or program_args.development_mode:  # if event doesn't exist
+        if name not in list_name_commands_already_exists or program_args.development_mode:  # if event doesn't exist
             result_type = command.result_type
-            id_command = getattr(self, utils.create_command_definer(str(result_type))) \
+            id_command = getattr(self, utils.create_command_definer(result_type)) \
                 (id_object=object_id, name=name)
             command.id = id_command
             command.clear()
@@ -306,7 +306,7 @@ class Manager(AbstractManager):
         list_name_events_already_exists = map(lambda id: self.multi_stub.event_call('name', 'name', id=id),
                                                   self.events(object_id))
         event.set_multi_stub(self.multi_stub)
-        if not(name in list_name_events_already_exists) or program_args.development_mode: # if event doesn't exist
+        if name not in list_name_events_already_exists or program_args.development_mode: # if event doesn't exist
             event.id = self.create_event(id_object=object_id, name=name)
             getattr(event, event.priority.create_func)()
             event.clear()
@@ -359,7 +359,7 @@ class Manager(AbstractManager):
         self.g_thread.start()
         while True:
             time.sleep(0.1)
-            if not (self.g_thread.is_alive()):
+            if not self.g_thread.is_alive():
                 break
 
     def grpc_thread(self):

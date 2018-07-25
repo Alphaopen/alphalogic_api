@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import time
 from alphalogic_api.logger import log
 from alphalogic_api.core.utils import decode_string

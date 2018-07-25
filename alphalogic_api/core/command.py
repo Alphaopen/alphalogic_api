@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import inspect
-import alphalogic_api.protocol.rpc_pb2 as rpc_pb2
+from alphalogic_api.protocol import rpc_pb2
 from alphalogic_api.core.multistub import MultiStub
-import alphalogic_api.core.utils as utils
+from alphalogic_api.core import utils
 from alphalogic_api.logger import log
 from alphalogic_api.core.exceptions import exception_info
 
@@ -70,21 +70,21 @@ class AbstractCommand(object):
         return answer.name, answer.value
 
     def set_argument(self, name_arg, value):
-        value_type = utils.value_field_definer(value)
+        value_type = utils.value_type_field_definer(type(value))
         cur_choices = self.choices[name_arg] if name_arg in self.choices else None
         if cur_choices is None:
             value_rpc = utils.get_rpc_value(type(value), value)
             self._call('set_argument', argument=name_arg, value=value_rpc)
         else:
             req = rpc_pb2.CommandRequest(id=self.id, argument=name_arg)
-            val_type = utils.value_field_definer(value)
+            val_type = utils.value_type_field_definer(type(value))
             setattr(req.value, val_type, value)
-            for index, val in enumerate(cur_choices):
+            for val in cur_choices:
                 if isinstance(val, tuple):
-                    val_type = utils.value_field_definer(val[0])
+                    val_type = utils.value_type_field_definer(type(val[0]))
                     setattr(req.enums[val[1]], val_type, val[0])
                 else:
-                    val_type = utils.value_field_definer(val)
+                    val_type = utils.value_type_field_definer(type(val))
                     setattr(req.enums[str(val)], val_type, val)
 
             self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set,

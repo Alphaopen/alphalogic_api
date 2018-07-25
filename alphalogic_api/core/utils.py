@@ -2,68 +2,60 @@
 from __future__ import unicode_literals
 import locale
 import datetime
-import alphalogic_api.protocol.rpc_pb2 as rpc_pb2
+from alphalogic_api.protocol import rpc_pb2
 from alphalogic_api.core.type_attributes import Visible, Access, Priority
 from alphalogic_api.logger import log
 import inspect
 from alphalogic_api.core.exceptions import Exit
 
+
 def value_type_field_definer(value_type):
-    if 'unicode' in str(value_type):
+    if unicode is value_type:
         return 'string_value'
-    elif 'int' in str(value_type):
+    elif int is value_type or long is value_type:
         return 'int64_value'
-    elif 'float' in str(value_type):
+    elif float is value_type:
         return 'double_value'
-    elif 'datetime' in str(value_type):
+    elif datetime.datetime is value_type:
         return 'datetime_value'
-    elif 'bool' in str(value_type):
+    elif bool is value_type:
         return 'bool_value'
-    elif 'list' in str(value_type):
-        return 'list'
-
-
-def value_field_definer(value):
-    if 'unicode' in str(type(value)):
-        return 'string_value'
-    elif 'int' in str(type(value)):
-        return 'int64_value'
-    elif 'float' in str(type(value)):
-        return 'double_value'
-    elif 'datetime' in str(type(value)):
-        return 'datetime_value'
-    elif 'bool' in str(type(value)):
-        return 'bool_value'
-    elif 'list' in str(type(value)):
-        return 'list'
-    elif 'tuple' in str(type(value)):
+    elif tuple is value_type:
         return 'tuple'
+    elif list is value_type:
+        return 'list'
+    else:
+        raise Exception('Unknown type')
 
 
-def create_command_definer(result_type_str):
-    if 'unicode' in result_type_str:
+def create_command_definer(result_type):
+    if unicode is result_type:
         return 'create_string_command'
-    elif 'int' in result_type_str:
+    elif int is result_type or long is result_type:
         return 'create_int_command'
-    elif 'float' in result_type_str:
+    elif float is result_type:
         return 'create_double_command'
-    elif 'datetime' in result_type_str:
+    elif datetime.datetime is result_type:
         return 'create_datetime_command'
-    elif 'bool' in result_type_str:
+    elif bool is result_type:
         return 'create_bool_command'
+    else:
+        raise Exception('Unknown type')
 
 
-def create_parameter_definer(result_type_str):
-    if 'unicode' in result_type_str:
+def create_parameter_definer(result_type):
+    if unicode is result_type:
         return 'create_string_parameter'
-    elif 'int' in result_type_str:
+    elif int is result_type or long is result_type:
         return 'create_int_parameter'
-    elif 'float' in result_type_str:
+    elif float is result_type:
         return 'create_double_parameter'
-    elif 'datetime' in result_type_str:
+    elif datetime.datetime is result_type:
         return 'create_datetime_parameter'
-    elif 'bool' in result_type_str:
+    elif bool is result_type:
         return 'create_bool_parameter'
+    else:
+        raise Exception('Unknown type')
 
 
 def get_command_argument_type(arg):
