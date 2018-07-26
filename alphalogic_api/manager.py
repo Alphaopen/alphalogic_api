@@ -160,6 +160,8 @@ class Manager(AbstractManager):
     def __init__(self):
         signal.signal(signal.SIGTERM, shutdown)
         signal.signal(signal.SIGINT, shutdown)
+
+    def start_threads(self):
         self.g_thread = Thread(target=self.grpc_thread)
         self.tasks_pool = TasksPool()
 
