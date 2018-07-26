@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import unicode_literals
 import os
 import sys
 from logging import getLogger, StreamHandler, Formatter, getLevelName, CRITICAL
 from logging.handlers import RotatingFileHandler
-from alphalogic_api import args
+from alphalogic_api.options import args
 
 
 class Logger(object):
