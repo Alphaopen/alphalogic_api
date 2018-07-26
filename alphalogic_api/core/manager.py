@@ -170,7 +170,7 @@ class Manager(AbstractManager):
     def prepare_for_work(self, object, id):
         Manager.nodes[id] = object
         list_id_parameters_already_exists = self.parameters(id)
-        list_parameters_name_already_exists = map(lambda id: self.multi_stub.parameter_call('name', 'name', id=id),
+        list_parameters_name_already_exists = map(lambda id: self.multi_stub.parameter_call('name', id=id).name,
                                                   list_id_parameters_already_exists)
         list_parameters_name_period = [getattr(object, name).period_name for name in object.run_function_names]
         list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
@@ -237,7 +237,7 @@ class Manager(AbstractManager):
 
     def create_parameter(self, name, object, object_id, list_id_parameters_already_exists, is_copy=True,
                          parameter=None):
-        list_name_parameters_already_exists = map(lambda id: self.multi_stub.parameter_call('name', 'name', id=id),
+        list_name_parameters_already_exists = map(lambda id: self.multi_stub.parameter_call('name', id=id).name,
                                                   list_id_parameters_already_exists)
         if is_copy:
             parameter = object.__dict__[name].get_copy()
@@ -276,7 +276,7 @@ class Manager(AbstractManager):
             self.create_parameter(name, object, object_id, list_id_parameters_already_exists)
 
     def create_command(self, name, command, object_id):
-        list_name_commands_already_exists = map(lambda id: self.multi_stub.command_call('name', 'name', id=id),
+        list_name_commands_already_exists = map(lambda id: self.multi_stub.command_call('name', id=id).name,
                                                self.commands(object_id))
         command.set_multi_stub(self.multi_stub)
         if name not in list_name_commands_already_exists or program_args.development_mode:  # if event doesn't exist
@@ -303,7 +303,7 @@ class Manager(AbstractManager):
             self.create_command(name, command, object_id)
 
     def configure_single_event(self, name, event, object_id):
-        list_name_events_already_exists = map(lambda id: self.multi_stub.event_call('name', 'name', id=id),
+        list_name_events_already_exists = map(lambda id: self.multi_stub.event_call('name', id=id).name,
                                                   self.events(object_id))
         event.set_multi_stub(self.multi_stub)
         if name not in list_name_events_already_exists or program_args.development_mode: # if event doesn't exist

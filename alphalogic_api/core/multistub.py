@@ -71,7 +71,7 @@ class MultiStub(object):
         if function_name in kwargs['fun_set']:  # function_name - check availability
             try:
                 answer = getattr(kwargs['stub'], function_name)(kwargs['request'])
-                return reduce(lambda acc, x: getattr(answer, x), args, answer)  # recursive search
+                return answer
 
             except grpc.RpcError, err:
                 if err.code() == grpc.StatusCode.NOT_FOUND:
