@@ -5,6 +5,7 @@
 *.idea
 *.log
 *.log.*
+*.vscode
 build
 venv
 logs/
