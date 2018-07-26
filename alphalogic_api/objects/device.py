@@ -102,6 +102,7 @@ class Device(object):
 class Root(Device):
     def __init__(self, host, port):
         try:
+            self.manager.start_threads()
             self.joinable = False
             self.manager.configure_multi_stub(host + ':' + str(port))
             id_root = self.manager.root()

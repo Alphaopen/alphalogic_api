@@ -11,7 +11,7 @@ from setuptools import setup
 
 VERSION_MAJOR = 0  # (System version)
 VERSION_MINOR = 0  # (Tests version)
-BUILD_NUMBER = 4   # (Issues version)
+BUILD_NUMBER = 5   # (Issues version)
 
 ver = '%d.%d.%d' % (VERSION_MAJOR, VERSION_MINOR, BUILD_NUMBER)
 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     setup(
         name='alphalogic_api',
-        version=ver,
+        version=ver, 
         description=__doc__.replace('\n', '').strip(),
         long_description=long_description,
         author='Alphaopen',
