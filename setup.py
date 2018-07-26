@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     setup(
         name='alphalogic_api',
-        version=ver,
+        version=ver, 
         description=__doc__.replace('\n', '').strip(),
         long_description=long_description,
         author='Alphaopen',
