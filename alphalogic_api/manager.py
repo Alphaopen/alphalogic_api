@@ -4,19 +4,18 @@ import signal
 import time
 from threading import Thread
 from alphalogic_api.protocol import rpc_pb2
-from alphalogic_api.core.multistub import MultiStub
-from alphalogic_api.core.parameter import Parameter
-from alphalogic_api.core.event import Event
-from alphalogic_api.core.command import Command
-from alphalogic_api.core import utils
+from alphalogic_api.multistub import MultiStub
+from alphalogic_api.objects.parameter import Parameter, ParameterDouble
+from alphalogic_api.objects.event import Event
+from alphalogic_api.objects.command import Command
 from alphalogic_api.logger import log
-from alphalogic_api.core.tasks_pool import TasksPool
-from alphalogic_api.core.parameter import ParameterDouble
-from alphalogic_api.core.utils import shutdown, decode_string
+from alphalogic_api.tasks_pool import TasksPool
+from alphalogic_api.utils import shutdown, decode_string
 from alphalogic_api.attributes import Visible
-from alphalogic_api.core.exceptions import ComponentNotFound, exception_info
-from alphalogic_api.core.configure_inspector import ConfigureInspector
-from alphalogic_api import args as program_args
+from alphalogic_api.exceptions import ComponentNotFound, exception_info
+from alphalogic_api.conf_inspector import ConfInspector
+from alphalogic_api.options import args as program_args
+from alphalogic_api import utils
 
 
 class AbstractManager(object):
@@ -156,7 +155,7 @@ class Manager(AbstractManager):
     nodes = {}  # Nodes dictionary. 'id' as a key
     components = {}  # All commands, parameters, events dictionary. 'id' as a key
     components_for_device = {}  # All commands, parameters, events of node. Node 'id' as a key
-    inspector = ConfigureInspector()
+    inspector = ConfInspector()
 
     def __init__(self):
         signal.signal(signal.SIGTERM, shutdown)

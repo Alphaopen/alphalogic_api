@@ -5,13 +5,17 @@ import linecache
 
 
 class IncorrectRPCRequest(Exception):
-
+    """
+    Unsupported request by protocol. Check alphalogic_api code
+    """
     def __init__(self, msg):
         super(IncorrectRPCRequest, self).__init__(msg)
 
 
 class RequestError(Exception):
-
+    """
+    gRPC call exception
+    """
     def __init__(self, msg):
         super(RequestError, self).__init__(msg)
 
@@ -29,6 +33,9 @@ class Exit(Exception):
 
 
 def exception_info():
+    """
+    Writes filename and line of exception
+    """
     exc_type, exc_obj, tb = sys.exc_info()
     f = tb.tb_frame
     lineno = tb.tb_lineno

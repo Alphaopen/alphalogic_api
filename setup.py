@@ -33,7 +33,7 @@ if __name__ == '__main__':
         include_package_data=True,
         packages=[
             'alphalogic_api',
-            'alphalogic_api.core',
+            'alphalogic_api.objects',
             'alphalogic_api.protocol'
         ],
         license='Commercial',

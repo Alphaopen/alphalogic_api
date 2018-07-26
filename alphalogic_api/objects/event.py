@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from alphalogic_api.core import utils
+from alphalogic_api import utils
 from alphalogic_api.attributes import Priority
 
 

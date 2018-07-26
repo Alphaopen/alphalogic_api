@@ -3,16 +3,15 @@ from __future__ import unicode_literals
 
 import datetime
 
-from alphalogic_api import Visible, Access, Priority
-from alphalogic_api import Root, Device
-from alphalogic_api import command
-from alphalogic_api import MajorEvent
-from alphalogic_api import Parameter, ParameterBool, ParameterInt, \
+from alphalogic_api.attributes import Visible, Access
+from alphalogic_api.objects import Root, Device
+from alphalogic_api.objects import MajorEvent
+from alphalogic_api.objects import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
-from alphalogic_api import utils
-from alphalogic_api import run
 from alphalogic_api.options import host, port
-from alphalogic_api import ComponentNotFound, RequestError
+from alphalogic_api.exceptions import ComponentNotFound
+from alphalogic_api.decorators import command, run
+from alphalogic_api import utils
 
 
 def handle_after_set_double(node, parameter):

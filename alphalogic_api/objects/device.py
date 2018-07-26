@@ -4,15 +4,15 @@ from __future__ import unicode_literals
 import time
 import sys
 from threading import Lock, Thread
-from alphalogic_api.core.parameter import Parameter, ParameterString, ParameterBool, ParameterInt
+from alphalogic_api.objects.event import Event
+from alphalogic_api.objects.command import Command
+from alphalogic_api.objects.parameter import Parameter, ParameterString, ParameterBool, ParameterInt
 from alphalogic_api.attributes import Visible, Access
-from alphalogic_api.core.event import Event
-from alphalogic_api.core.command import Command
-from alphalogic_api.core.manager import Manager
+from alphalogic_api.manager import Manager
 from alphalogic_api.logger import log
-from alphalogic_api.core.utils import Exit, decode_string
-from alphalogic_api.core.tasks_pool import TasksPool
-from alphalogic_api.core.exceptions import exception_info
+from alphalogic_api.utils import Exit, decode_string
+from alphalogic_api.tasks_pool import TasksPool
+from alphalogic_api.exceptions import exception_info
 
 
 class Device(object):

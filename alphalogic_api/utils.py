@@ -5,7 +5,7 @@ import datetime
 from alphalogic_api.protocol import rpc_pb2
 from alphalogic_api.logger import log
 import inspect
-from alphalogic_api.core.exceptions import Exit
+from alphalogic_api.exceptions import Exit
 
 
 def value_type_field_definer(value_type):

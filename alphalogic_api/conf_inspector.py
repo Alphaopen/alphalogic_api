@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 import datetime
 from alphalogic_api.attributes import Visible, Access, Priority
 from alphalogic_api.logger import log
-from alphalogic_api.core.exceptions import exception_info
-from alphalogic_api.core.utils import decode_string, Exit, value_from_rpc
+from alphalogic_api.exceptions import exception_info
+from alphalogic_api.utils import Exit, value_from_rpc
 
 
-class ConfigureInspector(object):
+class ConfInspector(object):
 
     def is_parameter_exist(self, name, object):
         try:

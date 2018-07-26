@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import grpc
 from alphalogic_api.logger import log
-from alphalogic_api.core.exceptions import IncorrectRPCRequest, RequestError, ComponentNotFound
+from alphalogic_api.exceptions import IncorrectRPCRequest, RequestError, ComponentNotFound
 
 from alphalogic_api.protocol.rpc_pb2 import (
     ObjectRequest,
