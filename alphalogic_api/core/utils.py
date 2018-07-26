@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import locale
 import datetime
 from alphalogic_api.protocol import rpc_pb2
-from alphalogic_api.core.type_attributes import Visible, Access, Priority
 from alphalogic_api.logger import log
 import inspect
 from alphalogic_api.core.exceptions import Exit

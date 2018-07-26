@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import datetime
-from type_attributes import Visible, Access, Priority
+from alphalogic_api.attributes import Visible, Access, Priority
 from alphalogic_api.logger import log
 from alphalogic_api.core.exceptions import exception_info
 from alphalogic_api.core.utils import decode_string, Exit, value_from_rpc

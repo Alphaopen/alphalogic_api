@@ -11,7 +11,7 @@ from alphalogic_api import Parameter, ParameterBool, ParameterInt, \
     ParameterDouble, ParameterDatetime, ParameterString
 from alphalogic_api import utils
 from alphalogic_api import run
-from alphalogic_api import host, port
+from alphalogic_api.options import host, port
 from alphalogic_api import ComponentNotFound, RequestError
 
 

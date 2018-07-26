@@ -5,11 +5,11 @@ import datetime
 
 from alphalogic_api.protocol import rpc_pb2
 
-from alphalogic_api.core.type_attributes import Visible, Access
+from alphalogic_api.attributes import Visible, Access
 from alphalogic_api.core.multistub import MultiStub
 from alphalogic_api.core import utils
 from alphalogic_api.logger import log
-from alphalogic_api.core.utils import Exit, shutdown
+from alphalogic_api.core.utils import Exit
 
 
 class AbstractParameter(object):

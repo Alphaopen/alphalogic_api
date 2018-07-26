@@ -5,7 +5,7 @@ import time
 import sys
 from threading import Lock, Thread
 from alphalogic_api.core.parameter import Parameter, ParameterString, ParameterBool, ParameterInt
-from alphalogic_api.core.type_attributes import Visible, Access
+from alphalogic_api.attributes import Visible, Access
 from alphalogic_api.core.event import Event
 from alphalogic_api.core.command import Command
 from alphalogic_api.core.manager import Manager
