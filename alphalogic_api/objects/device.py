@@ -80,6 +80,14 @@ class Device(object):
     def command(self, name):
         return self.manager.get_component_by_name(name, self.id, 'command')
 
+    def parent(self):
+        return self.manager.parent(self.id)
+
+    def root(self):
+        return self.manager.root()
+
+    def children(self):
+        return self.manager.children(self.id)
 
 
     '''
@@ -105,7 +113,7 @@ class Root(Device):
             self.manager.start_threads()
             self.joinable = False
             self.manager.configure_multi_stub(host + ':' + str(port))
-            id_root = self.manager.root()
+            id_root = self.manager.root_id()
             type_device = self.manager.get_type(id_root)
             super(Root, self).__init__(type_device, id_root)
             self.log.info('Connecting to ' + host + ':' + unicode(port))
@@ -118,7 +126,6 @@ class Root(Device):
             log.error(decode_string(err))
             self.manager.tasks_pool.stop_operation_thread()
             sys.exit(2)
-
 
     def init(self, id_root):
         list_id_device_exist = []
@@ -153,4 +160,3 @@ class Root(Device):
                     break
                 except Exception, err:
                     log.error(decode_string(err))
-
