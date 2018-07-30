@@ -16,12 +16,10 @@ class Logger(object):
         else:
             log.setLevel(getLevelName(args.log_level.upper()))
 
-            log_path = os.path.join(os.path.pardir, 'logs')
+            if not os.path.isdir(args.log_directory):
+                os.makedirs(args.log_directory)
 
-            if not os.path.isdir(log_path):
-                os.makedirs(log_path)
-
-            fh = RotatingFileHandler(os.path.join(log_path, "stub.log"),
+            fh = RotatingFileHandler(os.path.join(args.log_directory, "stub.log"),
                                      maxBytes=args.log_max_file_size,
                                      backupCount=args.log_max_files)
             fh.setLevel(getLevelName(args.log_level.upper()))
