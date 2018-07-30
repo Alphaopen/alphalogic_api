@@ -27,7 +27,6 @@ class Device(object):
     desc = ParameterString(visible=Visible.setup, access=Access.read_write)
     type_when_create = ParameterString(visible=Visible.hidden, access=Access.read_only)
     isService = ParameterBool(visible=Visible.common, access=Access.read_write)
-    version = ParameterString(visible=Visible.setup, access=Access.read_only)
     connected = ParameterBool(visible=Visible.common, access=Access.read_only)
     ready_to_work = ParameterBool(visible=Visible.common, access=Access.read_only)
     error = ParameterBool(visible=Visible.common, access=Access.read_only)
@@ -44,7 +43,12 @@ class Device(object):
         # Parameters
         list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
         for name in list_parameters_name:
-            self.__dict__[name] = type(self).__dict__[name] if name in type(self).__dict__ else Device.__dict__[name]
+            if name in type(self).__dict__:
+                self.__dict__[name] = type(self).__dict__[name]
+            elif name in Device.__dict__:
+                self.__dict__[name] = Device.__dict__[name]
+            elif name in Root.__dict__:
+                self.__dict__[name] = Root.__dict__[name]
 
         # Commands
         is_callable = lambda x: callable(getattr(self, x)) and not x.startswith('_') and\
@@ -80,6 +84,14 @@ class Device(object):
     def command(self, name):
         return self.manager.get_component_by_name(name, self.id, 'command')
 
+    def parent(self):
+        return self.manager.parent(self.id)
+
+    def root(self):
+        return self.manager.root()
+
+    def children(self):
+        return self.manager.children(self.id)
 
 
     '''
@@ -100,6 +112,8 @@ class Device(object):
 
 
 class Root(Device):
+    version = ParameterString(visible=Visible.setup, access=Access.read_only)
+
     def __init__(self, host, port):
         try:
             self.manager.start_threads()
@@ -118,7 +132,6 @@ class Root(Device):
             log.error(decode_string(err))
             self.manager.tasks_pool.stop_operation_thread()
             sys.exit(2)
-
 
     def init(self, id_root):
         list_id_device_exist = []

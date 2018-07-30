@@ -204,8 +204,6 @@ class Manager(AbstractManager):
             self.prepare_existing_devices(child_id)
 
     def create_object(self, object_id):
-        parent_id = self.parent(object_id)
-        parent = Manager.nodes[parent_id] if (parent_id in Manager.nodes) else None
         class_name_str = self.get_type(object_id)
         class_name = Manager.dict_type_objects[class_name_str]
         object = class_name(class_name_str, object_id)
@@ -275,7 +273,6 @@ class Manager(AbstractManager):
             Manager.components[id_parameter] = parameter
             Manager.components_for_device[object_id].append(id_parameter)
 
-
     def configure_parameters(self, object, object_id, list_id_parameters_already_exists, list_names):
         for name in list_names:
             self.create_parameter(name, object, object_id, list_id_parameters_already_exists)
@@ -344,6 +341,21 @@ class Manager(AbstractManager):
         raise ComponentNotFound(u'Can not found \'{}\' in the \'{}\' (id={})'
                                 .format(name, self.nodes[object_id].type, object_id))
 
+    def root_id(self):
+        return super(Manager, self).root()
+
+    def parent(self, object_id):
+        id = super(Manager, self).parent(object_id)
+        return Manager.nodes[id] if id in Manager.nodes else None
+
+    def root(self):
+        id = super(Manager, self).root()
+        return Manager.nodes[id] if id in Manager.nodes else None
+
+    def children(self, object_id):
+        ids = super(Manager, self).children(object_id)
+        return list(Manager.nodes[id] for id in ids if id in Manager.nodes)
+
     def configure_run_function(self, object, object_id, list_id_parameters_already_exists):
         for name in object.run_function_names:
             time_stamp = time.time()
@@ -356,7 +368,7 @@ class Manager(AbstractManager):
             self.tasks_pool.add_task(time_stamp + period, getattr(object, name))
 
     def get_all_device(self, object_id, result):
-        list_children = self.children(object_id)
+        list_children = super(Manager, self).children(object_id)
         result.append(object_id)
         map(lambda x: self.get_all_device(x, result), list_children)
 

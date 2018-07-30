@@ -205,6 +205,7 @@ assert list(x.name() == 'cmd_simple_event' for x in cmds)
 cmd = root.command('cmd_simple_event')
 cmd = root.command('check')
 
+
 root.join()
 
 
