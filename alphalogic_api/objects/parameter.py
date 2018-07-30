@@ -149,8 +149,12 @@ class AbstractParameter(object):
 
 
 class Parameter(AbstractParameter):
+    index_number = 0
 
     def __init__(self, *args, **kwargs):
+        self.index_number = Parameter.index_number
+        Parameter.index_number += 1
+
         for arg in kwargs:
             self.__dict__[arg] = kwargs[arg]
 
@@ -186,7 +190,7 @@ class Parameter(AbstractParameter):
             if value is not None:
                 self.set(value)
         elif attr in ['value_type', 'visible', 'access', 'default', 'choices', 'multi_stub', 'id',
-                      'parameter_name', 'callback']:
+                      'parameter_name', 'callback', 'index_number']:
             self.__dict__[attr] = value
         return self
 

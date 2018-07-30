@@ -175,10 +175,14 @@ class Manager(AbstractManager):
                                                   list_id_parameters_already_exists)
         list_parameters_name_period = [getattr(object, name).period_name for name in object.run_function_names]
         list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
-        list_parameters_name_should_exists = list(set(list_parameters_name_should_exists)
-                                                  | set(list_parameters_name_period))
-        list_parameters_name_should_exists = list(set(list_parameters_name_should_exists)
-                                                  - set(list_parameters_name_already_exists))
+
+        list_parameters_name_should_exists = map(lambda x: (getattr(object, x), x), list_parameters_name_should_exists)
+        list_parameters_name_should_exists = list(zip(*sorted(list_parameters_name_should_exists,
+                                                         key=lambda x: x[0].index_number))[1])
+        list_parameters_name_should_exists = list_parameters_name_should_exists + list_parameters_name_period
+        list_parameters_name_should_exists = [name for name in list_parameters_name_should_exists
+                                              if name not in list_parameters_name_already_exists]
+
         # order of call below function is important
         self.configure_run_function(object, id, list_id_parameters_already_exists)
         list_id_parameters_already_exists = self.parameters(id)
