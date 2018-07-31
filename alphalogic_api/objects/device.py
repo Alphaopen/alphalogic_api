@@ -119,7 +119,7 @@ class Root(Device):
             self.manager.start_threads()
             self.joinable = False
             self.manager.configure_multi_stub(host + ':' + str(port))
-            id_root = self.manager.root()
+            id_root = self.manager.root_id()
             type_device = self.manager.get_type(id_root)
             super(Root, self).__init__(type_device, id_root)
             self.log.info('Connecting to ' + host + ':' + unicode(port))
@@ -155,7 +155,7 @@ class Root(Device):
                         self.manager.g_thread = Thread(target=self.manager.grpc_thread)
                         self.manager.tasks_pool = TasksPool()
                     time.sleep(1)
-                    id_root = self.manager.root()
+                    id_root = self.manager.root_id()
                     self.init(id_root)
                     is_connected = True
                 except Exit:

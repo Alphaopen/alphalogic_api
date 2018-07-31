@@ -349,7 +349,7 @@ class Manager(AbstractManager):
         return Manager.nodes[id] if id in Manager.nodes else None
 
     def root(self):
-        id = super(Manager, self).root()
+        id = self.root_id()
         return Manager.nodes[id] if id in Manager.nodes else None
 
     def children(self, object_id):
