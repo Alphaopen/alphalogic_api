@@ -11,7 +11,7 @@ from setuptools import setup
 
 VERSION_MAJOR = 0  # (System version)
 VERSION_MINOR = 0  # (Tests version)
-BUILD_NUMBER = 6   # (Issues version)
+BUILD_NUMBER = 7   # (Issues version)
 
 ver = '%d.%d.%d' % (VERSION_MAJOR, VERSION_MINOR, BUILD_NUMBER)
 
@@ -39,7 +39,8 @@ if __name__ == '__main__':
         packages=[
             'alphalogic_api',
             'alphalogic_api.objects',
-            'alphalogic_api.protocol'
+            'alphalogic_api.protocol',
+            'alphalogic_api.tests'
         ],
         classifiers=(
             "Programming Language :: Python :: 2.7",
