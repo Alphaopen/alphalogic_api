@@ -14,6 +14,11 @@ class MyRoot(Root):
         ]
 
 
+def uint64_to_int64(i):
+    _MAX = (1 << 63) - 1
+    return -(i - _MAX) if i > _MAX else i
+
+
 class TreeChecker(Device):
 
     @command(result_type=long)
@@ -26,11 +31,13 @@ class TreeChecker(Device):
 
     @command(result_type=long)
     def get_child_id(self, index=0):
-        return self.children()[index].id
+        id = self.children()[index].id
+        return uint64_to_int64(id)
 
     @command(result_type=long)
     def get_root_id(self):
-        return self.root().id
+        id = self.root().id
+        return uint64_to_int64(id)
 
     def handle_get_available_children(self):
         return [
