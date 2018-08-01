@@ -29,8 +29,8 @@ def onerror(func, path, exc_info):
 if __name__ == '__main__':
 
     # remove previous build
-    if os.path.exists('sdist'):
-        shutil.rmtree('sdist', onerror=onerror)
+    if os.path.exists('dist'):
+        shutil.rmtree('dist', onerror=onerror)
 
     #
     ext = 'zip' if sys.platform == 'win32' else 'gztar'

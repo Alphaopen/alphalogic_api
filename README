@@ -16,3 +16,7 @@ Install pip if not present:
 
 1. python build.py or python setup.py sdist bdist_wheel
 
+## Upload package
+
+1. twine upload --repository pypi dist/*
+twine config in the ~/.pypirc
