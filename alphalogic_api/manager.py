@@ -242,8 +242,13 @@ class Manager(AbstractManager):
                          parameter=None):
         list_name_parameters_already_exists = map(lambda id: self.multi_stub.parameter_call('name', id=id).name,
                                                   list_id_parameters_already_exists)
-        if is_copy:
+        if is_copy and name in object.__dict__:
             parameter = object.__dict__[name].get_copy()
+        elif is_copy and name not in object.__dict__ and program_args.development_mode:
+            return
+        elif parameter is None:
+            raise Exception('{0} is None'.format(name))
+
         object.__dict__[name] = parameter
         parameter.parameter_name = name
         parameter.set_multi_stub(self.multi_stub)
