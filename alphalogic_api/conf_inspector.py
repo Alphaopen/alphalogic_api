@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import datetime
 from alphalogic_api.attributes import Visible, Access, Priority
 from alphalogic_api.logger import log
-from alphalogic_api.exceptions import exception_info
+from alphalogic_api.exceptions import exception_traceback
 from alphalogic_api.utils import Exit, value_from_rpc
 
 
@@ -71,8 +71,7 @@ class ConfInspector(object):
                             raise Exception('Real and model enums are different')
             '''
         except Exception, err:
-            exception_info()
-            log.error('Parameter discrepancy ##{0}'.format(parameter_model.parameter_name))
+            exception_traceback('Parameter discrepancy ##{0}'.format(parameter_model.parameter_name))
             raise Exit
 
     def is_event_exist(self, name, object):
@@ -104,8 +103,7 @@ class ConfInspector(object):
                     raise Exception('Real and model arguments are different')
 
         except Exception, err:
-            exception_info()
-            log.error('Event discrepancy ##{0}'.format(event_model.name()))
+            exception_traceback('Event discrepancy ##{0}'.format(event_model.name()))
             raise Exit
 
     def check_command_accordance(self, command_model):
@@ -134,8 +132,7 @@ class ConfInspector(object):
                     raise Exception('Real and model arguments are different')
 
         except Exception, err:
-            exception_info()
-            log.error('Command discrepancy ##{0}'.format(command_model.name()))
+            exception_traceback('Command discrepancy ##{0}'.format(command_model.name()))
             raise Exit
 
     def check_value_type_accordance(self, arg_type_model, arg_type_real):

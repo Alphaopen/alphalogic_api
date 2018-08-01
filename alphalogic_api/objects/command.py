@@ -5,7 +5,7 @@ from alphalogic_api.protocol import rpc_pb2
 from alphalogic_api.multistub import MultiStub
 from alphalogic_api import utils
 from alphalogic_api.logger import log
-from alphalogic_api.exceptions import exception_info
+from alphalogic_api.exceptions import exception_traceback
 
 
 class AbstractCommand(object):
@@ -122,7 +122,6 @@ class Command(AbstractCommand):
             self.function(self.device, **function_dict)
 
         except Exception, err:
-            exception_info()
             reason = utils.decode_string(err)
-            log.info('Command \'{0}\' raise exception: \'{1}\''.format(self.name(), reason))
+            exception_traceback('Command \'{0}\' raise exception: \'{1}\''.format(self.name(), reason))
             self.set_exception(reason)
