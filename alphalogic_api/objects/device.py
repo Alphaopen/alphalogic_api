@@ -118,7 +118,7 @@ class Root(Device):
         try:
             self.manager.start_threads()
             self.joinable = False
-            self.manager.configure_multi_stub(host + ':' + str(port))
+            self.manager.configure_multi_stub(host + ':' + unicode(port))
             id_root = self.manager.root_id()
             type_device = self.manager.get_type(id_root)
             super(Root, self).__init__(type_device, id_root)

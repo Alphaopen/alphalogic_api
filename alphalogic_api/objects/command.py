@@ -85,7 +85,7 @@ class AbstractCommand(object):
                     setattr(req.enums[val[1]], val_type, val[0])
                 else:
                     val_type = utils.value_type_field_definer(type(val))
-                    setattr(req.enums[str(val)], val_type, val)
+                    setattr(req.enums[unicode(val)], val_type, val)
 
             self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set,
                                         request=req, stub=self.multi_stub.stub_command)

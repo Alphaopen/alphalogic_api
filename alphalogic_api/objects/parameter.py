@@ -132,9 +132,9 @@ class AbstractParameter(object):
         attr_type = utils.value_type_field_definer(value_type)
         for val in values:
             if isinstance(val, tuple):
-                setattr(req.enums[str(val[1])], attr_type, val[0])
+                setattr(req.enums[unicode(val[1])], attr_type, val[0])
             else:
-                setattr(req.enums[str(val)], attr_type, val)
+                setattr(req.enums[unicode(val)], attr_type, val)
 
         self.multi_stub.call_helper('set_enums', fun_set=MultiStub.parameter_fun_set, request=req,
                                     stub=self.multi_stub.stub_parameter)
