@@ -12,7 +12,7 @@ from alphalogic_api.manager import Manager
 from alphalogic_api.logger import log
 from alphalogic_api.utils import Exit, decode_string
 from alphalogic_api.tasks_pool import TasksPool
-from alphalogic_api.exceptions import exception_info
+from alphalogic_api.exceptions import exception_traceback
 
 
 class Device(object):
@@ -128,8 +128,7 @@ class Root(Device):
             self.log.info('Root connected OK')
 
         except Exception, err:
-            exception_info()
-            log.error(decode_string(err))
+            exception_traceback(decode_string(err))
             self.manager.tasks_pool.stop_operation_thread()
             sys.exit(2)
 

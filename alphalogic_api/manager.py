@@ -12,7 +12,7 @@ from alphalogic_api.logger import log
 from alphalogic_api.tasks_pool import TasksPool
 from alphalogic_api.utils import shutdown, decode_string
 from alphalogic_api.attributes import Visible
-from alphalogic_api.exceptions import ComponentNotFound, exception_info
+from alphalogic_api.exceptions import ComponentNotFound, exception_traceback
 from alphalogic_api.conf_inspector import ConfInspector
 from alphalogic_api.options import args as program_args
 from alphalogic_api import utils
@@ -410,8 +410,7 @@ class Manager(AbstractManager):
                                     device = Manager.nodes[param.owner()]  # TODO check
                                     Manager.components[r.id].callback(device, param)
                                 except Exception, err:
-                                    exception_info()
-                                    log.error('After set parameter value callback error' + decode_string(err))
+                                    exception_traceback('After set parameter value callback error: ' + decode_string(err))
                         else:
                             log.warn('Parameter {0} not found'.format(r.id))
 
@@ -422,12 +421,10 @@ class Manager(AbstractManager):
                             log.warn('Command {0} not found'.format(r.id))
 
                 except Exception, err:
-                    exception_info()
-                    log.error(decode_string(err) + '\nstate=' + decode_string(r.state))
+                    exception_traceback(decode_string(err) + '\nstate=' + decode_string(r.state))
 
                 finally:
                     self.multi_stub.stub_adapter.ack(ack)
 
         except Exception, err:
-            exception_info()
-            log.error(decode_string(err))
+            exception_traceback(decode_string(err))

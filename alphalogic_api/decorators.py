@@ -4,7 +4,7 @@ import inspect
 import time
 from alphalogic_api.logger import log
 from alphalogic_api import utils
-from alphalogic_api.exceptions import exception_info
+from alphalogic_api.exceptions import exception_traceback
 
 
 def command_preparation(wrapped, func, **kwargs_c):
@@ -78,8 +78,7 @@ def run(*argv_r, **kwargs_r):
                         else:
                             device.manager.tasks_pool.add_task(time_finish, getattr(device, func.func_name))
             except Exception, err:
-                exception_info()
-                log.error(utils.decode_string(err))
+                exception_traceback(utils.decode_string(err))
 
         wrapped.runnable = True
         wrapped.period_name = kwargs_r.keys()[0]
