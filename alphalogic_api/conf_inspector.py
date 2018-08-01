@@ -48,6 +48,7 @@ class ConfInspector(object):
                 raise Exception('Real and model access are different')
 
             # 4 check enums
+            '''
             model_choices = parameter_model.choices
             real_choices = parameter_model.enums()
             if model_choices is None and len(real_choices) != 0:
@@ -68,6 +69,7 @@ class ConfInspector(object):
                         real_vals, real_keys = sorted(real_vals), sorted(real_keys)
                         if model_vals != real_vals or model_keys != real_keys:
                             raise Exception('Real and model enums are different')
+            '''
         except Exception, err:
             exception_info()
             log.error('Parameter discrepancy ##{0}'.format(parameter_model.parameter_name))

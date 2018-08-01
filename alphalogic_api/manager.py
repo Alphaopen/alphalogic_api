@@ -193,7 +193,7 @@ class Manager(AbstractManager):
         self.configure_events(object, id)
 
     def prepare_existing_devices(self, id_parent):
-        for child_id in self.children(id_parent):
+        for child_id in super(Manager, self).children(id_parent):
             class_name_str = self.get_type(child_id)
             if class_name_str not in Manager.dict_type_objects:
                 Manager.dict_type_objects[class_name_str] = utils.get_class_name_from_str(class_name_str)
