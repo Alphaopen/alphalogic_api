@@ -9,12 +9,18 @@ message Empty {
 message Value {
     oneof oneof_value {
         bool bool_value = 1;
-        int64 int64_value = 2;
+        int64 long_value = 2;
         double double_value = 3;
         int64 datetime_value = 4;
         string string_value = 5;
     }
 }
+
+message NamedValue {
+    string name = 1;
+    Value value = 2;
+}
+
 
 
 // Object Service
@@ -26,7 +32,7 @@ service ObjectService {
     rpc type(ObjectRequest) returns (ObjectReply) {}
 
     rpc create_string_parameter(ObjectRequest) returns (ObjectReply) {}
-    rpc create_int_parameter(ObjectRequest) returns (ObjectReply) {}
+    rpc create_long_parameter(ObjectRequest) returns (ObjectReply) {}
     rpc create_double_parameter(ObjectRequest) returns (ObjectReply) {}
     rpc create_datetime_parameter(ObjectRequest) returns (ObjectReply) {}
     rpc create_bool_parameter(ObjectRequest) returns (ObjectReply) {}
@@ -34,7 +40,7 @@ service ObjectService {
     rpc create_event(ObjectRequest) returns (ObjectReply) {}
 
     rpc create_string_command(ObjectRequest) returns (ObjectReply) {}
-    rpc create_int_command(ObjectRequest) returns (ObjectReply) {}
+    rpc create_long_command(ObjectRequest) returns (ObjectReply) {}
     rpc create_double_command(ObjectRequest) returns (ObjectReply) {}
     rpc create_datetime_command(ObjectRequest) returns (ObjectReply) {}
     rpc create_bool_command(ObjectRequest) returns (ObjectReply) {}
@@ -90,7 +96,7 @@ service ParameterService {
     rpc set_desc(ParameterRequest) returns (ParameterReply) {}
 
     rpc is_string(ParameterRequest) returns (ParameterReply) {}
-    rpc is_int(ParameterRequest) returns (ParameterReply) {}
+    rpc is_long(ParameterRequest) returns (ParameterReply) {}
     rpc is_double(ParameterRequest) returns (ParameterReply) {}
     rpc is_datetime(ParameterRequest) returns (ParameterReply) {}
     rpc is_bool(ParameterRequest) returns (ParameterReply) {}
@@ -134,7 +140,7 @@ message ParameterRequest {
     string display_name = 2; // rpc set_display_name
     string desc = 3; // rpc set_desc
     Value value = 4; // rpc set, set_enum
-    map<string, Value> enums = 5; // rpc set_enums
+    repeated NamedValue enums = 5; // rpc set_enums
     string enum_name = 6; // rpc has_enum, set_enum
 }
 
@@ -143,9 +149,9 @@ message ParameterReply {
     string display_name = 2; // rpc display_name
     string desc = 3; // rpc desc
     Value value = 4; // rpc get
-    map<string, Value> enums = 5; // rpc enums
+    repeated NamedValue enums = 5; // rpc enums
 
-    bool yes = 100; // rpc is_string, is_int, is_double, is_datetime, is_bool, is_runtime, is_setup, is_hidden, is_common, is_read_only, is_read_write, is_licensed, has_enum
+    bool yes = 100; // rpc is_string, is_long, is_double, is_datetime, is_bool, is_runtime, is_setup, is_hidden, is_common, is_read_only, is_read_write, is_licensed, has_enum
     uint64 owner = 200; // rpc owner
 }
 
@@ -192,7 +198,7 @@ message EventRequest {
 
     string argument = 5; // rpc argument, set_argument, has_argument
     Value value = 6; // prc set_argument
-    map<string, Value> enums = 7; // optional for rpc set_argument
+    repeated NamedValue enums = 7; // optional for rpc set_argument
 }
 
 message EventReply {
@@ -219,7 +225,7 @@ service CommandService {
 
     // result type
     rpc is_string(CommandRequest) returns (CommandReply) {}
-    rpc is_int(CommandRequest) returns (CommandReply) {}
+    rpc is_long(CommandRequest) returns (CommandReply) {}
     rpc is_double(CommandRequest) returns (CommandReply) {}
     rpc is_datetime(CommandRequest) returns (CommandReply) {}
     rpc is_bool(CommandRequest) returns (CommandReply) {}
@@ -245,7 +251,7 @@ message CommandRequest {
 
     string argument = 5; // rpc argument, set_argument, has_argument
     Value value = 6; // prc set_argument, set_result
-    map<string, Value> enums = 7; // optional for rpc set_argument
+    repeated NamedValue enums = 7; // optional for rpc set_argument
 }
 
 message CommandReply {
@@ -256,22 +262,22 @@ message CommandReply {
     Value value = 4; // rpc argument
     repeated string names = 5; // rpc argument_list
 
-    bool yes = 100; // rpc is_string, is_int, is_double, is_datetime, is_bool
+    bool yes = 100; // rpc is_string, is_long, is_double, is_datetime, is_bool
     uint64 owner = 200; // rpc owner
 }
 
 
-// Adapter Service
-service AdapterService {
-    rpc states(Empty) returns (stream AdapterStream) {}
-    rpc ack(AdapterStream) returns (Empty) {}  // state acknowledge 
+// State Service
+service StateService {
+    rpc states(Empty) returns (stream StateStream) {}
+    rpc ack(StateStream) returns (Empty) {}  // state acknowledge 
 }
 
-message AdapterStream {
-    AdapterState state = 1;
+message StateStream {
+    State state = 1;
     uint64 id = 2;
 
-    enum AdapterState {
+    enum State {
         AFTER_CREATING_OBJECT = 0;
         BEFORE_REMOVING_OBJECT = 1;
         GETTING_AVAILABLE_CHILDREN = 2;

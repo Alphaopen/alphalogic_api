@@ -39,8 +39,8 @@ class ObjectServiceStub(object):
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
         response_deserializer=rpc__pb2.ObjectReply.FromString,
         )
-    self.create_int_parameter = channel.unary_unary(
-        '/adapter.rpc.ObjectService/create_int_parameter',
+    self.create_long_parameter = channel.unary_unary(
+        '/adapter.rpc.ObjectService/create_long_parameter',
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
         response_deserializer=rpc__pb2.ObjectReply.FromString,
         )
@@ -69,8 +69,8 @@ class ObjectServiceStub(object):
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
         response_deserializer=rpc__pb2.ObjectReply.FromString,
         )
-    self.create_int_command = channel.unary_unary(
-        '/adapter.rpc.ObjectService/create_int_command',
+    self.create_long_command = channel.unary_unary(
+        '/adapter.rpc.ObjectService/create_long_command',
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
         response_deserializer=rpc__pb2.ObjectReply.FromString,
         )
@@ -215,7 +215,7 @@ class ObjectServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def create_int_parameter(self, request, context):
+  def create_long_parameter(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -257,7 +257,7 @@ class ObjectServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def create_int_command(self, request, context):
+  def create_long_command(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -432,8 +432,8 @@ def add_ObjectServiceServicer_to_server(servicer, server):
           request_deserializer=rpc__pb2.ObjectRequest.FromString,
           response_serializer=rpc__pb2.ObjectReply.SerializeToString,
       ),
-      'create_int_parameter': grpc.unary_unary_rpc_method_handler(
-          servicer.create_int_parameter,
+      'create_long_parameter': grpc.unary_unary_rpc_method_handler(
+          servicer.create_long_parameter,
           request_deserializer=rpc__pb2.ObjectRequest.FromString,
           response_serializer=rpc__pb2.ObjectReply.SerializeToString,
       ),
@@ -462,8 +462,8 @@ def add_ObjectServiceServicer_to_server(servicer, server):
           request_deserializer=rpc__pb2.ObjectRequest.FromString,
           response_serializer=rpc__pb2.ObjectReply.SerializeToString,
       ),
-      'create_int_command': grpc.unary_unary_rpc_method_handler(
-          servicer.create_int_command,
+      'create_long_command': grpc.unary_unary_rpc_method_handler(
+          servicer.create_long_command,
           request_deserializer=rpc__pb2.ObjectRequest.FromString,
           response_serializer=rpc__pb2.ObjectReply.SerializeToString,
       ),
@@ -613,8 +613,8 @@ class ParameterServiceStub(object):
         request_serializer=rpc__pb2.ParameterRequest.SerializeToString,
         response_deserializer=rpc__pb2.ParameterReply.FromString,
         )
-    self.is_int = channel.unary_unary(
-        '/adapter.rpc.ParameterService/is_int',
+    self.is_long = channel.unary_unary(
+        '/adapter.rpc.ParameterService/is_long',
         request_serializer=rpc__pb2.ParameterRequest.SerializeToString,
         response_deserializer=rpc__pb2.ParameterReply.FromString,
         )
@@ -791,7 +791,7 @@ class ParameterServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def is_int(self, request, context):
+  def is_long(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1006,8 +1006,8 @@ def add_ParameterServiceServicer_to_server(servicer, server):
           request_deserializer=rpc__pb2.ParameterRequest.FromString,
           response_serializer=rpc__pb2.ParameterReply.SerializeToString,
       ),
-      'is_int': grpc.unary_unary_rpc_method_handler(
-          servicer.is_int,
+      'is_long': grpc.unary_unary_rpc_method_handler(
+          servicer.is_long,
           request_deserializer=rpc__pb2.ParameterRequest.FromString,
           response_serializer=rpc__pb2.ParameterReply.SerializeToString,
       ),
@@ -1581,8 +1581,8 @@ class CommandServiceStub(object):
         request_serializer=rpc__pb2.CommandRequest.SerializeToString,
         response_deserializer=rpc__pb2.CommandReply.FromString,
         )
-    self.is_int = channel.unary_unary(
-        '/adapter.rpc.CommandService/is_int',
+    self.is_long = channel.unary_unary(
+        '/adapter.rpc.CommandService/is_long',
         request_serializer=rpc__pb2.CommandRequest.SerializeToString,
         response_deserializer=rpc__pb2.CommandReply.FromString,
         )
@@ -1684,7 +1684,7 @@ class CommandServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def is_int(self, request, context):
+  def is_long(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1794,8 +1794,8 @@ def add_CommandServiceServicer_to_server(servicer, server):
           request_deserializer=rpc__pb2.CommandRequest.FromString,
           response_serializer=rpc__pb2.CommandReply.SerializeToString,
       ),
-      'is_int': grpc.unary_unary_rpc_method_handler(
-          servicer.is_int,
+      'is_long': grpc.unary_unary_rpc_method_handler(
+          servicer.is_long,
           request_deserializer=rpc__pb2.CommandRequest.FromString,
           response_serializer=rpc__pb2.CommandReply.SerializeToString,
       ),
@@ -1855,8 +1855,8 @@ def add_CommandServiceServicer_to_server(servicer, server):
   server.add_generic_rpc_handlers((generic_handler,))
 
 
-class AdapterServiceStub(object):
-  """Adapter Service
+class StateServiceStub(object):
+  """State Service
   """
 
   def __init__(self, channel):
@@ -1866,19 +1866,19 @@ class AdapterServiceStub(object):
       channel: A grpc.Channel.
     """
     self.states = channel.unary_stream(
-        '/adapter.rpc.AdapterService/states',
+        '/adapter.rpc.StateService/states',
         request_serializer=rpc__pb2.Empty.SerializeToString,
-        response_deserializer=rpc__pb2.AdapterStream.FromString,
+        response_deserializer=rpc__pb2.StateStream.FromString,
         )
     self.ack = channel.unary_unary(
-        '/adapter.rpc.AdapterService/ack',
-        request_serializer=rpc__pb2.AdapterStream.SerializeToString,
+        '/adapter.rpc.StateService/ack',
+        request_serializer=rpc__pb2.StateStream.SerializeToString,
         response_deserializer=rpc__pb2.Empty.FromString,
         )
 
 
-class AdapterServiceServicer(object):
-  """Adapter Service
+class StateServiceServicer(object):
+  """State Service
   """
 
   def states(self, request, context):
@@ -1896,19 +1896,19 @@ class AdapterServiceServicer(object):
     raise NotImplementedError('Method not implemented!')
 
 
-def add_AdapterServiceServicer_to_server(servicer, server):
+def add_StateServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
       'states': grpc.unary_stream_rpc_method_handler(
           servicer.states,
           request_deserializer=rpc__pb2.Empty.FromString,
-          response_serializer=rpc__pb2.AdapterStream.SerializeToString,
+          response_serializer=rpc__pb2.StateStream.SerializeToString,
       ),
       'ack': grpc.unary_unary_rpc_method_handler(
           servicer.ack,
-          request_deserializer=rpc__pb2.AdapterStream.FromString,
+          request_deserializer=rpc__pb2.StateStream.FromString,
           response_serializer=rpc__pb2.Empty.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
-      'adapter.rpc.AdapterService', rpc_method_handlers)
+      'adapter.rpc.StateService', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))
