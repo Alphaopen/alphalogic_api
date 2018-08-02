@@ -46,8 +46,8 @@ class AbstractManager(object):
         answer = self._call('create_string_parameter', id_object, name=name)
         return answer.id
 
-    def create_int_parameter(self, id_object, name):
-        answer = self._call('create_int_parameter', id_object, name=name)
+    def create_long_parameter(self, id_object, name):
+        answer = self._call('create_long_parameter', id_object, name=name)
         return answer.id
 
     def create_double_parameter(self, id_object, name):
@@ -70,8 +70,8 @@ class AbstractManager(object):
         answer = self._call('create_string_command', id_object, name=name)
         return answer.id
 
-    def create_int_command(self, id_object, name):
-        answer = self._call('create_int_command', id_object, name=name)
+    def create_long_command(self, id_object, name):
+        answer = self._call('create_long_command', id_object, name=name)
         return answer.id
 
     def create_double_command(self, id_object, name):
@@ -392,22 +392,22 @@ class Manager(AbstractManager):
             for r in self.multi_stub.stub_adapter.states(rpc_pb2.Empty()):
                 ack = r
                 try:
-                    if r.state == rpc_pb2.AdapterStream.AFTER_CREATING_OBJECT:
+                    if r.state == rpc_pb2.StateStream.AFTER_CREATING_OBJECT:
                         log.info('Create device {0}'.format(r.id))
                         self.create_object(r.id)
 
-                    elif r.state == rpc_pb2.AdapterStream.BEFORE_REMOVING_OBJECT:
+                    elif r.state == rpc_pb2.StateStream.BEFORE_REMOVING_OBJECT:
                         log.info('Remove device {0}'.format(r.id))
                         if r.id in Manager.nodes:
                             self.delete_object(r.id)
                         else:
                             log.warn('Object {0} not found'.format(r.id))
 
-                    elif r.state == rpc_pb2.AdapterStream.GETTING_AVAILABLE_CHILDREN:
+                    elif r.state == rpc_pb2.StateStream.GETTING_AVAILABLE_CHILDREN:
                         log.info('Get available children of {0}'.format(r.id))
                         self.get_available_children(r.id)
 
-                    elif r.state == rpc_pb2.AdapterStream.AFTER_SETTING_PARAMETER:
+                    elif r.state == rpc_pb2.StateStream.AFTER_SETTING_PARAMETER:
                         if r.id in Manager.components:
                             if Manager.components[r.id].callback:
                                 try:
@@ -419,7 +419,7 @@ class Manager(AbstractManager):
                         else:
                             log.warn('Parameter {0} not found'.format(r.id))
 
-                    elif r.state == rpc_pb2.AdapterStream.EXECUTING_COMMAND:
+                    elif r.state == rpc_pb2.StateStream.EXECUTING_COMMAND:
                         if r.id in Manager.components:
                             Manager.components[r.id].call_function()  # try except inside
                         else:

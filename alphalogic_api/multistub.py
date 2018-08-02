@@ -16,12 +16,12 @@ from alphalogic_api.protocol.rpc_pb2_grpc import (
     ParameterServiceStub,
     EventServiceStub,
     CommandServiceStub,
-    AdapterServiceStub,
+    StateServiceStub,
     ObjectServiceServicer,
     ParameterServiceServicer,
     EventServiceServicer,
     CommandServiceServicer,
-    AdapterServiceServicer
+    StateServiceServicer
 )
 
 
@@ -33,7 +33,7 @@ class MultiStub(object):
         self.stub_parameter = ParameterServiceStub(self.channel)
         self.stub_event = EventServiceStub(self.channel)
         self.stub_command = CommandServiceStub(self.channel)
-        self.stub_adapter = AdapterServiceStub(self.channel)
+        self.stub_adapter = StateServiceStub(self.channel)
 
     @staticmethod
     def static_initialization():
@@ -41,7 +41,7 @@ class MultiStub(object):
         MultiStub.parameter_fun_set = MultiStub.dict_create_helper(ParameterServiceServicer)
         MultiStub.event_fun_set = MultiStub.dict_create_helper(EventServiceServicer)
         MultiStub.command_fun_set = MultiStub.dict_create_helper(CommandServiceServicer)
-        MultiStub.adapter_fun_set = MultiStub.dict_create_helper(AdapterServiceServicer)
+        MultiStub.adapter_fun_set = MultiStub.dict_create_helper(StateServiceServicer)
 
     @staticmethod
     def dict_create_helper(service):

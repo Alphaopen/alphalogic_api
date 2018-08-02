@@ -12,7 +12,7 @@ log_levels = ['trace',
 
 log_directory = os.path.join(os.getcwd(), 'logs')
 
-parser = argparse.ArgumentParser(description='Alphalogic Adapter Stub', add_help=False)
+parser = argparse.ArgumentParser(description='Alphalogic Service Stub', add_help=False)
 parser.add_argument('--help', action='store_true', help='Print help')
 parser.add_argument('-h', '--host', default='localhost', help='Set host (default 127.0.0.1)')
 parser.add_argument('-p', '--port', default=42001, type=int, help='Set port (default 42001)')

@@ -35,8 +35,8 @@ class AbstractCommand(object):
         answer = self._call('is_string')
         return answer.yes
 
-    def is_int(self):
-        answer = self._call('is_int')
+    def is_long(self):
+        answer = self._call('is_long')
         return answer.yes
 
     def is_double(self):
@@ -80,12 +80,15 @@ class AbstractCommand(object):
             val_type = utils.value_type_field_definer(type(value))
             setattr(req.value, val_type, value)
             for val in cur_choices:
+                e = req.enums.add()
                 if isinstance(val, tuple):
+                    e.name = val[1]
                     val_type = utils.value_type_field_definer(type(val[0]))
-                    setattr(req.enums[val[1]], val_type, val[0])
+                    setattr(e.value, val_type, val[0])
                 else:
+                    e.name = unicode(val)
                     val_type = utils.value_type_field_definer(type(val))
-                    setattr(req.enums[unicode(val)], val_type, val)
+                    setattr(e.value, val_type, val)
 
             self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set,
                                         request=req, stub=self.multi_stub.stub_command)

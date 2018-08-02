@@ -39,8 +39,8 @@ class AbstractParameter(object):
         answer = self._call('is_string')
         return answer.yes
 
-    def is_int(self):
-        answer = self._call('is_int')
+    def is_long(self):
+        answer = self._call('is_long')
         return answer.yes
 
     def is_double(self):
@@ -131,10 +131,13 @@ class AbstractParameter(object):
         req = rpc_pb2.ParameterRequest(id=self.id)
         attr_type = utils.value_type_field_definer(value_type)
         for val in values:
+            e = req.enums.add()
             if isinstance(val, tuple):
-                setattr(req.enums[unicode(val[1])], attr_type, val[0])
+                e.name = unicode(val[1])
+                setattr(e.value, attr_type, val[0])
             else:
-                setattr(req.enums[unicode(val)], attr_type, val)
+                e.name = unicode(val)
+                setattr(e.value, attr_type, val)
 
         self.multi_stub.call_helper('set_enums', fun_set=MultiStub.parameter_fun_set, request=req,
                                     stub=self.multi_stub.stub_parameter)

@@ -22,7 +22,7 @@ class ConfInspector(object):
             #1 check value_type
             if parameter_model.value_type is bool and not(parameter_model.is_bool()):
                 raise Exception('Real and model type are different')
-            elif parameter_model.value_type is int and not(parameter_model.is_int()):
+            elif parameter_model.value_type is int and not(parameter_model.is_long()):
                 raise Exception('Real and model type are different')
             elif parameter_model.value_type is float and not(parameter_model.is_double()):
                 raise Exception('Real and model type are different')
@@ -113,7 +113,7 @@ class ConfInspector(object):
             model_result_type = command_model.result_type
             if model_result_type is bool and not(command_model.is_bool()):
                 raise Exception('Real and model result type are different')
-            elif model_result_type is int and not(command_model.is_int()):
+            elif model_result_type is int and not(command_model.is_long()):
                 raise Exception('Real and model result type are different')
             elif model_result_type is float and not(command_model.is_double()):
                 raise Exception('Real and model result type are different')

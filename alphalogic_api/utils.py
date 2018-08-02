@@ -12,7 +12,7 @@ def value_type_field_definer(value_type):
     if unicode is value_type:
         return 'string_value'
     elif int is value_type or long is value_type:
-        return 'int64_value'
+        return 'long_value'
     elif float is value_type:
         return 'double_value'
     elif datetime.datetime is value_type:
@@ -31,7 +31,7 @@ def create_command_definer(result_type):
     if unicode is result_type:
         return 'create_string_command'
     elif int is result_type or long is result_type:
-        return 'create_int_command'
+        return 'create_long_command'
     elif float is result_type:
         return 'create_double_command'
     elif datetime.datetime is result_type:
@@ -46,7 +46,7 @@ def create_parameter_definer(result_type):
     if unicode is result_type:
         return 'create_string_parameter'
     elif int is result_type or long is result_type:
-        return 'create_int_parameter'
+        return 'create_long_parameter'
     elif float is result_type:
         return 'create_double_parameter'
     elif datetime.datetime is result_type:
@@ -93,7 +93,7 @@ def get_rpc_value(value_type, value=None):
     value_rpc = rpc_pb2.Value()
 
     if value_type == int or value_type == long:
-        value_rpc.int64_value = value if value else 0
+        value_rpc.long_value = value if value else 0
     elif value_type == float:
         value_rpc.double_value = value if value else 0.0
     elif value_type == datetime.datetime:
@@ -115,8 +115,8 @@ def get_rpc_value(value_type, value=None):
 def value_from_rpc(value_rpc):
     if value_rpc.HasField('bool_value'):
         return value_rpc.bool_value
-    elif value_rpc.HasField('int64_value'):
-        return value_rpc.int64_value
+    elif value_rpc.HasField('long_value'):
+        return value_rpc.long_value
     elif value_rpc.HasField('double_value'):
         return value_rpc.double_value
     elif value_rpc.HasField('datetime_value'):
