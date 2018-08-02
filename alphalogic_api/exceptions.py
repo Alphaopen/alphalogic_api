@@ -23,7 +23,7 @@ class RequestError(Exception):
 
 class ComponentNotFound(Exception):
     """
-    If component not found in the Device
+    If component not found in the Object
     """
     def __init__(self, msg):
         super(ComponentNotFound, self).__init__(msg)

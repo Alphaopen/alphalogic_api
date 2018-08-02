@@ -6,7 +6,7 @@ import sys
 from threading import Lock, Thread
 from alphalogic_api.objects.event import Event
 from alphalogic_api.objects.command import Command
-from alphalogic_api.objects.parameter import Parameter, ParameterString, ParameterBool, ParameterInt
+from alphalogic_api.objects.parameter import Parameter, ParameterString, ParameterBool, ParameterLong
 from alphalogic_api.attributes import Visible, Access
 from alphalogic_api.manager import Manager
 from alphalogic_api.logger import log
@@ -15,7 +15,7 @@ from alphalogic_api.tasks_pool import TasksPool
 from alphalogic_api.exceptions import exception_traceback
 
 
-class Device(object):
+class Object(object):
     """
     Node with parameters, commands, events and run functions.
     Parameters, commands, events can't be with same name.
@@ -30,7 +30,7 @@ class Device(object):
     connected = ParameterBool(visible=Visible.common, access=Access.read_only)
     ready_to_work = ParameterBool(visible=Visible.common, access=Access.read_only)
     error = ParameterBool(visible=Visible.common, access=Access.read_only)
-    number_of_errors = ParameterInt(visible=Visible.setup, access=Access.read_write)
+    number_of_errors = ParameterLong(visible=Visible.setup, access=Access.read_write)
     status = ParameterString(visible=Visible.common, access=Access.read_only)
 
     def __init__(self, type_device, id_device):
@@ -45,8 +45,8 @@ class Device(object):
         for name in list_parameters_name:
             if name in type(self).__dict__:
                 self.__dict__[name] = type(self).__dict__[name]
-            elif name in Device.__dict__:
-                self.__dict__[name] = Device.__dict__[name]
+            elif name in Object.__dict__:
+                self.__dict__[name] = Object.__dict__[name]
             elif name in Root.__dict__:
                 self.__dict__[name] = Root.__dict__[name]
 
@@ -111,7 +111,7 @@ class Device(object):
         pass
 
 
-class Root(Device):
+class Root(Object):
     version = ParameterString(visible=Visible.setup, access=Access.read_only)
 
     def __init__(self, host, port):

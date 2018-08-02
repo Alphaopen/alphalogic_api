@@ -209,7 +209,7 @@ class ParameterBool(Parameter):
         return Parameter(*args, value_type=bool, **kwargs)
 
 
-class ParameterInt(Parameter):
+class ParameterLong(Parameter):
     def __new__(cls, *args, **kwargs):
         return Parameter(*args, value_type=int, **kwargs)
 

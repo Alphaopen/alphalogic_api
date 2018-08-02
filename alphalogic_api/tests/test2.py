@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from alphalogic_api.objects import Root, Device
+from alphalogic_api.objects import Root, Object
 from alphalogic_api.decorators import command
 from alphalogic_api.options import host, port
 
@@ -19,7 +19,7 @@ def uint64_to_int64(i):
     return -(i - _MAX) if i > _MAX else i
 
 
-class TreeChecker(Device):
+class TreeChecker(Object):
 
     @command(result_type=long)
     def get_root_id(self):

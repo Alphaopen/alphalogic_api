@@ -222,7 +222,7 @@ class Manager(AbstractManager):
             map(delete_id, Manager.components_for_device[object_id])
             del Manager.components_for_device[object_id]
             del Manager.nodes[object_id]
-            log.info('Device {0} removed'.format(object_id))
+            log.info('Object {0} removed'.format(object_id))
 
     def get_available_children(self, id_device):
         device = Manager.nodes[id_device]
@@ -401,7 +401,7 @@ class Manager(AbstractManager):
                         if r.id in Manager.nodes:
                             self.delete_object(r.id)
                         else:
-                            log.warn('Device {0} not found'.format(r.id))
+                            log.warn('Object {0} not found'.format(r.id))
 
                     elif r.state == rpc_pb2.AdapterStream.GETTING_AVAILABLE_CHILDREN:
                         log.info('Get available children of {0}'.format(r.id))
