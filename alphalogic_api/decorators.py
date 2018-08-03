@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 import inspect
 import time
+import traceback
 from alphalogic_api.logger import log
 from alphalogic_api import utils
-from alphalogic_api.exceptions import exception_traceback
 
 
 def command_preparation(wrapped, func, **kwargs_c):
@@ -64,7 +64,8 @@ def run(*argv_r, **kwargs_r):
                         try:
                             func(device)
                         except Exception, err:
-                            log.error(u'Run function exception: ' + utils.decode_string(err))
+                            t = traceback.format_exc()
+                            log.error(u'Run function exception: {0}'.format(t))
 
                         time_finish = time.time()
                         time_spend = time_finish-time_start
@@ -77,8 +78,10 @@ def run(*argv_r, **kwargs_r):
                                                                getattr(device, func.func_name))
                         else:
                             device.manager.tasks_pool.add_task(time_finish, getattr(device, func.func_name))
+
             except Exception, err:
-                exception_traceback(utils.decode_string(err))
+                t = traceback.format_exc()
+                log.error(u'system error in run decorator: {0}'.format(t))
 
         wrapped.runnable = True
         wrapped.period_name = kwargs_r.keys()[0]

@@ -31,11 +31,3 @@ class ComponentNotFound(Exception):
 
 class Exit(Exception):
     pass
-
-
-def exception_traceback(message):
-    """
-    Writes filename and line of exception
-    """
-    log.error(message)
-    log.error(traceback.format_exc())

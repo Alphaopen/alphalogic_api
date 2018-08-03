@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 import time
 import sys
+import traceback
 from threading import Lock, Thread
 from alphalogic_api.objects.event import Event
 from alphalogic_api.objects.command import Command
@@ -12,7 +13,6 @@ from alphalogic_api.manager import Manager
 from alphalogic_api.logger import log
 from alphalogic_api.utils import Exit, decode_string
 from alphalogic_api.tasks_pool import TasksPool
-from alphalogic_api.exceptions import exception_traceback
 
 
 class Object(object):
@@ -128,7 +128,8 @@ class Root(Object):
             self.log.info('Root connected OK')
 
         except Exception, err:
-            exception_traceback(decode_string(err))
+            t = traceback.format_exc()
+            self.log.error(t)
             self.manager.tasks_pool.stop_operation_thread()
             sys.exit(2)
 
