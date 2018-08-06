@@ -7,7 +7,7 @@ from alphalogic_api.logger import log
 
 class IncorrectRPCRequest(Exception):
     """
-    Unsupported request by protocol. Check alphalogic_api code
+    Unsupported request by protocol. Check alphalogic_api.rst code
     """
     def __init__(self, msg):
         super(IncorrectRPCRequest, self).__init__(msg)
