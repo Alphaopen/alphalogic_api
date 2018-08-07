@@ -26,6 +26,27 @@ def command_preparation(wrapped, func, **kwargs_c):
 
 
 def command(*argv_c, **kwargs_c):
+    """
+    Use this decorator to create Command object.
+
+    Example 1::
+
+        # The command returns True every time
+        @command(result_type=bool)
+        def cmd_exception(self):
+            # do smth
+            return True
+
+    Example 2::
+
+        # The command has three arguments and returns 'where' argument value
+        @command(result_type=bool)
+        def cmd_alarm(self, where='here', when=datetime.datetime.now(), why=2):
+            return where
+
+
+    :arg result_type: Result type
+    """
     def decorator(func):
         def wrapped(device, *argv, **kwargs):
             try:
@@ -43,21 +64,16 @@ def command(*argv_c, **kwargs_c):
 
 def run(*argv_r, **kwargs_r):
     """
-    This function periodically executed.
-    It created Parameter with period in seconds
+    This function executes periodically. It also creates an integer Parameter which means period value in seconds.
 
-    Example:
+    Example: ::
 
-    # Called every 1 second.
-    # You can change period by changing parameter 'period_one' value
+        # Called every 1 second.
+        # You can change period by changing parameter 'period_one' value.
 
-    @run(period_one=1)
-    def run_one(self):
-        self.counter.val += 1
-
-    :param argv_r:
-    :param kwargs_r:
-    :return:
+        @run(period_one=1)
+        def run_one(self):
+            self.counter.val += 1
     """
     def decorator(func):
         def wrapped(device):

@@ -3,7 +3,7 @@
 API Documentation
 =================
 
-.. py:module:: alphalogic_api.objects.object
+.. py:module:: alphalogic_api.objects
 
 Objects
 -------
@@ -14,6 +14,7 @@ Root
 .. autoclass:: Root
    :members:
 
+
 Object
 ~~~~~~
 
@@ -21,15 +22,12 @@ Object
    :members:
 
 
-.. py:module:: alphalogic_api.objects.parameter
-
 Parameter
 ~~~~~~~~~
 
 .. autoclass:: Parameter
    :members:
 
-.. py:module:: alphalogic_api.objects.event
 
 Event
 ~~~~~
@@ -37,12 +35,22 @@ Event
 .. autoclass:: Event
    :members:
 
-.. py:module:: alphalogic_api.objects.command
 
-Command
-~~~~~~~
+Decorators
+----------
 
-.. autoclass:: Command
+.. py:module:: alphalogic_api.decorators
+
+command
+~~~~~
+
+.. autoclass:: command
+   :members:
+
+run
+~~~~~
+
+.. autoclass:: run
    :members:
 
 
