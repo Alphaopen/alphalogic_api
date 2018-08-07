@@ -112,9 +112,15 @@ class Object(object):
 
 
 class Root(Object):
+
     version = ParameterString(visible=Visible.setup, access=Access.read_only)
 
     def __init__(self, host, port):
+        """
+        The main object, that connects to adapter
+        :arg host: hostname of the adapter with gRPC interface turned on
+        :arg port: port of the adapter
+        """
         try:
             self.manager.start_threads()
             self.joinable = False
@@ -143,6 +149,9 @@ class Root(Object):
         self.manager.prepare_existing_devices(id_root)
 
     def join(self):
+        """
+        The infinity communication loop
+        """
         if self.joinable:
             is_connected = True
             while True:
@@ -166,4 +175,3 @@ class Root(Object):
                     break
                 except Exception, err:
                     log.error(decode_string(err))
-

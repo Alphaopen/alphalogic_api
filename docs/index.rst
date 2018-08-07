@@ -6,7 +6,7 @@
 Alphalogic API
 ==============
 
-Official library for creating adapters in the Alphalogic system
+The official library for creating the Alphalogic system adapter
 
 Compatibility
 -------------
@@ -35,6 +35,8 @@ Install the ``alphalogic_api`` package with `pip
 Example Usage
 -------------
 
+Create ``stub.py`` file in the Alphalogic adapter folder.
+
 ::
 
     # -*- coding: utf-8 -*-
@@ -60,10 +62,6 @@ Example Usage
     # python loop
     root = MyRoot(host, port)
     root.join()
-
-
-Logging
-~~~~~~~
 
 ...
 
