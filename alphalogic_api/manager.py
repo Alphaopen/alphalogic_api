@@ -15,7 +15,7 @@ from alphalogic_api.utils import shutdown, decode_string
 from alphalogic_api.attributes import Visible
 from alphalogic_api.exceptions import ComponentNotFound
 from alphalogic_api.conf_inspector import ConfInspector
-from alphalogic_api.options import args as program_args
+from alphalogic_api import options
 from alphalogic_api import utils
 
 
@@ -245,7 +245,7 @@ class Manager(AbstractManager):
                                                   list_id_parameters_already_exists)
         if is_copy and name in object.__dict__:
             parameter = object.__dict__[name].get_copy()
-        elif is_copy and name not in object.__dict__ and program_args.development_mode:
+        elif is_copy and name not in object.__dict__ and options.program_args.development_mode:
             return
         elif parameter is None:
             raise Exception('{0} is None'.format(name))
@@ -254,7 +254,7 @@ class Manager(AbstractManager):
         parameter.parameter_name = name
         parameter.set_multi_stub(self.multi_stub)
 
-        if name not in list_name_parameters_already_exists or program_args.development_mode: # if parameter doesn't exist
+        if name not in list_name_parameters_already_exists or options.args.development_mode: # if parameter doesn't exist
             value_type = parameter.value_type
             id_parameter = getattr(self, utils.create_parameter_definer(value_type)) \
                 (id_object=object_id, name=name)
@@ -270,7 +270,7 @@ class Manager(AbstractManager):
                 if (is_tuple and parameter.val not in zip(*parameter.choices)[0]) \
                         or not is_tuple and parameter.val not in parameter.choices:
                     parameter.val = getattr(parameter, 'default', None)
-        elif name in list_name_parameters_already_exists and not program_args.development_mode:
+        elif name in list_name_parameters_already_exists and not options.args.development_mode:
             id_parameter = self.parameter(object_id, name)
             parameter.id = id_parameter
             Manager.inspector.check_parameter_accordance(parameter)
@@ -287,7 +287,7 @@ class Manager(AbstractManager):
         list_name_commands_already_exists = map(lambda id: self.multi_stub.command_call('name', id=id).name,
                                                self.commands(object_id))
         command.set_multi_stub(self.multi_stub)
-        if name not in list_name_commands_already_exists or program_args.development_mode:  # if event doesn't exist
+        if name not in list_name_commands_already_exists or options.args.development_mode:  # if event doesn't exist
             result_type = command.result_type
             id_command = getattr(self, utils.create_command_definer(result_type)) \
                 (id_object=object_id, name=name)
@@ -296,7 +296,7 @@ class Manager(AbstractManager):
             for arg in command.arguments:
                 name_arg, value_arg = arg
                 command.set_argument(name_arg, value_arg)
-        elif name in list_name_commands_already_exists and not program_args.development_mode:
+        elif name in list_name_commands_already_exists and not options.args.development_mode:
             id_command = self.command(object_id, name)
             command.id = id_command
             Manager.inspector.check_command_accordance(command)
@@ -314,14 +314,14 @@ class Manager(AbstractManager):
         list_name_events_already_exists = map(lambda id: self.multi_stub.event_call('name', id=id).name,
                                                   self.events(object_id))
         event.set_multi_stub(self.multi_stub)
-        if name not in list_name_events_already_exists or program_args.development_mode: # if event doesn't exist
+        if name not in list_name_events_already_exists or options.args.development_mode: # if event doesn't exist
             event.id = self.create_event(id_object=object_id, name=name)
             getattr(event, event.priority.create_func)()
             event.clear()
             for name_arg, value_type in event.arguments:
                 value_arg = utils.value_from_rpc(utils.get_rpc_value(value_type))
                 event.set_argument(name_arg, value_arg)
-        elif name in list_name_events_already_exists and not program_args.development_mode:
+        elif name in list_name_events_already_exists and not options.args.development_mode:
             id_event = self.event(object_id, name)
             event.id = id_event
             Manager.inspector.check_event_accordance(event)

@@ -112,6 +112,10 @@ class Object(object):
 
 
 class Root(Object):
+    """
+    Node with parameters, commands, events and run functions.
+    Parameters, commands, events can't be with same name.
+    """
 
     version = ParameterString(visible=Visible.setup, access=Access.read_only)
 
@@ -128,6 +132,7 @@ class Root(Object):
             id_root = self.manager.root_id()
             type_device = self.manager.get_type(id_root)
             super(Root, self).__init__(type_device, id_root)
+
             self.log.info('Connecting to ' + host + ':' + unicode(port))
             self.init(id_root)
             self.joinable = True
@@ -135,7 +140,7 @@ class Root(Object):
 
         except Exception, err:
             t = traceback.format_exc()
-            self.log.error(t)
+            log.error(t)  # cause Exception can raise before super(Root)
             self.manager.tasks_pool.stop_operation_thread()
             sys.exit(2)
 

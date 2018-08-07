@@ -8,9 +8,8 @@ from alphalogic_api.objects import Root, Object
 from alphalogic_api.objects import MajorEvent
 from alphalogic_api.objects import ParameterBool, ParameterLong, \
     ParameterDouble, ParameterDatetime, ParameterString
-from alphalogic_api.options import host, port
 from alphalogic_api.decorators import command, run
-
+from alphalogic_api import init
 
 def handle_after_set_double(node, parameter):
     node.log.info('double changed')
@@ -55,7 +54,9 @@ class Controller(Object):
         self.counter.val += 1
 
 
-# python loop
-root = MyRoot(host, port)
-root.join()
+if __name__ == '__main__':
+    # python loop
+    host, port = init()
+    root = MyRoot(host, port)
+    root.join()
 

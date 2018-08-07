@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from alphalogic_api.objects import Root, Object
 from alphalogic_api.decorators import command
-from alphalogic_api.options import host, port
+from alphalogic_api import init
 
 
 class MyRoot(Root):
@@ -45,6 +45,8 @@ class TreeChecker(Object):
         ]
 
 
-root = MyRoot(host, port)
-root.log.info('connect to ' + host + ':' + unicode(port))
-root.join()
+if __name__ == '__main__':
+    # python loop
+    host, port = init()
+    root = MyRoot(host, port)
+    root.join()

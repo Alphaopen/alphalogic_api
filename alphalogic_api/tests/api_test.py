@@ -8,7 +8,7 @@ from alphalogic_api.objects import Root, Object
 from alphalogic_api.objects import MajorEvent
 from alphalogic_api.objects import Parameter, ParameterBool, ParameterLong, \
     ParameterDouble, ParameterDatetime, ParameterString
-from alphalogic_api.options import host, port
+from alphalogic_api import init
 from alphalogic_api.exceptions import ComponentNotFound
 from alphalogic_api.decorators import command, run
 from alphalogic_api import utils
@@ -163,50 +163,56 @@ class Controller(Object):
         ]
 
 
-# python loop
-root = MyRoot(host, port)
-root.alarm.emit(where='asdadsadg', why=3, when=datetime.datetime.now())
 
-# Parameters
-try:
-    root.parameter('asgasdgg')
-    assert False, 'ComponentNotFound doesnt\' works'
-except ComponentNotFound, err:
-    pass
-
-pars = root.parameters()
-assert list(x.name() == 'param_bool' for x in pars)
-param = root.parameter('param_bool')
-assert not param.val
-param = root.parameter('param_int')
-assert param.val == 2
-
-# Events
-try:
-    root.event('asgasdgg')
-    assert False, 'ComponentNotFound doesnt\' works'
-except ComponentNotFound, err:
-    pass
-
-events = root.events()
-assert list(x.name() == 'alarm' for x in events)
-ev = root.event('alarm')
-
-# Commands
-
-try:
-    root.command('asgasdgg')
-    assert False, 'ComponentNotFound doesnt\' works'
-except ComponentNotFound, err:
-    pass
-
-cmds = root.commands()
-assert list(x.name() == 'cmd_simple_event' for x in cmds)
-cmd = root.command('cmd_simple_event')
-cmd = root.command('check')
+if __name__ == '__main__':
+    # python loop
+    host, port = init()
 
 
-root.join()
+    # python loop
+    root = MyRoot(host, port)
+    root.alarm.emit(where='asdadsadg', why=3, when=datetime.datetime.now())
+
+    # Parameters
+    try:
+        root.parameter('asgasdgg')
+        assert False, 'ComponentNotFound doesnt\' works'
+    except ComponentNotFound, err:
+        pass
+
+    pars = root.parameters()
+    assert list(x.name() == 'param_bool' for x in pars)
+    param = root.parameter('param_bool')
+    assert not param.val
+    param = root.parameter('param_int')
+    assert param.val == 2
+
+    # Events
+    try:
+        root.event('asgasdgg')
+        assert False, 'ComponentNotFound doesnt\' works'
+    except ComponentNotFound, err:
+        pass
+
+    events = root.events()
+    assert list(x.name() == 'alarm' for x in events)
+    ev = root.event('alarm')
+
+    # Commands
+
+    try:
+        root.command('asgasdgg')
+        assert False, 'ComponentNotFound doesnt\' works'
+    except ComponentNotFound, err:
+        pass
+
+    cmds = root.commands()
+    assert list(x.name() == 'cmd_simple_event' for x in cmds)
+    cmd = root.command('cmd_simple_event')
+    cmd = root.command('check')
+
+
+    root.join()
 
 
 '''
