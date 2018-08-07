@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import sys
-import linecache
-import traceback
-from alphalogic_api.logger import log
+
 
 class IncorrectRPCRequest(Exception):
     """
-    Unsupported request by protocol. Check alphalogic_api.rst code
+    Unsupported request by protocol. Check alphalogic_api code
     """
     def __init__(self, msg):
         super(IncorrectRPCRequest, self).__init__(msg)

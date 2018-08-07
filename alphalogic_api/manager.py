@@ -337,7 +337,7 @@ class Manager(AbstractManager):
 
     def get_components(self, object_id, component_type):
         ids = getattr(self, component_type)(id_object=object_id)
-        #  Component in the adapter, but not in the alphalogic_api.rst is OK. Reject.
+        #  Function return components in the adapter, except nonexistent.
         return list(self.components[id] for id in ids if id in self.components)
 
     def get_component_by_name(self, name, object_id, component_type):
