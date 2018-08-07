@@ -46,7 +46,7 @@ Create ``stub.py`` file in the Alphalogic adapter folder.
     from alphalogic_api.objects import Root
     from alphalogic_api.objects import MajorEvent
     from alphalogic_api.objects import ParameterLong
-    from alphalogic_api.options import host, port
+    from alphalogic_api import init
     from alphalogic_api.decorators import command
 
 
@@ -59,10 +59,12 @@ Create ``stub.py`` file in the Alphalogic adapter folder.
             # do smth
             return True
 
-    # python loop
-    root = MyRoot(host, port)
-    root.join()
 
+    if __name__ == '__main__':
+        # python loop
+        host, port = init()
+        root = MyRoot(host, port)
+        root.join()
 ...
 
 .. toctree::

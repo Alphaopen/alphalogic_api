@@ -24,5 +24,8 @@ twine config in the ~/.pypirc
 
 ## Build documentation
 
+Uncomment requirements.txt lines for docs and run pip
+[sudo] pip install -r requirements.txt
+
 1. cd docs
 2. make html
