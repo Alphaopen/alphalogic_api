@@ -28,9 +28,14 @@ def command_preparation(wrapped, func, **kwargs_c):
 def command(*argv_c, **kwargs_c):
     def decorator(func):
         def wrapped(device, *argv, **kwargs):
-            result = func(device, *argv, **kwargs)
-            device.__dict__[wrapped.function_name].set_result(result)
-            return result
+            try:
+                result = func(device, *argv, **kwargs)
+                device.__dict__[wrapped.function_name].set_result(result)
+                return result
+            except Exception, err:
+                t = traceback.format_exc()
+                log.error(u'Run function exception: {0}'.format(t))
+                device.__dict__[wrapped.function_name].set_exception(t)
         command_preparation(wrapped, func, **kwargs_c)
         return wrapped
     return decorator

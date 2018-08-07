@@ -11,7 +11,7 @@ The official library for creating the Alphalogic system adapter
 Compatibility
 -------------
 
-The library is compatible with Alphalogic adapter versions since ``.0311``
+The library is compatible with Alphalogic adapter versions since ``.0315``
 
 The recommended way to set your requirements in your `setup.py` or
 `requirements.txt` is::
