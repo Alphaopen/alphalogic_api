@@ -20,3 +20,9 @@ Install pip if not present:
 
 1. twine upload --repository pypi dist/*
 twine config in the ~/.pypirc
+
+
+## Build documentation
+
+1. cd docs
+2. make html

@@ -14,11 +14,12 @@ Root
 .. autoclass:: Root
    :members:
 
-Device
+Object
 ~~~~~~
 
-.. autoclass:: Device
+.. autoclass:: Object
    :members:
+
 
 .. py:module:: alphalogic_api.objects.parameter
 

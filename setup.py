@@ -7,18 +7,13 @@ Python stub library for Alphalogic adapters.
 import sys
 import platform
 from setuptools import setup
+from alphalogic_api import __version__
 
-
-VERSION_MAJOR = 0  # (System version)
-VERSION_MINOR = 0  # (Tests version)
-BUILD_NUMBER = 9   # (Issues version)
-
-ver = '%d.%d.%d' % (VERSION_MAJOR, VERSION_MINOR, BUILD_NUMBER)
 
 cur = 'win32' if sys.platform == 'win32' else platform.linux_distribution()[0].lower()
 ext = '.zip' if sys.platform == 'win32' else '.tar.gz'
 
-bin_name = 'alphalogic_api-%s-%s%s' % (cur, ver, ext)
+bin_name = 'alphalogic_api-%s-%s%s' % (cur, __version__, ext)
 
 
 if __name__ == '__main__':
@@ -28,7 +23,7 @@ if __name__ == '__main__':
 
     setup(
         name='alphalogic_api',
-        version=ver, 
+        version=__version__,
         description=__doc__.replace('\n', '').strip(),
         long_description=long_description,
         author='Alphaopen',
