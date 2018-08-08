@@ -9,67 +9,141 @@ import traceback
 
 
 class AbstractCommand(object):
+    """
+    AbstractCommand implements CommandService service(see rpc.proto).
+    """
 
     def _call(self, func_name, *args, **kwargs):
         return self.multi_stub.command_call(func_name, id=self.id, *args, **kwargs)
 
     def name(self):
+        """
+        :rtype: unicode
+        """
         answer = self._call('name')
         return answer.name
 
     def display_name(self):
+        """
+        :rtype: unicode
+        """
         answer = self._call('display_name')
         return answer.display_name
 
     def desc(self):
+        """
+        :rtype: unicode
+        """
         answer = self._call('desc')
         return answer.desc
 
     def set_display_name(self, display_name):
+        """
+        :arg display_name: unicode
+        """
         self._call('set_display_name', display_name=display_name)
 
     def set_desc(self, desc):
+        """
+        :arg desc: unicode
+        """
         self._call('set_desc', desc=desc)
 
     def is_string(self):
+        """
+        Function return True if result type of command is string
+
+        :rtype: bool
+        """
         answer = self._call('is_string')
         return answer.yes
 
     def is_long(self):
+        """
+        Function return True if result type of command is long
+
+        :rtype: bool
+        """
         answer = self._call('is_long')
         return answer.yes
 
     def is_double(self):
+        """
+        Function return True if result type of command is double
+
+        :rtype: bool
+        """
         answer = self._call('is_double')
         return answer.yes
 
     def is_datetime(self):
+        """
+        Function return True if result type of command is datetime
+
+        :rtype: bool
+        """
         answer = self._call('is_datetime')
         return answer.yes
 
     def is_bool(self):
+        """
+        Function return True if result type of command is bool
+
+        :rtype: bool
+        """
         answer = self._call('is_bool')
         return answer.yes
 
     def set_result(self, value):
+        """
+        Set value in command.
+        The command will be executed, when this function was done.
+
+        :arg value: The possible types of value: long, float, datetime, bool and unicode
+        """
         value_rpc = utils.get_rpc_value(type(value), value)
         self._call('set_result', value=value_rpc)
 
     def set_exception(self, reason):
+        """
+        Set exception in command.
+        Information about exception will be called for adapter's side.
+
+        :arg reason: state unicode string
+        """
         self._call('set_exception', exception=reason)
 
     def clear(self):
+        """
+        Clear return arguments in command
+        """
         self._call('clear')
 
     def argument_list(self):
+        """
+        Function argument list
+        :rtype: list of arguments names
+        """
         answer = self._call('argument_list')
         return answer.names
 
     def argument(self, name_argument):
+        """
+        Function return argument of command.
+        :arg name_argument: name of argument
+        :rtype: tuple: (name, value)
+            name is name of argument
+            value is value of argument
+        """
         answer = self._call('argument', argument=name_argument)
         return answer.name, answer.value
 
     def set_argument(self, name_arg, value):
+        """
+        Set argument in command.
+        :param name_arg: name of argument
+        :param value: value of argument
+        """
         value_type = utils.value_type_field_definer(type(value))
         cur_choices = self.choices[name_arg] if name_arg in self.choices else None
         if cur_choices is None:
@@ -94,11 +168,21 @@ class AbstractCommand(object):
                                         request=req, stub=self.multi_stub.stub_command)
 
     def owner(self):
+        """
+        Function return id of command's owner
+        :rtype: uint64
+        """
         answer = self._call('owner')
         return answer.owner
 
 
 class Command(AbstractCommand):
+    """
+    Command class is used in command decorator.
+
+    :arg device: has 'Object' type
+    :arg function: executed function
+    """
     def __init__(self, device, function):
         self.function = function
         self.result_type = function.result_type
@@ -111,6 +195,11 @@ class Command(AbstractCommand):
         self.multi_stub = multi_stub
 
     def call_function(self):
+        """
+        This function is performed when user call command
+
+        :rtype: result type is defined in function of adapter code
+        """
         try:
             arg_list = self.argument_list()
             function_dict = {}
