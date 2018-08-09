@@ -27,7 +27,7 @@ def command_preparation(wrapped, func, **kwargs_c):
 
 def command(*argv_c, **kwargs_c):
     """
-    Use this decorator to create Command object.
+    Use this decorator to create :class:`~alphalogic_api.objects.command.Command` object.
 
     Example 1::
 

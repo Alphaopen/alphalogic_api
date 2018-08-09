@@ -10,7 +10,8 @@ import traceback
 
 class AbstractCommand(object):
     """
-    AbstractCommand implements CommandService service(see rpc.proto).
+    AbstractCommand implements CommandService service(see `rpc.proto <https://github.com/Alphaopen/alphalogic_api/blob/
+    master/alphalogic_api/protocol/proto/rpc.proto>`_)
     """
 
     def _call(self, func_name, *args, **kwargs):
@@ -18,6 +19,8 @@ class AbstractCommand(object):
 
     def name(self):
         """
+        Return name of command
+
         :rtype: unicode
         """
         answer = self._call('name')
@@ -25,6 +28,8 @@ class AbstractCommand(object):
 
     def display_name(self):
         """
+        Return display name of command
+
         :rtype: unicode
         """
         answer = self._call('display_name')
@@ -32,6 +37,8 @@ class AbstractCommand(object):
 
     def desc(self):
         """
+        Return description of command
+
         :rtype: unicode
         """
         answer = self._call('desc')
@@ -39,12 +46,16 @@ class AbstractCommand(object):
 
     def set_display_name(self, display_name):
         """
+        Set display name of command
+
         :arg display_name: unicode
         """
         self._call('set_display_name', display_name=display_name)
 
     def set_desc(self, desc):
         """
+        Set description of command
+
         :arg desc: unicode
         """
         self._call('set_desc', desc=desc)
@@ -96,8 +107,7 @@ class AbstractCommand(object):
 
     def set_result(self, value):
         """
-        Set value in command.
-        The command will be executed, when this function was done.
+        Set result in command
 
         :arg value: The possible types of value: long, float, datetime, bool and unicode
         """
@@ -115,13 +125,14 @@ class AbstractCommand(object):
 
     def clear(self):
         """
-        Clear return arguments in command
+        Remove command's arguments
         """
         self._call('clear')
 
     def argument_list(self):
         """
-        Function argument list
+        Function return argument list of command
+
         :rtype: list of arguments names
         """
         answer = self._call('argument_list')
@@ -129,20 +140,23 @@ class AbstractCommand(object):
 
     def argument(self, name_argument):
         """
-        Function return argument of command.
+        Function return argument of command
+
         :arg name_argument: name of argument
-        :rtype: tuple: (name, value)
-            name is name of argument
-            value is value of argument
+        :rtype:
+            | tuple (name, value)
+            | name is name of argument
+            | value is value of argument
         """
         answer = self._call('argument', argument=name_argument)
         return answer.name, answer.value
 
     def set_argument(self, name_arg, value):
         """
-        Set argument in command.
-        :param name_arg: name of argument
-        :param value: value of argument
+        Set argument in command
+
+        :arg name_arg: name of argument
+        :arg value: value of argument
         """
         value_type = utils.value_type_field_definer(type(value))
         cur_choices = self.choices[name_arg] if name_arg in self.choices else None
@@ -170,6 +184,7 @@ class AbstractCommand(object):
     def owner(self):
         """
         Function return id of command's owner
+
         :rtype: uint64
         """
         answer = self._call('owner')
@@ -178,9 +193,10 @@ class AbstractCommand(object):
 
 class Command(AbstractCommand):
     """
-    Command class is used in command decorator.
+    | Command class is used in command decorator.
+    | Command inherits from :class:`~alphalogic_api.objects.command.AbstractCommand`.
 
-    :arg device: has 'Object' type
+    :arg device: has :class:`~alphalogic_api.objects.Object` type
     :arg function: executed function
     """
     def __init__(self, device, function):

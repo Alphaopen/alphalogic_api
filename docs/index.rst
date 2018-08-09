@@ -72,6 +72,7 @@ Create ``stub.py`` file in the Alphalogic adapter folder.
    :caption: Contents:
 
    alphalogic_api
+   abstract_classes
    license
 
 
