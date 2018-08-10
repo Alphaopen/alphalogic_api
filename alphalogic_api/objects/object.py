@@ -67,12 +67,27 @@ class Object(object):
         self.__dict__['run_function_names'] = filter(is_runnable, dir(self))
 
     def parameters(self):
+        """
+        Return parameters for current node.
+
+        :rtype: list of :class:`~alphalogic_api.objects.parameter.Parameter` #TODO
+        """
         return self.manager.get_components(self.id, 'parameters')
 
     def events(self):
+        """
+        Return events for current node.
+
+        :rtype: list of :class:`~alphalogic_api.objects.event.Event` #TODO
+        """
         return self.manager.get_components(self.id, 'events')
 
     def commands(self):
+        """
+        Return commands for current node.
+
+        :rtype: list of :class:`~alphalogic_api.objects.command.Command` #TODO
+        """
         return self.manager.get_components(self.id, 'commands')
 
     def parameter(self, name):
@@ -113,18 +128,16 @@ class Object(object):
 
 class Root(Object):
     """
-    Node with parameters, commands, events and run functions.
-    Parameters, commands, events can't be with same name.
+    Root inherits from :class:`~alphalogic_api.objects.Object`.
+    The main object that connects to adapter.
+
+    :arg host: hostname of the adapter with gRPC interface turned on
+    :arg port: port of the adapter
     """
 
     version = ParameterString(visible=Visible.setup, access=Access.read_only)
 
     def __init__(self, host, port):
-        """
-        The main object, that connects to adapter
-        :arg host: hostname of the adapter with gRPC interface turned on
-        :arg port: port of the adapter
-        """
         try:
             self.manager.start_threads()
             self.joinable = False
