@@ -91,21 +91,54 @@ class Object(object):
         return self.manager.get_components(self.id, 'commands')
 
     def parameter(self, name):
+        """
+        Get parameter by name
+
+        :arg name: name of parameter
+        :rtype: type is :class:`~alphalogic_api.objects.parameter.Parameter`
+        """
         return self.manager.get_component_by_name(name, self.id, 'parameter')
 
     def event(self, name):
+        """
+        Get event by name
+
+        :arg name: name of event
+        :rtype: type is :class:`~alphalogic_api.objects.event.Event`
+        """
         return self.manager.get_component_by_name(name, self.id, 'event')
 
     def command(self, name):
+        """
+        Get command by name
+
+        :arg name: name of command
+        :rtype: type is :class:`~alphalogic_api.objects.command.Command`
+        """
         return self.manager.get_component_by_name(name, self.id, 'command')
 
     def parent(self):
+        """
+        Get parent of node
+
+        :rtype: type of node
+        """
         return self.manager.parent(self.id)
 
     def root(self):
+        """
+        Get root of node
+
+        :rtype: type of root node
+        """
         return self.manager.root()
 
     def children(self):
+        """
+        Get list of children nodes
+
+        :rtype: list of types of children nodes
+        """
         return self.manager.children(self.id)
 
 
@@ -120,9 +153,15 @@ class Object(object):
             self.__dict__[name] = value
     '''
     def handle_get_available_children(self):
+        """
+        Handler get available children
+        """
         return []
 
     def handle_before_remove_device(self):
+        """
+        Handler before remove device
+        """
         pass
 
 

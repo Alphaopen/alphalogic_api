@@ -57,7 +57,7 @@ There are types of interactions with adapter: commands, parameters, and events.
 | Corresponds to a state that indicates what has happened with the system object
 
 | :ref:`command_link`
-| Corresponds to a state that indicates what has happened with the system object
+| A simple operation a system object can perform.
 
 
 Example Usage
