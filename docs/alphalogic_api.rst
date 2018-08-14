@@ -45,7 +45,7 @@ Nodes inherits from class Object, except root node:
 Parameter
 ~~~~~~~~~
 | It will be possible to create types of parameter:
-| ParameterBool, ParameterInt, ParameterDouble, ParameterDatetime, ParameterString
+| ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
 
 Example of using:
 ::
@@ -58,7 +58,7 @@ Arguments of parameter are optional.
 +-------------+----------------------+--------------------------+
 | Argument    | Default value        | Possible values          |
 +=============+======================+==========================+
-| default     | ParameterInt - 0     | | Any values of types    |
+| default     | ParameterLong - 0    | | Any values of types    |
 |             |----------------------| | are allowed ( for      |
 |             | ParameterBool - False| | ParameterDouble is     |
 |             |----------------------| | real number)           |
@@ -118,6 +118,25 @@ Event
 | It will be possible to create types of event:
 | TrivialEvent, MinorEvent, MajorEvent, CriticalEvent, BlockerEvent
 
+Names and values of arguments are passed by using tuple.
+::
+   alarm = MajorEvent(('where', unicode), ('when', datetime.datetime), ('why', long))
+
+First value of tuple is name of event's argument , second is type of event's argument.
+
+| List of possible type of arguments to create:
+| unicode, datetime.datetime, long, float, bool
+
+Example of event emit:
+::
+    alarm.emit(where=where, when=when, why=why)
+
+If event without arguments:
+::
+    alarm.emit()
+
+
+
 .. autoclass:: Event
    :members:
 
@@ -143,6 +162,36 @@ run
 
 
 .. py:module:: alphalogic_api.exceptions
+
+Handlers
+-------
+
+Three handlers may be installed by users:
+
+1) Handle for request available children of node:
+::
+    def handle_get_available_children(self):
+    return [
+        (Controller, 'Controller')
+    ]
+
+This function are should be define for all node who may to create children nodes.
+
+2) A handler that fires after parameter is changed:
+::
+    def handle_after_set_double(node, parameter):
+        node.log.info('double changed')
+        node.after_set_value_test_event.emit(value=parameter.val)
+
+    param_double = ParameterDouble(default=2.3, callback=handle_after_set_double)
+
+If param_double is changed, then function handle_after_set_double will be called.
+
+3) A handler that fires before node will be deleted:
+::
+        def handle_before_remove_device(self):
+            do something
+
 
 Exceptions
 ----------
