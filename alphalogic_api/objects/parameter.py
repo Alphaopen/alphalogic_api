@@ -23,7 +23,7 @@ class AbstractParameter(object):
 
     def name(self):
         """
-        Return name of parameter
+        Return name of the parameter
 
         :rtype: unicode
         """
@@ -32,7 +32,7 @@ class AbstractParameter(object):
 
     def display_name(self):
         """
-        Return display name of parameter
+        Return display name of the parameter
 
         :rtype: unicode
         """
@@ -41,7 +41,7 @@ class AbstractParameter(object):
 
     def desc(self):
         """
-        Return description of parameter
+        Return description of the parameter
 
         :rtype: unicode
         """
@@ -50,7 +50,7 @@ class AbstractParameter(object):
 
     def set_display_name(self, display_name):
         """
-        Set display name of parameter
+        Set display name of the parameter
 
         :arg display_name: unicode
         """
@@ -58,7 +58,7 @@ class AbstractParameter(object):
 
     def set_desc(self, desc):
         """
-        Set description of parameter
+        Set description of the parameter
 
         :arg desc: unicode
         """
@@ -66,7 +66,7 @@ class AbstractParameter(object):
 
     def is_string(self):
         """
-        Function return True if type of parameter is string
+        Return True if the parameter value type is string
 
         :rtype: bool
         """
@@ -75,7 +75,7 @@ class AbstractParameter(object):
 
     def is_long(self):
         """
-        Function return True if type of parameter is long
+        Return True if the parameter value type is long
 
         :rtype: bool
         """
@@ -84,7 +84,7 @@ class AbstractParameter(object):
 
     def is_double(self):
         """
-        Function return True if type of parameter is double
+        Return True if the parameter value type is double
 
         :rtype: bool
         """
@@ -93,7 +93,7 @@ class AbstractParameter(object):
 
     def is_datetime(self):
         """
-        Function return True if type of parameter is datetime
+        Return True if the parameter value type is datetime
 
         :rtype: bool
         """
@@ -102,7 +102,7 @@ class AbstractParameter(object):
 
     def is_bool(self):
         """
-        Function return True if type of parameter is bool
+        Return True if the parameter value type is bool
 
         :rtype: bool
         """
@@ -111,7 +111,7 @@ class AbstractParameter(object):
 
     def is_runtime(self):
         """
-        Function return True if visible type of parameter is runtime
+        Return True if the parameter type is Visible.runtime
 
         :rtype: bool
         """
@@ -120,7 +120,7 @@ class AbstractParameter(object):
 
     def is_setup(self):
         """
-        Function return True if visible type of parameter is setup
+        Return True if the parameter type is Visible.setup
 
         :rtype: bool
         """
@@ -129,7 +129,7 @@ class AbstractParameter(object):
 
     def is_hidden(self):
         """
-        Function return True if visible type of parameter is hidden
+        Return True if the parameter type is Visible.hidden
 
         :rtype: bool
         """
@@ -138,7 +138,7 @@ class AbstractParameter(object):
 
     def is_common(self):
         """
-        Function return True if visible type of parameter is common
+        Return True if the parameter type is Visible.common
 
         :rtype: bool
         """
@@ -147,31 +147,31 @@ class AbstractParameter(object):
 
     def set_runtime(self):
         """
-        Set visible type of event to runtime
+        Set the parameter type to Visible.runtime
         """
         answer = self._call('set_runtime')
 
     def set_setup(self):
         """
-        Set visible type of event to setup
+        Set the parameter type to Visible.setup
         """
         answer = self._call('set_setup')
 
     def set_hidden(self):
         """
-        Set visible type of event to hidden
+        Set the parameter type to Visible.hidden
         """
         answer = self._call('set_hidden')
 
     def set_common(self):
         """
-        Set visible type of event to common
+        Set the parameter type to Visible.common
         """
         answer = self._call('set_common')
 
     def is_read_only(self):
         """
-        Function return True if access type of event is read only
+        Return True if the parameter access type is Access.read_only
 
         :rtype: bool
         """
@@ -180,7 +180,7 @@ class AbstractParameter(object):
 
     def is_read_write(self):
         """
-        Function return True if access type of event is read write
+        Return True if the parameter access type is Access.read_write
 
         :rtype: bool
         """
@@ -189,19 +189,19 @@ class AbstractParameter(object):
 
     def set_read_only(self):
         """
-        Set access type of event to read only
+        Set the parameter access type to Access.read_only
         """
         answer = self._call('set_read_only')
 
     def set_read_write(self):
         """
-        Set access type of event to read write
+        Set the parameter access type to Access.read_write
         """
         answer = self._call('set_read_write')
 
     def is_licensed(self):
         """
-        Function return True if parameter is licensed
+        Return True if the parameter is the license key parameter
 
         :rtype: bool
         """
@@ -210,39 +210,39 @@ class AbstractParameter(object):
 
     def set_licensed(self):
         """
-        The function licenses the parameter
+        Set the license key parameter
         """
         answer = self._call('set_licensed')
 
     def clear(self):
         """
-        Remove predefined values list
+        Remove all predefined values from the 'choices' argument of the parameter
         """
         answer = self._call('clear')
 
     def get(self):
         """
-        Get value of parameter
+        Get parameter value
 
-        :rtype: The possible types of value: long, float, datetime, bool and unicode
+        :rtype: long, float, datetime, bool or unicode
         """
         answer = self._call('get')
         return utils.value_from_rpc(answer.value)
 
     def set(self, value):
         """
-        Set value of parameter
+        Set parameter value
 
-        :arg value: The possible types of value: long, float, datetime, bool and unicode
+        :arg value: The value type: long, float, datetime, bool or unicode
         """
         value_rpc = utils.get_rpc_value(self.value_type, value)
         self._call('set', value=value_rpc)
 
     def enums(self):
         """
-        Get predefined values from parameter
+        Get the predefined values from the 'choices' argument of the parameter
 
-        :rtype: list of values (long, float, datetime, bool and unicode)
+        :rtype: List of values of long, float, datetime, bool or unicode type in a tuple as t(value1, value2, value3 ….)
         """
         answer = self._call('enums')
         value_type_proto = utils.value_type_field_definer(self.value_type)
@@ -250,10 +250,10 @@ class AbstractParameter(object):
 
     def set_enum(self, value, enum_name):
         """
-        Add value to enum
+        Add a new enum member for the 'choices' argument of the parameter
 
-        :param value: The possible types of value: long, float, datetime, bool and unicode
-        :param enum_name: name of enum to add new value
+        :param value: The value type: long, float, datetime, bool or unicode
+        :param enum_name: enum member name
         """
         value_type_proto = utils.value_type_field_definer(self.value_type)
         value_rpc = rpc_pb2.Value()
@@ -262,10 +262,11 @@ class AbstractParameter(object):
 
     def set_enums(self, values):
         """
-        Set predefined values of parameter
+        Set a number of enum members for the 'choices' argument of the parameter
 
-        :param values:
-            | List of predefined values.
+        :param values: An array of values can be one of the following:
+            |  List of values of long, float, datetime, bool or unicode type in a tuple as t(value1, value2, value3 ….)
+            |  List of enum members in a tuple of tuples as t((value1, 'enum_name1'), (value2, 'enum_name2'), ...)
         """
         value_type = self.value_type
         req = rpc_pb2.ParameterRequest(id=self.id)
