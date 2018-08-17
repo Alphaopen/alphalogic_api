@@ -23,7 +23,7 @@ class AbstractParameter(object):
 
     def name(self):
         """
-        Return name of the parameter
+        Return parameter name
 
         :rtype: unicode
         """
@@ -32,7 +32,7 @@ class AbstractParameter(object):
 
     def display_name(self):
         """
-        Return display name of the parameter
+        Return parameter display name
 
         :rtype: unicode
         """
@@ -41,7 +41,7 @@ class AbstractParameter(object):
 
     def desc(self):
         """
-        Return description of the parameter
+        Return parameter description
 
         :rtype: unicode
         """
@@ -50,7 +50,7 @@ class AbstractParameter(object):
 
     def set_display_name(self, display_name):
         """
-        Set display name of the parameter
+        Set parameter display name
 
         :arg display_name: unicode
         """
@@ -58,7 +58,7 @@ class AbstractParameter(object):
 
     def set_desc(self, desc):
         """
-        Set description of the parameter
+        Set parameter description
 
         :arg desc: unicode
         """
@@ -66,7 +66,7 @@ class AbstractParameter(object):
 
     def is_string(self):
         """
-        Return True if the parameter value type is string
+        Return True if parameter value type is string
 
         :rtype: bool
         """
@@ -75,7 +75,7 @@ class AbstractParameter(object):
 
     def is_long(self):
         """
-        Return True if the parameter value type is long
+        Return True if parameter value type is long
 
         :rtype: bool
         """
@@ -84,7 +84,7 @@ class AbstractParameter(object):
 
     def is_double(self):
         """
-        Return True if the parameter value type is double
+        Return True if parameter value type is double
 
         :rtype: bool
         """
@@ -93,7 +93,7 @@ class AbstractParameter(object):
 
     def is_datetime(self):
         """
-        Return True if the parameter value type is datetime
+        Return True if parameter value type is datetime
 
         :rtype: bool
         """
@@ -102,7 +102,7 @@ class AbstractParameter(object):
 
     def is_bool(self):
         """
-        Return True if the parameter value type is bool
+        Return True if parameter value type is bool
 
         :rtype: bool
         """
@@ -111,7 +111,7 @@ class AbstractParameter(object):
 
     def is_runtime(self):
         """
-        Return True if the parameter type is Visible.runtime
+        Return True if parameter type is Visible.runtime
 
         :rtype: bool
         """
@@ -120,7 +120,7 @@ class AbstractParameter(object):
 
     def is_setup(self):
         """
-        Return True if the parameter type is Visible.setup
+        Return True if parameter type is Visible.setup
 
         :rtype: bool
         """
@@ -129,7 +129,7 @@ class AbstractParameter(object):
 
     def is_hidden(self):
         """
-        Return True if the parameter type is Visible.hidden
+        Return True if parameter type is Visible.hidden
 
         :rtype: bool
         """
@@ -138,7 +138,7 @@ class AbstractParameter(object):
 
     def is_common(self):
         """
-        Return True if the parameter type is Visible.common
+        Return True if parameter type is Visible.common
 
         :rtype: bool
         """
@@ -147,31 +147,31 @@ class AbstractParameter(object):
 
     def set_runtime(self):
         """
-        Set the parameter type to Visible.runtime
+        Set parameter type to Visible.runtime
         """
         answer = self._call('set_runtime')
 
     def set_setup(self):
         """
-        Set the parameter type to Visible.setup
+        Set parameter type to Visible.setup
         """
         answer = self._call('set_setup')
 
     def set_hidden(self):
         """
-        Set the parameter type to Visible.hidden
+        Set parameter type to Visible.hidden
         """
         answer = self._call('set_hidden')
 
     def set_common(self):
         """
-        Set the parameter type to Visible.common
+        Set parameter type to Visible.common
         """
         answer = self._call('set_common')
 
     def is_read_only(self):
         """
-        Return True if the parameter access type is Access.read_only
+        Return True if parameter access type is Access.read_only
 
         :rtype: bool
         """
@@ -180,7 +180,7 @@ class AbstractParameter(object):
 
     def is_read_write(self):
         """
-        Return True if the parameter access type is Access.read_write
+        Return True if parameter access type is Access.read_write
 
         :rtype: bool
         """
@@ -189,19 +189,19 @@ class AbstractParameter(object):
 
     def set_read_only(self):
         """
-        Set the parameter access type to Access.read_only
+        Set parameter access type to Access.read_only
         """
         answer = self._call('set_read_only')
 
     def set_read_write(self):
         """
-        Set the parameter access type to Access.read_write
+        Set parameter access type to Access.read_write
         """
         answer = self._call('set_read_write')
 
     def is_licensed(self):
         """
-        Return True if the parameter is the license key parameter
+        Return True if parameter is the license key parameter
 
         :rtype: bool
         """
@@ -240,7 +240,7 @@ class AbstractParameter(object):
 
     def enums(self):
         """
-        Get the predefined values from the 'choices' argument of the parameter
+        Get the predefined enumeration of values from the 'choices' argument of the parameter
 
         :rtype: List of values of long, float, datetime, bool or unicode type in a tuple as t(value1, value2, value3 ….)
         """
@@ -250,10 +250,11 @@ class AbstractParameter(object):
 
     def set_enum(self, value, enum_name):
         """
-        Add a new enum member for the 'choices' argument of the parameter
+
+        Add/replace enumeration member – a pair (value, name) – for the 'choices' argument of the parameter
 
         :param value: The value type: long, float, datetime, bool or unicode
-        :param enum_name: enum member name
+        :param enum_name: enumeration member name
         """
         value_type_proto = utils.value_type_field_definer(self.value_type)
         value_rpc = rpc_pb2.Value()
@@ -262,11 +263,11 @@ class AbstractParameter(object):
 
     def set_enums(self, values):
         """
-        Set a number of enum members for the 'choices' argument of the parameter
+        Add/replace multiple enumeration members for the 'choices' argument of the parameter
 
         :param values: An array of values can be one of the following:
-            |  List of values of long, float, datetime, bool or unicode type in a tuple as t(value1, value2, value3 ….)
-            |  List of enum members in a tuple of tuples as t((value1, 'enum_name1'), (value2, 'enum_name2'), ...)
+            | List of values of long, float, datetime, bool or unicode type in a tuple as t(value1, value2, value3 ….)
+            | List of enumeration members in a tuple of tuples as t((value1, 'enum_name1'), (value2, 'enum_name2'), ...)
         """
         value_type = self.value_type
         req = rpc_pb2.ParameterRequest(id=self.id)
@@ -285,7 +286,7 @@ class AbstractParameter(object):
 
     def has_enum(self, enum_name):
         """
-        Function return True if parameter has predefined values
+        Return True if parameter has a predefined enumeration of values
 
         :rtype: bool
         """
@@ -294,7 +295,7 @@ class AbstractParameter(object):
 
     def owner(self):
         """
-        Function return id of parameter's owner
+        Return ID of the parameter's owner
 
         :rtype: uint64
         """
@@ -305,6 +306,9 @@ class AbstractParameter(object):
 class Parameter(AbstractParameter):
     """
     Parameter inherits from :class:`~alphalogic_api.objects.parameter.AbstractParameter`.
+
+    :arg args: tuple of tuples (argument name, argument type)
+    :arg kwargs: name/value pairs of parameter attributes separated by commas, each attribute followed by an equal sign
     """
     index_number = 0
 

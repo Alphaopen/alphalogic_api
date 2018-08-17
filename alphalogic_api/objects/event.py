@@ -15,7 +15,7 @@ class AbstractEvent(object):
 
     def name(self):
         """
-        Return name of event
+        Return event name
 
         :rtype: unicode
         """
@@ -23,7 +23,7 @@ class AbstractEvent(object):
 
     def display_name(self):
         """
-        Return display name of event
+        Return event display name
 
         :rtype: unicode
         """
@@ -31,7 +31,7 @@ class AbstractEvent(object):
 
     def desc(self):
         """
-        Return description of event
+        Return event description
 
         :rtype: unicode
         """
@@ -39,7 +39,7 @@ class AbstractEvent(object):
 
     def set_display_name(self, display_name):
         """
-        Set display name of event
+        Set event display name
 
         :arg display_name: unicode
         """
@@ -47,7 +47,7 @@ class AbstractEvent(object):
 
     def set_desc(self, desc):
         """
-        Set description of event
+        Set event description
 
         :arg desc: unicode
         """
@@ -55,7 +55,7 @@ class AbstractEvent(object):
 
     def is_trivial(self):
         """
-        Function return True if type of event is trivial
+        Return True if event severity is trivial
 
         :rtype: bool
         """
@@ -63,7 +63,7 @@ class AbstractEvent(object):
 
     def is_minor(self):
         """
-        Function return True if type of event is minor
+        Return True if event severity is minor
 
         :rtype: bool
         """
@@ -71,7 +71,7 @@ class AbstractEvent(object):
 
     def is_major(self):
         """
-        Function return True if type of event is major
+        Return True if event severity is major
 
         :rtype: bool
         """
@@ -79,7 +79,7 @@ class AbstractEvent(object):
 
     def is_critical(self):
         """
-        Function return True if type of event is critical
+        Return True if event severity is critical
 
         :rtype: bool
         """
@@ -87,7 +87,7 @@ class AbstractEvent(object):
 
     def is_blocker(self):
         """
-        Function return True if type of event is blocker
+        Return True if event severity is blocker
 
         :rtype: bool
         """
@@ -95,37 +95,37 @@ class AbstractEvent(object):
 
     def set_trivial(self):
         """
-        Set type of event to trivial
+        Set event severity to trivial
         """
         self._call('set_trivial')
 
     def set_minor(self):
         """
-        Set type of event to minor
+        Set event severity to minor
         """
         self._call('set_minor')
 
     def set_major(self):
         """
-        Set type of event to major
+        Set event severity to major
         """
         self._call('set_major')
 
     def set_critical(self):
         """
-        Set type of event to critical
+        SSet event severity to critical
         """
         self._call('set_critical')
 
     def set_blocker(self):
         """
-        Set type of event to blocker
+        Set event severity to blocker
         """
         self._call('set_blocker')
 
     def set_time(self, timestamp):
         """
-        Set event time UTC
+        Set event time (UTC)
 
         :param timestamp: int(time.time() * 1000) (мс)
         """
@@ -133,11 +133,11 @@ class AbstractEvent(object):
 
     def emit(self, **kwargs):
         """
-        | Function emit event with the current UTC time.
-        | In order to set timestamp other than the current UTC time, you should call set_time function with required
-         timestamp before execute emit function.
+        | Emit event with the current UTC time.
+        | In order to use timestamp other than the current UTC time, you should call set_time function with required
+         timestamp before executing emit function.
 
-        :param kwargs: arguments
+        :param kwargs: name/value pairs of event arguments separated by commas, each argument followed by an equal sign
         """
         for arg_name, arg_type in self.arguments:
             if arg_name not in kwargs:
@@ -156,32 +156,30 @@ class AbstractEvent(object):
 
     def argument_list(self):
         """
-        Function return argument list of event
+        Return list of event arguments
 
-        :rtype: list of arguments names
+        :rtype: list of event argument names
         """
         answer = self._call('argument_list')
         return answer.names
 
     def argument(self, name_argument):
         """
-        Function return argument of event
+        Return event argument with value by argument name
 
-        :arg name_argument: name of argument
-        :rtype:
-            | tuple (name, value)
-            | name is name of argument
-            | value is value of argument
+        :arg name_argument: event argument name
+        :rtype: name/value pair as a tuple (argument name, argument value)
+
         """
         answer = self._call('argument', argument=name_argument)
         return answer.name, answer.value
 
     def set_argument(self, name_arg, value):
         """
-        Set argument in event
+        Add event argument / overwrite argument value
 
-        :arg name_arg: name of argument
-        :arg value: value of argument
+        :arg name_arg: argument name
+        :arg value: argument value
         """
         value_type = utils.value_type_field_definer(type(value))
 
@@ -193,7 +191,7 @@ class AbstractEvent(object):
 
     def owner(self):
         """
-        Function return id of event's owner
+        Return ID of the event's owner
 
         :rtype: uint64
         """
@@ -205,8 +203,8 @@ class Event(AbstractEvent):
     """
     Event inherits from :class:`~alphalogic_api.objects.event.AbstractEvent`.
 
-    :arg priority: trivial, minor, major, critical, blocker
-    :arg args: tuple of tuples (argument name, argument type)
+    :arg priority: trivial, minor, major, critical or blocker
+    :arg args: name/type pairs in a tuple of tuples (argument name, argument type)
     """
     def __init__(self, priority, *args):
         self.arguments = args
