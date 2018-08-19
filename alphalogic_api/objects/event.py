@@ -178,8 +178,8 @@ class AbstractEvent(object):
         """
         Add event argument / overwrite argument value
 
-        :arg name_arg: argument name
-        :arg value: argument value
+        :arg name_arg: event argument name
+        :arg value: event argument value
         """
         value_type = utils.value_type_field_definer(type(value))
 

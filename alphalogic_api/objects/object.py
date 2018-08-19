@@ -17,8 +17,8 @@ from alphalogic_api.tasks_pool import TasksPool
 
 class Object(object):
     """
-    Node with parameters, commands, events and run functions.
-    Parameters, commands, events can't be with same name.
+    Adapter object can have a number of parameters, commands, events and run functions.
+    Each of them must have a unique name among instances of the same class.
     """
     manager = Manager()
 
@@ -68,7 +68,7 @@ class Object(object):
 
     def parameters(self):
         """
-        Return parameters for current node.
+        Return parameters of the object
 
         :rtype: list of :class:`~alphalogic_api.objects.parameter.Parameter` #TODO
         """
@@ -76,7 +76,7 @@ class Object(object):
 
     def events(self):
         """
-        Return events for current node.
+        Return events of the object
 
         :rtype: list of :class:`~alphalogic_api.objects.event.Event` #TODO
         """
@@ -84,7 +84,7 @@ class Object(object):
 
     def commands(self):
         """
-        Return commands for current node.
+        Return events of the object
 
         :rtype: list of :class:`~alphalogic_api.objects.command.Command` #TODO
         """
@@ -94,8 +94,8 @@ class Object(object):
         """
         Get parameter by name
 
-        :arg name: name of parameter
-        :rtype: type is :class:`~alphalogic_api.objects.parameter.Parameter`
+        :arg name: parameter name
+        :rtype: :class:`~alphalogic_api.objects.parameter.Parameter`
         """
         return self.manager.get_component_by_name(name, self.id, 'parameter')
 
@@ -103,8 +103,8 @@ class Object(object):
         """
         Get event by name
 
-        :arg name: name of event
-        :rtype: type is :class:`~alphalogic_api.objects.event.Event`
+        :arg name: event name
+        :rtype: :class:`~alphalogic_api.objects.event.Event`
         """
         return self.manager.get_component_by_name(name, self.id, 'event')
 
@@ -112,32 +112,32 @@ class Object(object):
         """
         Get command by name
 
-        :arg name: name of command
-        :rtype: type is :class:`~alphalogic_api.objects.command.Command`
+        :arg name: command name
+        :rtype: :class:`~alphalogic_api.objects.command.Command`
         """
         return self.manager.get_component_by_name(name, self.id, 'command')
 
     def parent(self):
         """
-        Get parent of node
+        Get parent object
 
-        :rtype: type of node
+        :rtype: type of the parent object
         """
         return self.manager.parent(self.id)
 
     def root(self):
         """
-        Get root of node
+        Get root object
 
-        :rtype: type of root node
+        :rtype: type of the root object
         """
         return self.manager.root()
 
     def children(self):
         """
-        Get list of children nodes
+        Get child objects
 
-        :rtype: list of types of children nodes
+        :rtype: list of child object types
         """
         return self.manager.children(self.id)
 
@@ -167,11 +167,12 @@ class Object(object):
 
 class Root(Object):
     """
-    Root inherits from :class:`~alphalogic_api.objects.Object`.
-    The main object that connects to adapter.
+    Root object inherits from :class:`~alphalogic_api.objects.Object`.
+    This kind of object is a child for the adapter service node. Root object is created automatically when starting the adapter instance.
+    Usually serves for specifying initial device data or defining connection settings or simply as a go-between node.
 
-    :arg host: hostname of the adapter with gRPC interface turned on
-    :arg port: port of the adapter
+    :arg host: hostname of the adapter stub instance on a gRPC channel
+    :arg port: port of the adapter stub instance on a gRPC channel
     """
 
     version = ParameterString(visible=Visible.setup, access=Access.read_only)
@@ -207,7 +208,7 @@ class Root(Object):
 
     def join(self):
         """
-        The infinity communication loop
+        The infinite communication loop
         """
         if self.joinable:
             is_connected = True

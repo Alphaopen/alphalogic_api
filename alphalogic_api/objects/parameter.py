@@ -306,9 +306,6 @@ class AbstractParameter(object):
 class Parameter(AbstractParameter):
     """
     Parameter inherits from :class:`~alphalogic_api.objects.parameter.AbstractParameter`.
-
-    :arg args: tuple of tuples (argument name, argument type)
-    :arg kwargs: name/value pairs of parameter attributes separated by commas, each attribute followed by an equal sign
     """
     index_number = 0
 

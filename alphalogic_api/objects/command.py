@@ -19,7 +19,7 @@ class AbstractCommand(object):
 
     def name(self):
         """
-        Return name of command
+        Return command name
 
         :rtype: unicode
         """
@@ -28,7 +28,7 @@ class AbstractCommand(object):
 
     def display_name(self):
         """
-        Return display name of command
+        Return command display name
 
         :rtype: unicode
         """
@@ -37,7 +37,7 @@ class AbstractCommand(object):
 
     def desc(self):
         """
-        Return description of command
+        Return command description
 
         :rtype: unicode
         """
@@ -46,7 +46,7 @@ class AbstractCommand(object):
 
     def set_display_name(self, display_name):
         """
-        Set display name of command
+        Set command display name
 
         :arg display_name: unicode
         """
@@ -54,7 +54,7 @@ class AbstractCommand(object):
 
     def set_desc(self, desc):
         """
-        Set description of command
+        Set command description
 
         :arg desc: unicode
         """
@@ -62,7 +62,7 @@ class AbstractCommand(object):
 
     def is_string(self):
         """
-        Function return True if result type of command is string
+        Return True if command return type is string
 
         :rtype: bool
         """
@@ -71,7 +71,7 @@ class AbstractCommand(object):
 
     def is_long(self):
         """
-        Function return True if result type of command is long
+        Return True if command return type is long
 
         :rtype: bool
         """
@@ -80,7 +80,7 @@ class AbstractCommand(object):
 
     def is_double(self):
         """
-        Function return True if result type of command is double
+        Return True if command return type is double
 
         :rtype: bool
         """
@@ -89,7 +89,7 @@ class AbstractCommand(object):
 
     def is_datetime(self):
         """
-        Function return True if result type of command is datetime
+        Return True if command return type is datetime
 
         :rtype: bool
         """
@@ -98,7 +98,7 @@ class AbstractCommand(object):
 
     def is_bool(self):
         """
-        Function return True if result type of command is bool
+        Return True if command return type is bool
 
         :rtype: bool
         """
@@ -107,9 +107,9 @@ class AbstractCommand(object):
 
     def set_result(self, value):
         """
-        Set result in command
+        Set command return value
 
-        :arg value: The possible types of value: long, float, datetime, bool and unicode
+        :arg value: The value type: long, float, datetime, bool or unicode
         """
         value_rpc = utils.get_rpc_value(type(value), value)
         self._call('set_result', value=value_rpc)
@@ -125,38 +125,35 @@ class AbstractCommand(object):
 
     def clear(self):
         """
-        Remove command's arguments
+        Remove command arguments
         """
         self._call('clear')
 
     def argument_list(self):
         """
-        Function return argument list of command
+        Return list of command arguments
 
-        :rtype: list of arguments names
+        :rtype: list of command argument names
         """
         answer = self._call('argument_list')
         return answer.names
 
     def argument(self, name_argument):
         """
-        Function return argument of command
+        Return command argument with value by argument name
 
-        :arg name_argument: name of argument
-        :rtype:
-            | tuple (name, value)
-            | name is name of argument
-            | value is value of argument
+        :arg name_argument: command argument name
+        :rtype: name/value pair as a tuple (argument name, argument value)
         """
         answer = self._call('argument', argument=name_argument)
         return answer.name, answer.value
 
     def set_argument(self, name_arg, value):
         """
-        Set argument in command
+        Add command argument / overwrite argument value
 
-        :arg name_arg: name of argument
-        :arg value: value of argument
+        :arg name_arg: command argument name
+        :arg value: command argument value
         """
         value_type = utils.value_type_field_definer(type(value))
         cur_choices = self.choices[name_arg] if name_arg in self.choices else None
@@ -183,7 +180,7 @@ class AbstractCommand(object):
 
     def owner(self):
         """
-        Function return id of command's owner
+        Return ID of the command's owner
 
         :rtype: uint64
         """
@@ -212,9 +209,9 @@ class Command(AbstractCommand):
 
     def call_function(self):
         """
-        This function is performed when user call command
+        Call function when command executed
 
-        :rtype: result type is defined in function of adapter code
+        :rtype: The return type depends on the function code
         """
         try:
             arg_list = self.argument_list()
