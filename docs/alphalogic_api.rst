@@ -14,7 +14,7 @@ Objects
 
 Root
 ~~~~
-User's root object must be inherits from class Root:
+To specify a root object of the user-written adapter, you must create a class that inherits from class Root:
 ::
     ...
     from alphalogic_api.objects import Root
@@ -29,7 +29,7 @@ User's root object must be inherits from class Root:
 
 Object
 ~~~~~~
-Nodes inherits from class Object, except root node:
+To specify an adapter object (not Root object), create a class that inherits from the class Object:
 ::
     ...
     from alphalogic_api.objects import Object
@@ -44,60 +44,77 @@ Nodes inherits from class Object, except root node:
 
 Parameter
 ~~~~~~~~~
-| It will be possible to create types of parameter:
+| All the declarations of the parameters of the adapter object must be placed inside the Object class body.
+| You have to define parameter, depending on its value type:
 | ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
 
-Example of using:
+Example of parameter definition:
 ::
     hostname = ParameterString(visible=Visible.setup, access=Access.read_write, default='1', choices=('1', '2'))
 
-Arguments of parameter are optional.
+Parameter arguments are optional.
 
-.. table:: Values of parameter's arguments
+.. table:: Parameter arguments
 
-+-------------+----------------------+--------------------------+
-| Argument    | Default value        | Possible values          |
-+=============+======================+==========================+
-| default     | ParameterLong - 0    | | Any values of types    |
-|             |----------------------| | are allowed ( for      |
-|             | ParameterBool - False| | ParameterDouble is     |
-|             |----------------------| | real number)           |
-|             | ParameterDouble -0.0 |                          |
-|             |----------------------|                          |
-|             | ParameterDatetime - 0|                          |
-|             |----------------------|                          |
-|             | ParameterString - "" |                          |
-+-------------+----------------------+--------------------------+
-| visible     | Visible.runtime      | Visible.runtime          |
-|             |                      |--------------------------|
-|             |                      | Visible.setup            |
-|             |                      |--------------------------|
-|             |                      | Visible.hidden           |
-|             |                      |--------------------------|
-|             |                      | Visible.common           |
-+-------------+----------------------+--------------------------+
-| access      | Access.read_write    | Access.read_write        |
-|             |                      |--------------------------|
-|             |                      | Access.read_only         |
-+-------------+----------------------+--------------------------+
-| choices     | missing              | | The two possibilities  |
-|             |                      | | are allowed.           |
-|             |                      | | 1) list of values:     |
-|             |                      | | (val1, val2, ...)      |
-|             |                      | | 2) list of tuple values|
-|             |                      | | with description       |
-|             |                      | | ((val1, "desc1"),      |
-|             |                      | | (val2, "desc2"))       |
-+-------------+----------------------+--------------------------+
++-------------+---------------------------+----------------------+----------------------------+
+| Argument    | Description               | Default Value        | Possible Values            |
++=============+===========================+======================+============================+
+| default     | Default parameter value   | 0 (ParameterLong)    | | All the values of the    |
+|             |                           |----------------------| | corresponding type are   |
+|             |                           | False (ParameterBool)| | allowed (for example,    |
+|             |                           |----------------------| | a parameter of           |
+|             |                           | 0.0 (ParameterDouble)| | ParameterDouble can      |
+|             |                           |----------------------| | hold real numbers)       |
+|             |                           | 0 (ParameterDatetime)|                            |
+|             |                           |----------------------|                            |
+|             |                           | "" (ParameterString) |                            |
++-------------+---------------------------+----------------------+----------------------------+
+| visible     | A parameter type that     | Visible.runtime      | | Visible.runtime - used   |
+|             | specifies its features    |                      | | to transfer data from    |
+|             | and visibility in the     |                      | | integrated device or     |
+|             | Alphalogic Studio         |                      | | subsystem into           |
+|             |                           |                      | | Alphalogic               |
+|             |                           |                      |----------------------------|
+|             |                           |                      | | Visible.setup - used to  |
+|             |                           |                      | | configure adapter        |
+|             |                           |                      | | object's properties      |
+|             |                           |                      |----------------------------|
+|             |                           |                      | | Visible.hidden - used to |
+|             |                           |                      | | store some data that     |
+|             |                           |                      | | must be hidden for       |
+|             |                           |                      | | target user, e.g.        |
+|             |                           |                      | | adapter license key      |
+|             |                           |                      |----------------------------|
+|             |                           |                      | | Visible.common - a       |
+|             |                           |                      | | hybrid of                |
+|             |                           |                      | | Visible.runtime and      |
+|             |                           |                      | | Visible.setup            |
+|             |                           |                      | | parameter types          |
+|             |                           |                      | | providing combined       |
+|             |                           |                      | | functions                |
++-------------+---------------------------+----------------------+----------------------------+
+| access      | A parameter access type   | Access.read_write    | Access.read_write          |
+|             | which specifies the       |                      |----------------------------|
+|             | permitted and prohibited  |                      | Access.read_only           |
+|             | uses of the parameter     |                      |                            |
++-------------+---------------------------+----------------------+----------------------------+
+| choices     | Allows to set up a        | missing              | | The enumeration can be   |
+|             | predefined enumeration    |                      | | specified in one of two  |
+|             | of values for the         |                      | | different ways:          |
+|             | parameter                 |                      | | 1) list of values of the |
+|             |                           |                      | | corresponding type in a  |
+|             |                           |                      | | tuple as (value1,        |
+|             |                           |                      | | value2, ..., valueN)     |
+|             |                           |                      | | 2) list of enumeration   |
+|             |                           |                      | | members in a tuple of    |
+|             |                           |                      | | tuples as ((value1,      |
+|             |                           |                      | | 'enum_name1'), (value2,  |
+|             |                           |                      | | 'enum_name2'), ...,      |
+|             |                           |                      | | (value2, 'enum_nameN'))  |
++-------------+---------------------------+----------------------+----------------------------+
 
-| Description of parameter's arguments in constructor:
-| 1) default is value of parameter by default
-| 2) visible is method of display parameter in admin panel
-| 3) access is method of access for user
-| 4) choices is predefined values of parameter
 
-In order to use predefined values for parameter need to
-use two field default and choices.
+To build a value list for the parameter, it is required that both arguments 'choices' and 'default' are specified.
 ::
     param_tmp = ParameterString(default='ster 31', choices=('ster 31', 'ster 25', 'ster 23'))
 

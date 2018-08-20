@@ -242,7 +242,7 @@ class AbstractParameter(object):
         """
         Get the predefined enumeration of values from the 'choices' argument of the parameter
 
-        :rtype: List of values of long, float, datetime, bool or unicode type in a tuple as t(value1, value2, value3 ….)
+        :rtype: List of values of long, float, datetime, bool or unicode type in a tuple as (value1, value2, value3 ….)
         """
         answer = self._call('enums')
         value_type_proto = utils.value_type_field_definer(self.value_type)
@@ -266,8 +266,8 @@ class AbstractParameter(object):
         Add/replace multiple enumeration members for the 'choices' argument of the parameter
 
         :param values: An array of values can be one of the following:
-            | List of values of long, float, datetime, bool or unicode type in a tuple as t(value1, value2, value3 ….)
-            | List of enumeration members in a tuple of tuples as t((value1, 'enum_name1'), (value2, 'enum_name2'), ...)
+            | List of values of long, float, datetime, bool or unicode type in a tuple as (value1, value2, value3 ….)
+            | List of enumeration members in a tuple of tuples as ((value1, 'enum_name1'), (value2, 'enum_name2'), ...)
         """
         value_type = self.value_type
         req = rpc_pb2.ParameterRequest(id=self.id)
