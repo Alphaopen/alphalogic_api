@@ -171,8 +171,8 @@ class Root(Object):
     This kind of object is a child for the adapter service node. Root object is created automatically when starting the adapter instance.
     Usually serves for specifying initial device data or defining connection settings or simply as a go-between node.
 
-    :arg host: hostname of the adapter stub instance on a gRPC channel
-    :arg port: port of the adapter stub instance on a gRPC channel
+    :arg host: hostname of the gRPC stub instance of the composite adapter
+    :arg port: port of the gRPC stub instance of the composite adapter
     """
 
     version = ParameterString(visible=Visible.setup, access=Access.read_only)

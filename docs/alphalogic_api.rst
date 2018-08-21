@@ -69,10 +69,10 @@ Parameter arguments are optional.
 |             |                           |----------------------|                            |
 |             |                           | "" (ParameterString) |                            |
 +-------------+---------------------------+----------------------+----------------------------+
-| visible     | A parameter type that     | Visible.runtime      | | Visible.runtime - used   |
-|             | specifies its features    |                      | | to transfer data from    |
-|             | and visibility in the     |                      | | integrated device or     |
-|             | Alphalogic Studio         |                      | | subsystem into           |
+| visible     | | A parameter type that   | Visible.runtime      | | Visible.runtime - used   |
+|             | | specifies its features  |                      | | to transfer data from    |
+|             | | and visibility in the   |                      | | integrated device or     |
+|             | | Alphalogic Studio       |                      | | subsystem into           |
 |             |                           |                      | | Alphalogic               |
 |             |                           |                      |----------------------------|
 |             |                           |                      | | Visible.setup - used to  |
@@ -93,15 +93,15 @@ Parameter arguments are optional.
 |             |                           |                      | | providing combined       |
 |             |                           |                      | | functions                |
 +-------------+---------------------------+----------------------+----------------------------+
-| access      | A parameter access type   | Access.read_write    | Access.read_write          |
-|             | which specifies the       |                      |----------------------------|
-|             | permitted and prohibited  |                      | Access.read_only           |
-|             | uses of the parameter     |                      |                            |
+| access      | | A parameter access type | Access.read_write    | Access.read_write          |
+|             | | which specifies the     |                      |----------------------------|
+|             | | permitted and prohibited|                      | Access.read_only           |
+|             | | uses of the parameter   |                      |                            |
 +-------------+---------------------------+----------------------+----------------------------+
-| choices     | Allows to set up a        | missing              | | The enumeration can be   |
-|             | predefined enumeration    |                      | | specified in one of two  |
-|             | of values for the         |                      | | different ways:          |
-|             | parameter                 |                      | | 1) list of values of the |
+| choices     | | Allows to set up a      | missing              | | The enumeration can be   |
+|             | | predefined enumeration  |                      | | specified in one of two  |
+|             | | of values for the       |                      | | different ways:          |
+|             | | parameter               |                      | | 1) list of values of the |
 |             |                           |                      | | corresponding type in a  |
 |             |                           |                      | | tuple as (value1,        |
 |             |                           |                      | | value2, ..., valueN)     |
@@ -118,7 +118,7 @@ To build a value list for the parameter, it is required that both arguments 'cho
 ::
     param_tmp = ParameterString(default='ster 31', choices=('ster 31', 'ster 25', 'ster 23'))
 
-Case with value with description:
+Be careful to assign a value (not an enumeration member's name) to 'default' argument if the 'choices' argument provides enumeration with descriptions:
 ::
     param_tmp2 = ParameterBool(default=True, choices=((True, 'On'), (False, 'Off')))
 
@@ -183,7 +183,7 @@ run
 Handlers
 -------
 
-Three handlers may be installed by users:
+The handlers are executed when the corresponding event occurs. There are three handlers which can be installed to control the state of the adapter after calling some functions:
 
 1) Handle for request available children of node:
 ::
