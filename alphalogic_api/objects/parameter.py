@@ -305,7 +305,7 @@ class AbstractParameter(object):
 
 class Parameter(AbstractParameter):
     """
-    Parameter inherits from :class:`~alphalogic_api.objects.parameter.AbstractParameter`.
+    Class Parameter inherits all data elements and methods from :class:`~alphalogic_api.objects.parameter.AbstractParameter`.
     """
     index_number = 0
 

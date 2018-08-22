@@ -137,7 +137,7 @@ class AbstractEvent(object):
         | In order to use timestamp other than the current UTC time, you should call set_time function with required
          timestamp before executing emit function.
 
-        :param kwargs: name/value pairs of event arguments separated by commas, each argument followed by an equal sign
+        :param kwargs: name/value pairs of event arguments separated by commas, each argument name followed by an equal sign
         """
         for arg_name, arg_type in self.arguments:
             if arg_name not in kwargs:
@@ -201,7 +201,7 @@ class AbstractEvent(object):
 
 class Event(AbstractEvent):
     """
-    Event inherits from :class:`~alphalogic_api.objects.event.AbstractEvent`.
+    Class Event inherits inherits all data elements and methods from :class:`~alphalogic_api.objects.event.AbstractEvent`.
 
     :arg priority: trivial, minor, major, critical or blocker
     :arg args: name/type pairs in a tuple of tuples (argument name, argument type)

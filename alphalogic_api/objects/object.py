@@ -17,7 +17,8 @@ from alphalogic_api.tasks_pool import TasksPool
 
 class Object(object):
     """
-    Adapter object can have a number of parameters, commands, events and run functions.
+    Adapter object can have a number of interactions (parameters, commands, events) and run functions.
+    All the declarations of the object interactions must be placed inside the Object class body.
     Each of them must have a unique name among instances of the same class.
     """
     manager = Manager()

@@ -44,7 +44,6 @@ To specify an adapter object (not Root object), create a class that inherits fro
 
 Parameter
 ~~~~~~~~~
-| All the declarations of the parameters of the adapter object must be placed inside the Object class body.
 | You have to define parameter, depending on its value type:
 | ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
 
@@ -122,8 +121,7 @@ Be careful to assign a value (not an enumeration member's name) to 'default' arg
 ::
     param_tmp2 = ParameterBool(default=True, choices=((True, 'On'), (False, 'Off')))
 
-Class Parameter is defined in class scope:
-
+Here is the class definition of the class Parameter:
 
 .. autoclass:: Parameter
    :members:
@@ -132,27 +130,37 @@ Class Parameter is defined in class scope:
 
 Event
 ~~~~~
-| It will be possible to create types of event:
+| You have to define event, depending on its severity type:
 | TrivialEvent, MinorEvent, MajorEvent, CriticalEvent, BlockerEvent
 
-Names and values of arguments are passed by using tuple.
+To define an event with arguments, you must append a tuple of (argument name, argument type) pairs. The names of the arguments must be enclosed with single or double quotes.
+
+Example of event definition:
 ::
    alarm = MajorEvent(('where', unicode), ('when', datetime.datetime), ('why', long))
 
-First value of tuple is name of event's argument , second is type of event's argument.
+| The possible value type are:
+| unicode – used for string data,
+| datetime.datetime – used for date and time,
+| long – for integer values,
+| float – to store real numbers,
+| bool – used for boolean values.
 
-| List of possible type of arguments to create:
-| unicode, datetime.datetime, long, float, bool
-
-Example of event emit:
+The function that triggers an event occurence (emit) can be passed with the event arguments as a tuple of name/value pairs, each argument name followed by an equal sign:
 ::
-    alarm.emit(where=where, when=when, why=why)
+    alarm.emit(where="Red Square, Moscow", when=datetime.datetime(2018, 12, 31), why=123456)
 
-If event without arguments:
+Python allows you to pass functions as a parameters to another functions. In the present case, function can be passed instead of the value for the event argument:
 ::
-    alarm.emit()
+    alarm.emit(where="Red Square, Moscow", when=datetime.datetime.utcnow(), why=123456)
 
 
+Example of event function without arguments:
+::
+    alarm.clear()
+
+
+Here is the class definition of the class Event:
 
 .. autoclass:: Event
    :members:
@@ -167,6 +175,7 @@ Decorators
 
 Command
 ~~~~~~~
+Here is the class definition of the class Command:
 
 .. autoclass:: command
    :members:
@@ -183,9 +192,10 @@ run
 Handlers
 -------
 
-The handlers are executed when the corresponding event occurs. There are three handlers which can be installed to control the state of the adapter after calling some functions:
+The handlers are executed when the corresponding condition occurs.
+There are three handlers which can be installed to control the workflow of the adapter after calling some functions:
 
-1) Handle for request available children of node:
+1) Request on child objects of the adapetr object:
 ::
     def handle_get_available_children(self):
     return [

@@ -190,8 +190,8 @@ class AbstractCommand(object):
 
 class Command(AbstractCommand):
     """
-    | Command class is used in command decorator.
-    | Command inherits from :class:`~alphalogic_api.objects.command.AbstractCommand`.
+    | Class Command is used in command decorator.
+    | Class Command inherits all data elements and methods from :class:`~alphalogic_api.objects.command.AbstractCommand`.
 
     :arg device: has :class:`~alphalogic_api.objects.Object` type
     :arg function: executed function
