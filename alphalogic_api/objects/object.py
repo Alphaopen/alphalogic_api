@@ -154,15 +154,11 @@ class Object(object):
             self.__dict__[name] = value
     '''
     def handle_get_available_children(self):
-        """
-        Handler get available children
-        """
+
         return []
 
     def handle_before_remove_device(self):
-        """
-        Handler before remove device
-        """
+
         pass
 
 

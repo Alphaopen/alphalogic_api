@@ -168,6 +168,10 @@ Here is the class definition of the class Event:
 
 Decorators
 ----------
+A decorator is any callable Python object that is used to modify a function, method or class definition.
+A decorator is passed the original object being defined and returns a modified object, which is then bound to the name in the definition.
+Decorators are used for creating class methods or static methods, adding function attributes, tracing, setting pre- and postconditions, etc.
+The @ special character is used to indicate a decorator.
 
 .. py:module:: alphalogic_api.decorators
 
@@ -193,18 +197,28 @@ Handlers
 -------
 
 The handlers are executed when the corresponding condition occurs.
-There are three handlers which can be installed to control the workflow of the adapter after calling some functions:
+There are three types of handlers which can be installed to control the workflow of the adapter before or after calling some functions:
 
-1) Request on child objects of the adapetr object:
+1) Request on child objects of the adapter object:
 ::
     def handle_get_available_children(self):
     return [
-        (Controller, 'Controller')
+        (Controller, 'Controller'),
+        (MyObject, 'MyObject')
     ]
 
-This function are should be define for all node who may to create children nodes.
+You can define and implement this function in the object class to return an array of the child adapter objects.
+You must use the exact name of the handler as in the example above.
 
-2) A handler that fires after parameter is changed:
+2) Request on deletion of the adapter object(s):
+::
+        def handle_before_remove_device(self):
+            do something
+
+You can use this handler to do something before the node(s) from the tree of adapter objects will be deleted.
+You must use the exact name of the handler as in the example above.
+
+3) Changing the value of the parameter:
 ::
     def handle_after_set_double(node, parameter):
         node.log.info('double changed')
@@ -212,12 +226,9 @@ This function are should be define for all node who may to create children nodes
 
     param_double = ParameterDouble(default=2.3, callback=handle_after_set_double)
 
-If param_double is changed, then function handle_after_set_double will be called.
-
-3) A handler that fires before node will be deleted:
-::
-        def handle_before_remove_device(self):
-            do something
+The handler will be invoked when the specified parameter is changed.
+In the example above, this means that the function handle_after_set_double will be called if param_double is changed.
+In the case of parameter changes, you can use whichever name of the handler function you like.
 
 
 Exceptions

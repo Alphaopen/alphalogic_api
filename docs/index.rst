@@ -6,7 +6,7 @@
 Alphalogic API
 ==============
 
-The official library for creating the Alphalogic system adapter
+The Alphalogic API is the official library that provides developers with the tools for creating the Alphalogic system adapters in Python 2.
 
 Compatibility
 -------------
@@ -27,12 +27,12 @@ The recommended way to set your requirements in your `setup.py` or
 Installation
 ------------
 
-Install the ``alphalogic_api`` package with `pip
-<https://pypi.python.org/pypi/alphalogic-api>`_::
+To install the ``alphalogic_api`` package with `pip
+<https://pip.pypa.io/>`_:, run this command in your terminal::
 
     pip install alphalogic-api
 
-
+If you don't have pip installed, this `Python installation guide<http://docs.python-guide.org/en/latest/starting/installation/>`_ can guide you through the process.
 
 Overview
 -------------
@@ -60,51 +60,114 @@ There are types of interactions with adapter: commands, parameters, and events.
 | A simple operation a system object can perform.
 
 
-Example Usage
+Usage
 -------------
 
-Create ``stub.py`` file in the Alphalogic adapter folder.
+Navigate to the \bin folder of the installed composite Alphalogic adapter, and open ``stub.py`` file to edit.
+The use of the library can be demonstrated via the following example of the SendMail Adapter:
 
 ::
 
-    # -*- coding: utf-8 -*-
-    from __future__ import unicode_literals
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
-    from alphalogic_api.attributes import Visible, Access
-    from alphalogic_api.objects import Root, Object
-    from alphalogic_api.objects import MajorEvent
-    from alphalogic_api.objects import ParameterLong
-    from alphalogic_api import init
-    from alphalogic_api.decorators import command
+import smtplib
+
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+
+from operator import methodcaller
+
+from alphalogic_api import options
+from alphalogic_api.objects import Root, Object
+from alphalogic_api.attributes import Visible, Access
+from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
+from alphalogic_api.decorators import command, run
+from alphalogic_api.logger import log
+from alphalogic_api import init
 
 
-    class MyRoot(Root):
-        param_int = ParameterLong(default=2, visible=Visible.runtime, access=Access.read_only)
-        simple_event = MajorEvent()
+#
+# How to send an email with Python
+# http://naelshiab.com/tutorial-send-email-python/
+#
+def send_mail(smtp, message, topic, recipients):
+    host = smtp.ServerAddress.val
+    port = smtp.Port.val
+    user = smtp.Login.val
+    password = smtp.Password.val
+    timeout = smtp.TimeoutMillisec.val / 1000.0  # in seconds
+    from_addr = smtp.SenderAddress.val
+    to_addrs = map(methodcaller('strip'), recipients.split(','))  # 'mike@mail.com, tom@mail.com'
 
-        def handle_get_available_children(self):
-            return [
-                (Controller, 'Controller')
-            ]
+    msg = MIMEMultipart()
+    msg['From'] = smtp.SenderName.val
+    msg['To'] = recipients
+    msg['Subject'] = topic
 
-        @command(result_type=bool)
-        def cmd_alarm(self):
-            # do smth
-            return True
+    body = message
+    charset = dict(Smtp.ENCODING_CHOICES)[smtp.Encoding.val]
+    msg.attach(MIMEText(body, 'plain', charset))
 
-    class Controller(Object):
+    server = smtplib.SMTP(host=host, port=port, timeout=timeout)
+    server.starttls()
+    server.login(user=user, password=password)
+    text = msg.as_string()
+    server.sendmail(from_addr, to_addrs, text)
+    server.quit()
+    return ''
 
-        counter = ParameterLong(default=0)
+#
+# Adapter Stub.
+# Tree:
+# MailAdapter
+#     |
+#     |__Smtp
+#
+class MailAdapter(Root):
 
-        @run(period_one=1)
-        def run_one(self):
-            self.counter.val += 1
+    def handle_get_available_children(self):
+        return [
+            (Smtp, 'Smtp'),
+        ]
 
-        # python loop
-    if __name__ == '__main__':
-        host, port = init()
-        root = MyRoot(host, port)
-        root.join()
+class Smtp(Object):
+
+    PORT_CHOICES = (
+        (25, '25'),
+        (465, '465'),
+        (587, '587'),
+        (2525, '2525'),
+    )
+
+    ENCODING_CHOICES = (
+        (0, 'utf-8'),
+        (1, 'koi8-r'),
+        (2, 'windows-1251'),
+        (3, 'windows-1252'),
+    )
+
+    # parameters
+    ServerAddress = ParameterString(visible=Visible.setup)
+    SenderAddress = ParameterString(visible=Visible.setup)
+    Login = ParameterString(visible=Visible.setup)
+    Password = ParameterString(visible=Visible.setup)
+    SenderName = ParameterString(visible=Visible.setup)
+    Port = ParameterLong(visible=Visible.setup, choices=PORT_CHOICES, default=587)
+    TimeoutMillisec = ParameterLong(visible=Visible.common, default=5000)
+    Encoding = ParameterLong(visible=Visible.common, choices=ENCODING_CHOICES, default=0)
+
+    # commands
+    @command(result_type=unicode)
+    def SendMail(self, message='', topic='', recipients=''):
+        return send_mail(self, message=message, topic=topic, recipients=recipients)
+
+
+if __name__ == '__main__':
+    # main loop
+    host, port = init()
+    root = MailAdapter(host, port)
+    root.join()
 
 ...
 

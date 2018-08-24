@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 class IncorrectRPCRequest(Exception):
     """
-    Unsupported request by protocol. Check alphalogic_api code
+    This kind of exception occurs when there is an internal API error, possibly incorrect syntax of some function, or something else.
     """
     def __init__(self, msg):
         super(IncorrectRPCRequest, self).__init__(msg)
@@ -12,7 +12,7 @@ class IncorrectRPCRequest(Exception):
 
 class RequestError(Exception):
     """
-    gRPC call exception
+    Internal gRPC call error that occurs when the remote request processing has failed.
     """
     def __init__(self, msg):
         super(RequestError, self).__init__(msg)
@@ -20,11 +20,14 @@ class RequestError(Exception):
 
 class ComponentNotFound(Exception):
     """
-    If component not found in the Object
+    API error that occurs if the name of the declared variable is missing, mismatched, or unidentifiable
     """
     def __init__(self, msg):
         super(ComponentNotFound, self).__init__(msg)
 
 
 class Exit(Exception):
+    """
+    A fatal exception that will trigger adapter instance to exit
+    """
     pass

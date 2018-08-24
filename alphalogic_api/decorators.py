@@ -45,7 +45,7 @@ def command(*argv_c, **kwargs_c):
             return where
 
 
-    :arg result_type: Result type
+    :arg result_type: Command return type
     """
     def decorator(func):
         def wrapped(device, *argv, **kwargs):
@@ -69,7 +69,7 @@ def run(*argv_r, **kwargs_r):
     Example: ::
 
         # Called every 1 second.
-        # You can change period by changing parameter 'period_one' value.
+        # You can change period by changing 'period_one' parameter.
 
         @run(period_one=1)
         def run_one(self):
