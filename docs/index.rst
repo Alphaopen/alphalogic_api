@@ -11,18 +11,7 @@ The Alphalogic API is the official library that provides developers with the too
 Compatibility
 -------------
 
-The library is compatible with Alphalogic adapter versions since ``.0315``
-
-The recommended way to set your requirements in your `setup.py` or
-`requirements.txt` is::
-
-    # Protobuf
-    protobuf==3.6.0
-
-    # gRPC
-    grpcio==1.12.1
-    grpcio-tools==1.12.1
-
+The library is compatible with Alphalogic adapters versions since ``.0315``.
 
 Installation
 ------------
@@ -34,21 +23,31 @@ To install the ``alphalogic_api`` package with `pip
 
 If you don't have pip installed, this `Python installation guide<http://docs.python-guide.org/en/latest/starting/installation/>`_ can guide you through the process.
 
+Dependencies
+-------------
+
+To start using this library you need the Alphalogic Service Manager (ASM) to be installed on your machine. Additionally, you also need the composite Alphalogic adapter (probably, engine) to be installed to provide a "shell" for your code to run in.
+You can define the required dependencies by editing the 'requirements' parameter in the [pip] section in the ``stub.win32.ini`` file (for Windows) or ``stub.linux.ini`` file (for Linux). Navigate to the ``\bin`` folder of the installed composite Alphalogic adapter, and open appropriate file to edit.
+After saving this file, you can access the necessary libraries via the ASM: go to Infrastructure > Adapters page, download and install the specific dependencies by clicking on the install button for the deployed adapter.
+
 Overview
 -------------
-Alphalogic adapter is program in alphalogic platform.
-One side's adapter implements described programmed protocol or device(user code via the this library), and
-the other side is integrated in alphalogic platform.
+Alphalogic adapter is program for integrating third-party utilities/devices/subsystems/protocols into Alphalogic software platform. In the operating system, adapter runs as a stand-alone process and may be installed as a system service.
+Three types of adapters can be distinguished by the way they are generated:
+- traditional C++ adapters;
+- composite adapters of two different parts: a relatively unchangeable program core written in C++, supplemented by gRPC stub containing application-specific program code which can be written in almost any programming language (C++, Python, Go!, JavaScript, etc.).
+- Java adapters.
 
-Adapter has entities that represent objects(nodes), parameters, events, commands.
-Adapter is a tree of objects.
+The alphalogic_api library allows to access Alphalogic Integration API for easily developing composite adapters in Python 2, providing the integration developer with opportunity to code at once the functional part of the adapter, knowing nothing about the core.
+The integration developer can use any popular Python code editor like Sublime Text, Notepad++, Visual Studio Code, Atom, etc.
 
-:ref:`object_link` is a unit that has specific technical functions.
-Adapter has :ref:`root_link` object is a root of tree.
-Other node inherits from class Object.
+Every adapter has a tree-like structure of the adapter objects represented as a set of linked nodes. The object tree has a Root object which will be generated automatically after the adapter instance is started, and a number of parent/child objects forming the object architecture of the adapter.
 
+:ref:`object_link` is a unit that has specific information and/or implements the necessary technical functions of the integrated device/subsystem.
+:ref:`root_link` object is a root of adapter object tree. Usually serves for specifying initial device data or defining connection settings or simply as a go-between node. Root object cannot be deleted separately from the adapter instance.
+All other objects (not Root) – subobjects (dependent objects) – are inherited from class Object.
 
-There are types of interactions with adapter: commands, parameters, and events.
+Every adapter object has a defined set of specific types of interactions – parameters, events, and commands.
 
 | :ref:`parameter_link`
 | Corresponds to a current value of the system object's property.
@@ -64,6 +63,36 @@ Usage
 -------------
 
 Navigate to the \bin folder of the installed composite Alphalogic adapter, and open ``stub.py`` file to edit.
+
+::
+
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from alphalogic_api import options
+from alphalogic_api.objects import Root, Object
+from alphalogic_api.attributes import Visible, Access
+from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
+from alphalogic_api.decorators import command, run
+from alphalogic_api.logger import log
+from alphalogic_api import init
+
+
+class Engine(Root):
+    pass
+
+
+if __name__ == '__main__':
+    # main loop
+    host, port = init()
+    root = MailAdapter(host, port)
+    root.join()
+
+...
+
+Example Usage
+-------------
+
 The use of the library can be demonstrated via the following example of the SendMail Adapter:
 
 ::
