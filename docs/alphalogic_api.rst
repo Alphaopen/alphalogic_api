@@ -140,11 +140,11 @@ Example of event definition:
    alarm = MajorEvent(('where', unicode), ('when', datetime.datetime), ('why', long))
 
 | The possible value type are:
-| unicode – used for string data,
-| datetime.datetime – used for date and time,
-| long – for integer values,
-| float – to store real numbers,
-| bool – used for boolean values.
+* unicode – used for string data,
+* datetime.datetime – used for date and time,
+* long – for integer values,
+* float – to store real numbers,
+* bool – used for boolean values.
 
 The function that triggers an event occurence (emit) can be passed with the event arguments as a tuple of name/value pairs, each argument name followed by an equal sign:
 ::
