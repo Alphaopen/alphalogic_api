@@ -1,6 +1,5 @@
 .. _alphalogic_api:
 
-
 API Documentation
 =================
 
@@ -97,7 +96,7 @@ Parameter arguments are optional.
 |             | | permitted and prohibited|                      | Access.read_only           |
 |             | | uses of the parameter   |                      |                            |
 +-------------+---------------------------+----------------------+----------------------------+
-| choices     | | Allows to set up a      | missing              | | The enumeration can be   |
+| choices     | | Allows to set up a      | -                    | | The enumeration can be   |
 |             | | predefined enumeration  |                      | | specified in one of two  |
 |             | | of values for the       |                      | | different ways:          |
 |             | | parameter               |                      | | 1) list of values of the |
@@ -121,7 +120,7 @@ Be careful to assign a value (not an enumeration member's name) to 'default' arg
 ::
     param_tmp2 = ParameterBool(default=True, choices=((True, 'On'), (False, 'Off')))
 
-Here is the class definition of the class Parameter:
+Here is the definition of the class Parameter:
 
 .. autoclass:: Parameter
    :members:
@@ -130,7 +129,7 @@ Here is the class definition of the class Parameter:
 
 Event
 ~~~~~
-| You have to define event, depending on its severity type:
+| You have to define event, depending on its severity level:
 | TrivialEvent, MinorEvent, MajorEvent, CriticalEvent, BlockerEvent
 
 To define an event with arguments, you must append a tuple of (argument name, argument type) pairs. The names of the arguments must be enclosed with single or double quotes.
@@ -139,7 +138,7 @@ Example of event definition:
 ::
    alarm = MajorEvent(('where', unicode), ('when', datetime.datetime), ('why', long))
 
-| The possible value type are:
+| The possible value types of the event arguments are:
 * unicode – used for string data,
 * datetime.datetime – used for date and time,
 * long – for integer values,
@@ -155,12 +154,12 @@ Python allows you to pass functions as a parameters to another functions. In the
     alarm.emit(where="Red Square, Moscow", when=datetime.datetime.utcnow(), why=123456)
 
 
-Example of event function without arguments:
+Example of the event function without arguments:
 ::
     alarm.clear()
 
 
-Here is the class definition of the class Event:
+Here is the definition of the class Event:
 
 .. autoclass:: Event
    :members:
@@ -179,7 +178,7 @@ The @ special character is used to indicate a decorator.
 
 Command
 ~~~~~~~
-Here is the class definition of the class Command:
+Here is the definition of the class Command:
 
 .. autoclass:: command
    :members:
@@ -215,7 +214,7 @@ You must use the exact name of the handler as in the example above.
         def handle_before_remove_device(self):
             do something
 
-You can use this handler to do something before the node(s) from the tree of adapter objects will be deleted.
+You can use this handler to do something before the adapter object will be deleted.
 You must use the exact name of the handler as in the example above.
 
 3) Changing the value of the parameter:

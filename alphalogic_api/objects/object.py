@@ -138,7 +138,7 @@ class Object(object):
         """
         Get child objects
 
-        :rtype: list of child object types
+        :rtype: list of child :class:`~alphalogic_api.objects.Object`
         """
         return self.manager.children(self.id)
 
@@ -204,7 +204,9 @@ class Root(Object):
 
     def join(self):
         """
-        The infinite communication loop
+        Wait until all threads within stub process terminate.
+        This function provides an infinite communication loop between the adapter core and gRPC stub instance.
+        Must be placed in the code of the adapter to keep it working till the process be stopped by the user or an error happens.
         """
         if self.joinable:
             is_connected = True

@@ -64,8 +64,9 @@ def command(*argv_c, **kwargs_c):
 
 def run(*argv_r, **kwargs_r):
     """
-    This function executes periodically. It also creates an integer Parameter which means period value in seconds.
-
+    | This function is used to be called periodically by the gRPC process.
+    | It can be defined inside the Object class body to implement some repeatable tasks like interrogation of the controller, modem, database, etc.
+    | It is required to specify the necessary trigger period in seconds in the argument of the function.
     Example: ::
 
         # Called every 1 second.

@@ -6,7 +6,7 @@ from alphalogic_api.attributes import Priority
 
 class AbstractEvent(object):
     """
-    AbstractEvent implements EventService service(see `rpc.proto <https://github.com/Alphaopen/alphalogic_api/blob/
+    AbstractEvent implements EventService service (see `rpc.proto <https://github.com/Alphaopen/alphalogic_api/blob/
     master/alphalogic_api/protocol/proto/rpc.proto>`_)
     """
 
@@ -113,7 +113,7 @@ class AbstractEvent(object):
 
     def set_critical(self):
         """
-        SSet event severity to critical
+        Set event severity to critical
         """
         self._call('set_critical')
 

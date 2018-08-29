@@ -10,7 +10,7 @@ import traceback
 
 class AbstractCommand(object):
     """
-    AbstractCommand implements CommandService service(see `rpc.proto <https://github.com/Alphaopen/alphalogic_api/blob/
+    AbstractCommand implements CommandService service (see `rpc.proto <https://github.com/Alphaopen/alphalogic_api/blob/
     master/alphalogic_api/protocol/proto/rpc.proto>`_)
     """
 
