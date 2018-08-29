@@ -6,7 +6,7 @@
 Alphalogic API
 ==============
 
-The Alphalogic API is the official library that provides developers with the tools for creating the Alphalogic system adapters in Python 2.
+The Alphalogic API is an official library that provides developers with the tools for creating the Alphalogic system adapters in Python 2.
 
 Compatibility
 -------------
@@ -18,7 +18,6 @@ Installation
 
 To install the ``alphalogic_api`` package with `pip
 <https://pip.pypa.io/>`_, run this command in your terminal::
-
     pip install alphalogic-api
 
 If you don't have pip installed, this `Python installation guide
@@ -33,8 +32,8 @@ After saving this file, you can access the necessary libraries via the ASM: go t
 
 Overview
 -------------
-Alphalogic adapter is a program for integrating third-party utilities/devices/subsystems/protocols into Alphalogic software platform. In the operating system, adapter runs as a stand-alone process and may be installed as a system service.
-Three types of adapters can be distinguished by the way they are generated:
+| Alphalogic adapter is a program for integrating third-party utilities/devices/subsystems/protocols into Alphalogic software platform. In the operating system, adapter runs as a stand-alone process and may be installed as a system service.
+| Three types of adapters can be distinguished by the way they are generated:
 * traditional C++ adapters;
 * composite adapters of two different parts: a relatively unchangeable program core written in C++, supplemented by gRPC stub containing application-specific program code which can be written in almost any programming language (C++, Python, Go!, JavaScript, etc.).
 * Java adapters.
@@ -57,13 +56,13 @@ Every adapter object has a name and a defined set of the specific types of inter
 | Corresponds to a state that indicates what has happened with the object. Each event has a severity level associated with it. Some types of events may have arguments.
 
 | :ref:`command_link`
-| A simple operation an object can perform. The command execution may trigger some event or affects the change of some parameter value.
+| A simple operation an object can perform. Some types of commands may have arguments. The command execution may trigger some event or affects the change of some parameter value.
 
 
 Usage
 -------------
 
-Navigate to the ``\bin`` folder of the installed composite Alphalogic adapter and open ``stub.py`` file to edit that contains the following code:
+Navigate to the ``\bin`` folder of the installed composite Alphalogic adapter and open ``stub.py`` file to edit. It contains the following code:
 ::
 
    # -*- coding: utf-8 -*-
@@ -88,7 +87,6 @@ Navigate to the ``\bin`` folder of the installed composite Alphalogic adapter an
       root = MailAdapter(host, port)
       root.join()
 
-...
 In the beginning of the file, there is a line of the unicode_literals import, which makes all string literals of unicode type, instead of string type.
 Then come import statements for the classes probably required by the code of the adapter.
 Below, there is a declaration of the class Engine to implement the default root object, designed to be changed as needed.
@@ -100,7 +98,6 @@ Example Usage
 -------------
 
 The use of the library can be demonstrated via the following example of the SendMail Adapter:
-
 ::
 
    # -*- coding: utf-8 -*-
@@ -204,7 +201,6 @@ The use of the library can be demonstrated via the following example of the Send
       root = MailAdapter(host, port)
       root.join()
 
-...
 
 .. toctree::
    :maxdepth: 2

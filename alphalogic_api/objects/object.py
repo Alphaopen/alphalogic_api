@@ -87,7 +87,7 @@ class Object(object):
         """
         Return events of the object
 
-        :rtype: list of :class:`~alphalogic_api.objects.command.Command` #TODO
+        :rtype: list of :class:`~alphalogic_api.objects.command.Command`
         """
         return self.manager.get_components(self.id, 'commands')
 
@@ -96,7 +96,7 @@ class Object(object):
         Get parameter by name
 
         :arg name: parameter name
-        :rtype: :class:`~alphalogic_api.objects.parameter.Parameter`
+        :rtype: :class:`~alphalogic_api.objects.parameter.Parameter` #TODO
         """
         return self.manager.get_component_by_name(name, self.id, 'parameter')
 
@@ -105,7 +105,7 @@ class Object(object):
         Get event by name
 
         :arg name: event name
-        :rtype: :class:`~alphalogic_api.objects.event.Event`
+        :rtype: :class:`~alphalogic_api.objects.event.Event` #TODO
         """
         return self.manager.get_component_by_name(name, self.id, 'event')
 
@@ -122,7 +122,7 @@ class Object(object):
         """
         Get parent object
 
-        :rtype: type of the parent object
+        :rtype: parent :class:`~alphalogic_api.objects.Object`
         """
         return self.manager.parent(self.id)
 
@@ -130,7 +130,7 @@ class Object(object):
         """
         Get root object
 
-        :rtype: type of the root object
+        :rtype: :class:`~alphalogic_api.objects.Root`
         """
         return self.manager.root()
 
