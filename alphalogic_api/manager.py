@@ -245,7 +245,7 @@ class Manager(AbstractManager):
                                                   list_id_parameters_already_exists)
         if is_copy and name in object.__dict__:
             parameter = object.__dict__[name].get_copy()
-        elif is_copy and name not in object.__dict__ and options.program_args.development_mode:
+        elif is_copy and name not in object.__dict__ and options.args.development_mode:
             return
         elif parameter is None:
             raise Exception('{0} is None'.format(name))
