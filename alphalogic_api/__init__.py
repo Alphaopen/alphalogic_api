@@ -8,7 +8,7 @@ from alphalogic_api import options
 
 VERSION_MAJOR = 0  # (System version)
 VERSION_MINOR = 0  # (Tests version)
-BUILD_NUMBER = 10   # (Issues version)
+BUILD_NUMBER = 11   # (Issues version)
 
 __version__ = '.'.join(map(str, (VERSION_MAJOR, VERSION_MINOR, BUILD_NUMBER)))
 

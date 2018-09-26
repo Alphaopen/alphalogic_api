@@ -26,5 +26,21 @@ class ComponentNotFound(Exception):
         super(ComponentNotFound, self).__init__(msg)
 
 
+class TimeoutError(Exception):
+    """
+    gRPC request timeout. See --timeout argument
+    """
+    def __init__(self, msg):
+        super(TimeoutError, self).__init__(msg)
+
+
+class ConnectError(Exception):
+    """
+    gRPC can't connect to Stub
+    """
+    def __init__(self, msg):
+        super(ConnectError, self).__init__(msg)
+
+
 class Exit(Exception):
     pass
