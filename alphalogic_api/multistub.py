@@ -81,7 +81,7 @@ class MultiStub(object):
                     raise TimeoutError(err.message)
                 elif err.code() == grpc.StatusCode.UNAVAILABLE:
                     raise ConnectError(err.message)
-                raise RequestError(u'gRPC request failed (code={}): {}'.format(grpc.StatusCode.UNKNOWN, err.message))
+                raise RequestError(u'gRPC request failed (code={}): {}'.format(err.code(), err.message))
         else:
             raise IncorrectRPCRequest('{0} not found in {1}'.format(function_name, kwargs['fun_set']))
 
