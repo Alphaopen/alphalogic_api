@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import datetime
+from functools import partial
 
 from alphalogic_api.attributes import Visible, Access
 from alphalogic_api.objects import Root, Object
@@ -31,9 +32,18 @@ class MyRoot(Root):
     simple_event = MajorEvent()
 
     def handle_get_available_children(self):
-        return [
-            (Controller, 'Controller')
-        ]
+
+        r = []
+
+        for i in range(5):
+            f = partial(ControllerSpec, number=i)
+            f.cls = ControllerSpec
+            r.append((f, 'ControllerSpec {0}'.format(i)))
+
+        r.append((Controller, 'Controller'))
+
+        return r
+
 
     @command(result_type=bool)
     def cmd_alarm(self, where='here', when=datetime.datetime.now(), why=2):
@@ -46,12 +56,16 @@ class MyRoot(Root):
 
 
 class Controller(Object):
-
     counter = ParameterLong(default=0)
 
     @run(period_one=1)
     def run_one(self):
         self.counter.val += 1
+
+
+class ControllerSpec(Object):
+    def __init__(self, type_device, id_device, number):
+        super(ControllerSpec, self).__init__(type_device, id_device)
 
 
 if __name__ == '__main__':

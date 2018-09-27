@@ -153,6 +153,8 @@ class AbstractManager(object):
 
 class Manager(AbstractManager):
     dict_type_objects = {}  # Dictionary of nodes classes. 'type' as a key
+    dict_user_name_type_objects = {}  # Dictionary of nodes classes. 'user display name in available_children' as a key
+                                      # value - is type of object
     nodes = {}  # Nodes dictionary. 'id' as a key
     components = {}  # All commands, parameters, events dictionary. 'id' as a key
     components_for_device = {}  # All commands, parameters, events of node. Node 'id' as a key
@@ -179,7 +181,7 @@ class Manager(AbstractManager):
 
         list_parameters_name_should_exists = map(lambda x: (getattr(object, x), x), list_parameters_name_should_exists)
         list_parameters_name_should_exists = list(zip(*sorted(list_parameters_name_should_exists,
-                                                         key=lambda x: x[0].index_number))[1])
+                                                              key=lambda x: x[0].index_number))[1])
         list_parameters_name_should_exists = list_parameters_name_should_exists + list_parameters_name_period
         list_parameters_name_should_exists = [name for name in list_parameters_name_should_exists
                                               if name not in list_parameters_name_already_exists]
@@ -204,9 +206,9 @@ class Manager(AbstractManager):
             self.prepare_for_work(object, child_id)
             self.prepare_existing_devices(child_id)
 
-    def create_object(self, object_id):
+    def create_object(self, object_id, user_name_display):
         class_name_str = self.get_type(object_id)
-        class_name = Manager.dict_type_objects[class_name_str]
+        class_name = Manager.dict_user_name_type_objects[user_name_display]
         object = class_name(class_name_str, object_id)
         Manager.nodes[object_id] = object
         Manager.components_for_device[object_id] = []
@@ -230,10 +232,16 @@ class Manager(AbstractManager):
         available_devices = device.handle_get_available_children()
         self.unregister_all_makers(id_object=id_device)
 
-        for class_name, type_when_create in available_devices:
-            self.register_maker(id_object=id_device, name=type_when_create, type_str=class_name.__name__)
-            if class_name.__name__ not in Manager.dict_type_objects:
-                Manager.dict_type_objects[class_name.__name__] = class_name
+        for callable_class_name, user_name_display in available_devices:
+            if hasattr(callable_class_name, 'cls'):
+                type_str = callable_class_name.cls
+            else:
+                type_str = callable_class_name
+
+            self.register_maker(id_object=id_device, name=user_name_display, type_str=type_str.__name__)
+
+            if user_name_display not in Manager.dict_user_name_type_objects:
+                Manager.dict_user_name_type_objects[user_name_display] = callable_class_name
 
     def get_type(self, node_id):
         type_str = self.type(node_id)[7:]  # cut string 'device.'
@@ -254,7 +262,7 @@ class Manager(AbstractManager):
         parameter.parameter_name = name
         parameter.set_multi_stub(self.multi_stub)
 
-        if name not in list_name_parameters_already_exists or options.args.development_mode: # if parameter doesn't exist
+        if name not in list_name_parameters_already_exists or options.args.development_mode:  # if parameter doesn't exist
             value_type = parameter.value_type
             id_parameter = getattr(self, utils.create_parameter_definer(value_type)) \
                 (id_object=object_id, name=name)
@@ -285,7 +293,7 @@ class Manager(AbstractManager):
 
     def create_command(self, name, command, object_id):
         list_name_commands_already_exists = map(lambda id: self.multi_stub.command_call('name', id=id).name,
-                                               self.commands(object_id))
+                                                self.commands(object_id))
         command.set_multi_stub(self.multi_stub)
         if name not in list_name_commands_already_exists or options.args.development_mode:  # if event doesn't exist
             result_type = command.result_type
@@ -312,9 +320,9 @@ class Manager(AbstractManager):
 
     def configure_single_event(self, name, event, object_id):
         list_name_events_already_exists = map(lambda id: self.multi_stub.event_call('name', id=id).name,
-                                                  self.events(object_id))
+                                              self.events(object_id))
         event.set_multi_stub(self.multi_stub)
-        if name not in list_name_events_already_exists or options.args.development_mode: # if event doesn't exist
+        if name not in list_name_events_already_exists or options.args.development_mode:  # if event doesn't exist
             event.id = self.create_event(id_object=object_id, name=name)
             getattr(event, event.priority.create_func)()
             event.clear()
@@ -395,7 +403,10 @@ class Manager(AbstractManager):
                 try:
                     if r.state == rpc_pb2.StateStream.AFTER_CREATING_OBJECT:
                         log.info('Create device {0}'.format(r.id))
-                        self.create_object(r.id)
+                        id_name = self.parameter(r.id, 'type_when_create')
+                        rpc_value = self.multi_stub.parameter_call('get', id=id_name).value
+                        user_name_display = utils.value_from_rpc(rpc_value)
+                        self.create_object(r.id, user_name_display)
 
                     elif r.state == rpc_pb2.StateStream.BEFORE_REMOVING_OBJECT:
                         log.info('Remove device {0}'.format(r.id))
