@@ -185,10 +185,10 @@ class Root(Object):
             type_device = self.manager.get_type(id_root)
             super(Root, self).__init__(type_device, id_root)
 
-            self.log.info('Connecting to ' + host + ':' + unicode(port))
+            log.info('Connecting to ' + host + ':' + unicode(port))
             self.init(id_root)
             self.joinable = True
-            self.log.info('Root connected OK')
+            log.info('Root connected OK')
 
         except Exception, err:
             t = traceback.format_exc()

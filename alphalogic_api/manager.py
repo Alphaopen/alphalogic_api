@@ -417,7 +417,7 @@ class Manager(AbstractManager):
                                     Manager.components[r.id].callback(device, param)
                                 except Exception, err:
                                     t = traceback.format_exc()
-                                    self.log.error('After set parameter value callback error:\n{0}'.format(t))
+                                    log.error('After set parameter value callback error:\n{0}'.format(t))
                         else:
                             log.warn('Parameter {0} not found'.format(r.id))
 
@@ -429,11 +429,11 @@ class Manager(AbstractManager):
 
                 except Exception, err:
                     t = traceback.format_exc()
-                    self.log.error('grpc_thread error: {0}'.format(t))
+                    log.error('grpc_thread error: {0}'.format(t))
 
                 finally:
                     self.multi_stub.stub_adapter.ack(ack)
 
         except Exception, err:
             t = traceback.format_exc()
-            self.log.error('grpc_thread error2: {0}'.format(t))
+            log.error('grpc_thread error2: {0}'.format(t))
