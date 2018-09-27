@@ -13,6 +13,7 @@ from alphalogic_api.manager import Manager
 from alphalogic_api.logger import log
 from alphalogic_api.utils import Exit, decode_string
 from alphalogic_api.tasks_pool import TasksPool
+from alphalogic_api import init
 
 
 class Object(object):
@@ -176,8 +177,10 @@ class Root(Object):
 
     version = ParameterString(visible=Visible.setup, access=Access.read_only)
 
-    def __init__(self, host, port):
+    def __init__(self):
         try:
+            host, port = init()
+
             self.manager.start_threads()
             self.joinable = False
             self.manager.configure_multi_stub(host + ':' + unicode(port))
