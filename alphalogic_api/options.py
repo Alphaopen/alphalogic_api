@@ -25,6 +25,7 @@ def parse_arguments():
     parser.add_argument('--log_max_files', type=int, default=10, help='Set max files for rotating log file. Default=10')
     parser.add_argument('--development_mode', action='store_true', help='Don\'t check configure if present')
     parser.add_argument('--log_directory', default=log_directory, help='Log files directory. Now: {}'.format(log_directory))
+    parser.add_argument('--timeout', type=int, default=3, help='gRPC request timeout, sec')
 
     global args
     args = parser.parse_args()

@@ -2,7 +2,8 @@
 from __future__ import unicode_literals
 import grpc
 from alphalogic_api.logger import log
-from alphalogic_api.exceptions import IncorrectRPCRequest, RequestError, ComponentNotFound
+from alphalogic_api.exceptions import IncorrectRPCRequest, RequestError, ComponentNotFound, TimeoutError, ConnectError
+from alphalogic_api import options
 
 from alphalogic_api.protocol.rpc_pb2 import (
     ObjectRequest,
@@ -70,13 +71,17 @@ class MultiStub(object):
     def call_helper(self, function_name, *args, **kwargs):
         if function_name in kwargs['fun_set']:  # function_name - check availability
             try:
-                answer = getattr(kwargs['stub'], function_name)(kwargs['request'])
+                answer = getattr(kwargs['stub'], function_name)(kwargs['request'], timeout=options.args.timeout)
                 return answer
 
             except grpc.RpcError, err:
                 if err.code() == grpc.StatusCode.NOT_FOUND:
                     raise ComponentNotFound(err.message)
-                raise RequestError(u'gRPC request failed (code={}): {}'.format(grpc.StatusCode.UNKNOWN, err.message))
+                elif err.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                    raise TimeoutError(err.message)
+                elif err.code() == grpc.StatusCode.UNAVAILABLE:
+                    raise ConnectError(err.message)
+                raise RequestError(u'gRPC request failed (code={}): {}'.format(err.code(), err.message))
         else:
             raise IncorrectRPCRequest('{0} not found in {1}'.format(function_name, kwargs['fun_set']))
 
