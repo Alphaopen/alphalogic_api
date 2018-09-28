@@ -213,6 +213,7 @@ class Manager(AbstractManager):
         Manager.nodes[object_id] = object
         Manager.components_for_device[object_id] = []
         self.prepare_for_work(object, object_id)
+        Manager.nodes[object_id].handle_ready_for_work()
 
     def delete_object(self, object_id):
         with Manager.nodes[object_id].mutex:
@@ -426,7 +427,7 @@ class Manager(AbstractManager):
                                     param = Manager.components[r.id]  # TODO check
                                     device = Manager.nodes[param.owner()]  # TODO check
                                     Manager.components[r.id].callback(device, param)
-                                except Exception, err:
+                                except Exception as err:
                                     t = traceback.format_exc()
                                     log.error('After set parameter value callback error:\n{0}'.format(t))
                         else:
@@ -438,13 +439,13 @@ class Manager(AbstractManager):
                         else:
                             log.warn('Command {0} not found'.format(r.id))
 
-                except Exception, err:
+                except Exception as err:
                     t = traceback.format_exc()
                     log.error('grpc_thread error: {0}'.format(t))
 
                 finally:
                     self.multi_stub.stub_adapter.ack(ack)
 
-        except Exception, err:
+        except Exception as err:
             t = traceback.format_exc()
             log.error('grpc_thread error2: {0}'.format(t))

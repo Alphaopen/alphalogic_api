@@ -165,6 +165,13 @@ class Object(object):
         """
         pass
 
+    def handle_ready_for_work(self):
+        """
+        Handler ready for work.
+        Parameters, commands, events have already created.
+        """
+        pass
+
 
 class Root(Object):
     """
