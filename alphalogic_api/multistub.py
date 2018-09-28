@@ -76,12 +76,12 @@ class MultiStub(object):
 
             except grpc.RpcError, err:
                 if err.code() == grpc.StatusCode.NOT_FOUND:
-                    raise ComponentNotFound(err.message)
+                    raise ComponentNotFound(err.message + ' ' + err.details())
                 elif err.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
-                    raise TimeoutError(err.message)
+                    raise TimeoutError(err.message + ' ' + err.details())
                 elif err.code() == grpc.StatusCode.UNAVAILABLE:
-                    raise ConnectError(err.message)
-                raise RequestError(u'gRPC request failed (code={}): {}'.format(err.code(), err.message))
+                    raise ConnectError(err.message + ' ' + err.details())
+                raise RequestError(u'gRPC request failed (code={}): {}, {}'.format(err.code(), err.message, err.details()))
         else:
             raise IncorrectRPCRequest('{0} not found in {1}'.format(function_name, kwargs['fun_set']))
 
