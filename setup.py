@@ -46,7 +46,7 @@ if __name__ == '__main__':
         platforms=['linux2', 'win32'],
         install_requires=[
             'protobuf==3.6.0',
-            'grpcio==1.12.1',
-            'grpcio-tools==1.12.1',
+            'grpcio==1.13.0',
+            'grpcio-tools==1.13.0',
         ],
     )
