@@ -213,7 +213,7 @@ class Manager(AbstractManager):
         Manager.nodes[object_id] = object
         Manager.components_for_device[object_id] = []
         self.prepare_for_work(object, object_id)
-        Manager.nodes[object_id].handle_ready_for_work()
+        object.handle_change_state_defaults_loaded(**object.__dict__['memorized_arguments'])
 
     def delete_object(self, object_id):
         with Manager.nodes[object_id].mutex:

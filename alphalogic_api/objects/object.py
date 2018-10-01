@@ -34,12 +34,14 @@ class Object(object):
     number_of_errors = ParameterLong(visible=Visible.setup, access=Access.read_write)
     status = ParameterString(visible=Visible.common, access=Access.read_only)
 
-    def __init__(self, type_device, id_device):
+    def __init__(self, type_device, id_device, **kwargs):
         self.__dict__['log'] = log
         self.__dict__['type'] = type_device
         self.__dict__['id'] = id_device
         self.__dict__['flag_removing'] = False
         self.__dict__['mutex'] = Lock()
+        # this arguments will be used in creation of Object's subclass
+        self.__dict__['memorized_arguments'] = kwargs if kwargs else {}
 
         # Parameters
         list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
@@ -171,6 +173,19 @@ class Object(object):
         Parameters, commands, events have already created.
         """
         pass
+
+    def handle_change_state_defaults_loaded(self, **kwargs):
+        """
+        Handler for configure Object after creation.
+        Parameters, commands, events have already created.
+        """
+        if kwargs:
+            for param_value in kwargs:
+                if param_value in self.__dict__:
+                    self.__dict__[param_value].val = kwargs[param_value]
+                else:
+                    raise Exception('Unknown parameter {0}'.format(param_value))
+
 
 
 class Root(Object):

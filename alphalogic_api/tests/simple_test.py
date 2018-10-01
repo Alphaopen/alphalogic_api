@@ -65,8 +65,7 @@ class Controller(Object):
 
 
 class ControllerSpec(Object):
-    def __init__(self, type_device, id_device, number):
-        super(ControllerSpec, self).__init__(type_device, id_device)
+    number = ParameterLong(visible=Visible.setup)
 
 
 if __name__ == '__main__':
