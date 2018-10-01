@@ -194,6 +194,7 @@ class Manager(AbstractManager):
         self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_already_exists)
         self.configure_commands(object, id)
         self.configure_events(object, id)
+        Manager.nodes[id].handle_ready_for_work()
 
     def prepare_existing_devices(self, id_parent):
         for child_id in super(Manager, self).children(id_parent):
