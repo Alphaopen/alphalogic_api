@@ -180,11 +180,11 @@ class Object(object):
         Parameters, commands, events have already created.
         """
         if kwargs:
-            for param_value in kwargs:
-                if param_value in self.__dict__:
-                    self.__dict__[param_value].val = kwargs[param_value]
+            for param_name in kwargs:
+                if param_name in self.__dict__:
+                    self.__dict__[param_name].val = kwargs[param_name]
                 else:
-                    raise Exception('Unknown parameter {0}'.format(param_value))
+                    raise Exception('Unknown parameter {0}'.format(param_name))
 
 
 
