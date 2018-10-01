@@ -194,7 +194,6 @@ class Manager(AbstractManager):
         self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_already_exists)
         self.configure_commands(object, id)
         self.configure_events(object, id)
-        Manager.nodes[id].handle_ready_for_work()
 
     def prepare_existing_devices(self, id_parent):
         for child_id in super(Manager, self).children(id_parent):
@@ -205,6 +204,7 @@ class Manager(AbstractManager):
             object = class_name(class_name_str, child_id)
             Manager.components_for_device[child_id] = []
             self.prepare_for_work(object, child_id)
+            object.handle_prepare_for_work()
             self.prepare_existing_devices(child_id)
 
     def create_object(self, object_id, user_name_display):
@@ -214,7 +214,8 @@ class Manager(AbstractManager):
         Manager.nodes[object_id] = object
         Manager.components_for_device[object_id] = []
         self.prepare_for_work(object, object_id)
-        object.handle_change_state_defaults_loaded(**object.__dict__['memorized_arguments'])
+        object.handle_defaults_loaded(**object.__dict__['defaults_loaded_dict'])
+        object.handle_prepare_for_work()
 
     def delete_object(self, object_id):
         with Manager.nodes[object_id].mutex:

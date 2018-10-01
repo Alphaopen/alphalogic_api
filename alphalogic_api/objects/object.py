@@ -41,7 +41,7 @@ class Object(object):
         self.__dict__['flag_removing'] = False
         self.__dict__['mutex'] = Lock()
         # this arguments will be used in creation of Object's subclass
-        self.__dict__['memorized_arguments'] = kwargs if kwargs else {}
+        self.__dict__['defaults_loaded_dict'] = kwargs if kwargs else {}
 
         # Parameters
         list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
@@ -167,14 +167,14 @@ class Object(object):
         """
         pass
 
-    def handle_ready_for_work(self):
+    def handle_prepare_for_work(self):
         """
-        Handler ready for work.
+        Handler is executed before work of object
         Parameters, commands, events have already created.
         """
         pass
 
-    def handle_change_state_defaults_loaded(self, **kwargs):
+    def handle_defaults_loaded(self, **kwargs):
         """
         Handler for configure Object after creation.
         Parameters, commands, events have already created.
@@ -228,6 +228,7 @@ class Root(Object):
         map(self.manager.delete_object, list_need_to_delete)
         Manager.components_for_device[id_root] = []
         self.manager.prepare_for_work(self, id_root)
+        self.handle_prepare_for_work()
         self.manager.prepare_existing_devices(id_root)
 
     def join(self):
