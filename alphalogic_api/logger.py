@@ -6,6 +6,7 @@ from logging import getLogger, StreamHandler, Formatter, getLevelName, CRITICAL
 from logging.handlers import RotatingFileHandler
 from alphalogic_api import options
 
+
 class Logger(object):
     def __init__(self):
         log = getLogger('')
@@ -29,13 +30,14 @@ class Logger(object):
             log.addHandler(fh)
 
             # Use console for log output
-            console = sys.stderr
-            if console is not None:
-                # Logging to console and file both
-                console = StreamHandler(console)
-                console.setLevel(getLevelName(options.args.log_level.upper()))
-                console.setFormatter(formatter)
-                log.addHandler(console)
+            if not (options.args.noconsole or os.getenv('NOCONSOLE')):
+                console = sys.stderr
+                if console is not None:
+                    # Logging to console and file both
+                    console = StreamHandler(console)
+                    console.setLevel(getLevelName(options.args.log_level.upper()))
+                    console.setFormatter(formatter)
+                    log.addHandler(console)
 
 
 log = getLogger('')
