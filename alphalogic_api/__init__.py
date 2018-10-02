@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from alphalogic_api.logger import log
 from alphalogic_api.logger import Logger
-from logging import getLogger
 from alphalogic_api import options
 
 
@@ -18,10 +16,7 @@ def init():
     Initialize function. Should be run before Root object created.
     :return: host, port
     """
-    global log
-
     options.parse_arguments()
     Logger()
-    log = getLogger('')
 
     return options.args.host, options.args.port
