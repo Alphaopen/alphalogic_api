@@ -205,6 +205,8 @@ class Manager(AbstractManager):
             Manager.components_for_device[child_id] = []
             self.prepare_for_work(object, child_id)
             object.handle_prepare_for_work()
+
+        for child_id in super(Manager, self).children(id_parent):
             self.prepare_existing_devices(child_id)
 
     def create_object(self, object_id, user_name_display):

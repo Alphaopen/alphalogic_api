@@ -258,3 +258,4 @@ class Root(Object):
                     break
                 except Exception, err:
                     log.error(decode_string(err))
+            log.error('Stub has stopped successfully')
