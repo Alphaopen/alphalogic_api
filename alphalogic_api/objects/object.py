@@ -239,6 +239,8 @@ class Root(Object):
         if self.joinable:
             try:
                 self.manager.join()
+            except Exit:
+                log.info('Stub receive exit signal')
             except BaseException as err:
                 t = traceback.format_exc()
                 log.error('Root join error: {0}'.format(t))

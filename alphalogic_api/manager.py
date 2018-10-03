@@ -220,6 +220,8 @@ class Manager(AbstractManager):
         object.handle_prepare_for_work()
 
     def delete_object(self, object_id):
+        self.tasks_pool.stop_operation_thread()
+
         with Manager.nodes[object_id].mutex:
             Manager.nodes[object_id].flag_removing = True
             Manager.nodes[object_id].handle_before_remove_device()
@@ -230,6 +232,8 @@ class Manager(AbstractManager):
             map(delete_id, Manager.components_for_device[object_id])
             del Manager.components_for_device[object_id]
             del Manager.nodes[object_id]
+            self.tasks_pool.restart_operation_thread()
+            self.recover_run_functions()
             log.info('Object {0} removed'.format(object_id))
 
     def get_available_children(self, id_device):
@@ -375,7 +379,15 @@ class Manager(AbstractManager):
         ids = super(Manager, self).children(object_id)
         return list(Manager.nodes[id] for id in ids if id in Manager.nodes)
 
-    def configure_run_function(self, object, object_id, list_id_parameters_already_exists):
+    def recover_run_functions(self):
+        for id_object in Manager.nodes:
+            object = Manager.nodes[id_object]
+            self.configure_run_function(object, id_object)
+
+    def configure_run_function(self, object, object_id, list_id_parameters_already_exists=None):
+        if not list_id_parameters_already_exists:
+            list_id_parameters_already_exists = self.parameters(object_id)
+
         for name in object.run_function_names:
             time_stamp = time.time()
             period_name = getattr(object, name).period_name
