@@ -403,8 +403,7 @@ class Manager(AbstractManager):
         Infinity loop: get state from adapter
         """
         try:
-            for r in self.multi_stub.stub_adapter.states(rpc_pb2.Empty()):
-                ack = r
+            for r in self.multi_stub.stub_service.states(rpc_pb2.Empty()):
                 try:
                     if r.state == rpc_pb2.StateStream.AFTER_CREATING_OBJECT:
                         log.info('Create device {0}'.format(r.id))
@@ -448,7 +447,7 @@ class Manager(AbstractManager):
                     log.error('grpc_thread error: {0}'.format(t))
 
                 finally:
-                    self.multi_stub.stub_adapter.ack(ack)
+                    self.multi_stub.state_call('ack', id=r.id, state=r.state)
 
         except Exception as err:
             t = traceback.format_exc()

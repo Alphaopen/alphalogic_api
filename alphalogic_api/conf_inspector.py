@@ -112,6 +112,7 @@ class ConfInspector(object):
         try:
             id_command = command_model.id
             # 1 check return type
+            '''
             model_result_type = command_model.result_type
             if model_result_type is bool and not(command_model.is_bool()):
                 raise Exception('Real and model result type are different')
@@ -123,6 +124,7 @@ class ConfInspector(object):
                 raise Exception('Real and model result type are different')
             elif model_result_type is unicode and not(command_model.is_string()):
                 raise Exception('Real and model result type are different')
+            '''
 
             # 2 check argument list and check type in argument_list
             for arg_name_model, _ in command_model.arguments:

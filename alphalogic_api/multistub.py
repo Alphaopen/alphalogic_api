@@ -9,7 +9,8 @@ from alphalogic_api.protocol.rpc_pb2 import (
     ObjectRequest,
     ParameterRequest,
     EventRequest,
-    CommandRequest
+    CommandRequest,
+    StateStream
 )
 
 from alphalogic_api.protocol.rpc_pb2_grpc import (
@@ -34,7 +35,7 @@ class MultiStub(object):
         self.stub_parameter = ParameterServiceStub(self.channel)
         self.stub_event = EventServiceStub(self.channel)
         self.stub_command = CommandServiceStub(self.channel)
-        self.stub_adapter = StateServiceStub(self.channel)
+        self.stub_service = StateServiceStub(self.channel)
 
     @staticmethod
     def static_initialization():
@@ -42,7 +43,7 @@ class MultiStub(object):
         MultiStub.parameter_fun_set = MultiStub.dict_create_helper(ParameterServiceServicer)
         MultiStub.event_fun_set = MultiStub.dict_create_helper(EventServiceServicer)
         MultiStub.command_fun_set = MultiStub.dict_create_helper(CommandServiceServicer)
-        MultiStub.adapter_fun_set = MultiStub.dict_create_helper(StateServiceServicer)
+        MultiStub.service_fun_set = MultiStub.dict_create_helper(StateServiceServicer)
 
     @staticmethod
     def dict_create_helper(service):
@@ -67,6 +68,10 @@ class MultiStub(object):
     def command_call(self, *args, **kwargs):
         command_w = CommandRequest(**kwargs)
         return self.call_helper(*args, fun_set=MultiStub.command_fun_set, request=command_w, stub=self.stub_command)
+
+    def state_call(self, *args, **kwargs):
+        state_w = StateStream(**kwargs)
+        return self.call_helper(*args, fun_set=MultiStub.service_fun_set, request=state_w, stub=self.stub_service)
 
     def call_helper(self, function_name, *args, **kwargs):
         if function_name in kwargs['fun_set']:  # function_name - check availability

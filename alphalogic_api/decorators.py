@@ -77,14 +77,14 @@ def run(*argv_r, **kwargs_r):
     """
     def decorator(func):
         def wrapped(device):
-            try:
-                with device.mutex:
-                    if not device.flag_removing:
+            with device.mutex:
+                if not device.flag_removing:
+                    try:
                         time_start = time.time()
 
                         try:
                             func(device)
-                        except Exception, err:
+                        except Exception as err:
                             t = traceback.format_exc()
                             log.error(u'Run function exception: {0}'.format(t))
 
@@ -95,14 +95,14 @@ def run(*argv_r, **kwargs_r):
 
                         period = getattr(device, kwargs_r.keys()[0]).val
                         if time_spend < period:
-                            device.manager.tasks_pool.add_task(time_finish+period-time_spend,
+                            device.manager.tasks_pool.add_task(time_finish + period - time_spend,
                                                                getattr(device, func.func_name))
                         else:
                             device.manager.tasks_pool.add_task(time_finish, getattr(device, func.func_name))
 
-            except Exception, err:
-                t = traceback.format_exc()
-                log.error(u'system error in run decorator: {0}'.format(t))
+                    except Exception as err:
+                        t = traceback.format_exc()
+                        log.error(u'system error in run decorator: {0}'.format(t))
 
         wrapped.runnable = True
         wrapped.period_name = kwargs_r.keys()[0]

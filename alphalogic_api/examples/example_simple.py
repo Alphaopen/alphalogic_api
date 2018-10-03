@@ -41,7 +41,7 @@ class MyRoot(Root):
             ]
 
     # Commands
-    @command(result_type=bool)
+    @command(result_type=long)
     def cmd_alarm(self, where='here', when=datetime.datetime.now(), why=2):
         self.simple_event.emit()
         return self.param_count.val

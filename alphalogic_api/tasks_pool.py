@@ -67,7 +67,8 @@ class TasksPool(object):
             time.sleep(0.001)
 
     def add_task(self, time_stamp, task):
-        self.queue_tasks.put((time_stamp, task))
+        if not self.shutdown_flag.is_set():
+            self.queue_tasks.put((time_stamp, task))
 
     def stop_operation_thread(self):
         self.shutdown_flag.set()

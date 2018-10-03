@@ -219,6 +219,7 @@ class Root(Object):
             t = traceback.format_exc()
             log.error(t)  # cause Exception can raise before super(Root)
             self.manager.tasks_pool.stop_operation_thread()
+            log.info('The attempt of stub\'s run was failed')
             sys.exit(2)
 
     def init(self, id_root):
@@ -236,26 +237,14 @@ class Root(Object):
         The infinity communication loop
         """
         if self.joinable:
-            is_connected = True
-            while True:
-                try:
-                    if is_connected:
-                        self.manager.join()
-                        is_connected = False
-                        self.manager.tasks_pool.stop_operation_thread()
-                        self.manager.g_thread.join()
-                        self.manager.g_thread = Thread(target=self.manager.grpc_thread)
-                        self.manager.tasks_pool = TasksPool()
-                    time.sleep(1)
-                    id_root = self.manager.root_id()
-                    self.init(id_root)
-                    is_connected = True
-                except Exit:
-                    self.manager.tasks_pool.stop_operation_thread()
-                    self.manager.multi_stub.channel.close()
-                    if self.manager.g_thread.is_alive():
-                        self.manager.g_thread.join()
-                    break
-                except Exception, err:
-                    log.error(decode_string(err))
-            log.error('Stub has stopped successfully')
+            try:
+                self.manager.join()
+            except BaseException as err:
+                t = traceback.format_exc()
+                log.error('Root join error: {0}'.format(t))
+            finally:
+                self.manager.tasks_pool.stop_operation_thread()
+                self.manager.multi_stub.channel.close()
+                if self.manager.g_thread.is_alive():
+                    self.manager.g_thread.join()
+            log.info('Stub has stopped successfully')
