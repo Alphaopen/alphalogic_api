@@ -30,7 +30,7 @@ class Logger(object):
             log.addHandler(fh)
 
             # Use console for log output
-            if not (options.args.noconsole or os.getenv('NOCONSOLE')):
+            if not (options.args.noconsole or os.getenv('NOCONSOLE') == '1'):
                 console = sys.stderr
                 if console is not None:
                     # Logging to console and file both
