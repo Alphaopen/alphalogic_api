@@ -13,6 +13,7 @@ from alphalogic_api.manager import Manager
 from alphalogic_api.logger import log
 from alphalogic_api.utils import Exit, decode_string
 from alphalogic_api.tasks_pool import TasksPool
+from alphalogic_api import init
 
 
 class Object(object):
@@ -34,12 +35,14 @@ class Object(object):
     number_of_errors = ParameterLong(visible=Visible.setup, access=Access.read_write)
     status = ParameterString(visible=Visible.common, access=Access.read_only)
 
-    def __init__(self, type_device, id_device):
+    def __init__(self, type_device, id_device, **kwargs):
         self.__dict__['log'] = log
         self.__dict__['type'] = type_device
         self.__dict__['id'] = id_device
         self.__dict__['flag_removing'] = False
         self.__dict__['mutex'] = Lock()
+        # this arguments will be used in creation of Object's subclass
+        self.__dict__['defaults_loaded_dict'] = kwargs if kwargs else {}
 
         # Parameters
         list_parameters_name = filter(lambda attr: type(getattr(self, attr)) is Parameter, dir(self))
@@ -161,6 +164,26 @@ class Object(object):
 
         pass
 
+    def handle_prepare_for_work(self):
+        """
+        Handler is executed before work of object
+        Parameters, commands, events have already created.
+        """
+        pass
+
+    def handle_defaults_loaded(self, **kwargs):
+        """
+        Handler for configure Object after creation.
+        Parameters, commands, events have already created.
+        """
+        if kwargs:
+            for param_name in kwargs:
+                if param_name in self.__dict__:
+                    self.__dict__[param_name].val = kwargs[param_name]
+                else:
+                    raise Exception('Unknown parameter {0}'.format(param_name))
+
+
 
 class Root(Object):
     """
@@ -173,8 +196,10 @@ class Root(Object):
 
     version = ParameterString(visible=Visible.setup, access=Access.read_only)
 
-    def __init__(self, host, port):
+    def __init__(self):
         try:
+            host, port = init()
+
             self.manager.start_threads()
             self.joinable = False
             self.manager.configure_multi_stub(host + ':' + unicode(port))
@@ -182,15 +207,16 @@ class Root(Object):
             type_device = self.manager.get_type(id_root)
             super(Root, self).__init__(type_device, id_root)
 
-            self.log.info('Connecting to ' + host + ':' + unicode(port))
+            log.info('Connecting to ' + host + ':' + unicode(port))
             self.init(id_root)
             self.joinable = True
-            self.log.info('Root connected OK')
+            log.info('Root connected OK')
 
         except Exception, err:
             t = traceback.format_exc()
             log.error(t)  # cause Exception can raise before super(Root)
             self.manager.tasks_pool.stop_operation_thread()
+            log.info('The attempt of stub\'s run was failed')
             sys.exit(2)
 
     def init(self, id_root):
@@ -200,6 +226,7 @@ class Root(Object):
         map(self.manager.delete_object, list_need_to_delete)
         Manager.components_for_device[id_root] = []
         self.manager.prepare_for_work(self, id_root)
+        self.handle_prepare_for_work()
         self.manager.prepare_existing_devices(id_root)
 
     def join(self):
@@ -209,25 +236,16 @@ class Root(Object):
         Must be placed in the code of the adapter to keep it working till the process be stopped by the user or an error happens.
         """
         if self.joinable:
-            is_connected = True
-            while True:
-                try:
-                    if is_connected:
-                        self.manager.join()
-                        is_connected = False
-                        self.manager.tasks_pool.stop_operation_thread()
-                        self.manager.g_thread.join()
-                        self.manager.g_thread = Thread(target=self.manager.grpc_thread)
-                        self.manager.tasks_pool = TasksPool()
-                    time.sleep(1)
-                    id_root = self.manager.root_id()
-                    self.init(id_root)
-                    is_connected = True
-                except Exit:
-                    self.manager.tasks_pool.stop_operation_thread()
-                    self.manager.multi_stub.channel.close()
-                    if self.manager.g_thread.is_alive():
-                        self.manager.g_thread.join()
-                    break
-                except Exception, err:
-                    log.error(decode_string(err))
+            try:
+                self.manager.join()
+            except Exit:
+                log.info('Stub receive exit signal')
+            except BaseException as err:
+                t = traceback.format_exc()
+                log.error('Root join error: {0}'.format(t))
+            finally:
+                self.manager.tasks_pool.stop_operation_thread()
+                self.manager.multi_stub.channel.close()
+                if self.manager.g_thread.is_alive():
+                    self.manager.g_thread.join()
+            log.info('Stub has stopped successfully')

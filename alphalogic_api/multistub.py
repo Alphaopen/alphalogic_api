@@ -2,13 +2,15 @@
 from __future__ import unicode_literals
 import grpc
 from alphalogic_api.logger import log
-from alphalogic_api.exceptions import IncorrectRPCRequest, RequestError, ComponentNotFound
+from alphalogic_api.exceptions import IncorrectRPCRequest, RequestError, ComponentNotFound, TimeoutError, ConnectError
+from alphalogic_api import options
 
 from alphalogic_api.protocol.rpc_pb2 import (
     ObjectRequest,
     ParameterRequest,
     EventRequest,
-    CommandRequest
+    CommandRequest,
+    StateStream
 )
 
 from alphalogic_api.protocol.rpc_pb2_grpc import (
@@ -33,7 +35,7 @@ class MultiStub(object):
         self.stub_parameter = ParameterServiceStub(self.channel)
         self.stub_event = EventServiceStub(self.channel)
         self.stub_command = CommandServiceStub(self.channel)
-        self.stub_adapter = StateServiceStub(self.channel)
+        self.stub_service = StateServiceStub(self.channel)
 
     @staticmethod
     def static_initialization():
@@ -41,7 +43,7 @@ class MultiStub(object):
         MultiStub.parameter_fun_set = MultiStub.dict_create_helper(ParameterServiceServicer)
         MultiStub.event_fun_set = MultiStub.dict_create_helper(EventServiceServicer)
         MultiStub.command_fun_set = MultiStub.dict_create_helper(CommandServiceServicer)
-        MultiStub.adapter_fun_set = MultiStub.dict_create_helper(StateServiceServicer)
+        MultiStub.service_fun_set = MultiStub.dict_create_helper(StateServiceServicer)
 
     @staticmethod
     def dict_create_helper(service):
@@ -67,16 +69,24 @@ class MultiStub(object):
         command_w = CommandRequest(**kwargs)
         return self.call_helper(*args, fun_set=MultiStub.command_fun_set, request=command_w, stub=self.stub_command)
 
+    def state_call(self, *args, **kwargs):
+        state_w = StateStream(**kwargs)
+        return self.call_helper(*args, fun_set=MultiStub.service_fun_set, request=state_w, stub=self.stub_service)
+
     def call_helper(self, function_name, *args, **kwargs):
         if function_name in kwargs['fun_set']:  # function_name - check availability
             try:
-                answer = getattr(kwargs['stub'], function_name)(kwargs['request'])
+                answer = getattr(kwargs['stub'], function_name)(kwargs['request'], timeout=options.args.timeout)
                 return answer
 
             except grpc.RpcError, err:
                 if err.code() == grpc.StatusCode.NOT_FOUND:
-                    raise ComponentNotFound(err.message)
-                raise RequestError(u'gRPC request failed (code={}): {}'.format(grpc.StatusCode.UNKNOWN, err.message))
+                    raise ComponentNotFound(err.message + ' ' + err.details())
+                elif err.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                    raise TimeoutError(err.message + ' ' + err.details())
+                elif err.code() == grpc.StatusCode.UNAVAILABLE:
+                    raise ConnectError(err.message + ' ' + err.details())
+                raise RequestError(u'gRPC request failed (code={}): {}, {}'.format(err.code(), err.message, err.details()))
         else:
             raise IncorrectRPCRequest('{0} not found in {1}'.format(function_name, kwargs['fun_set']))
 

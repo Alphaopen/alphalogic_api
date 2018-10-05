@@ -53,10 +53,15 @@ def command(*argv_c, **kwargs_c):
                 result = func(device, *argv, **kwargs)
                 device.__dict__[wrapped.function_name].set_result(result)
                 return result
-            except Exception, err:
+            except Exception as err:
                 t = traceback.format_exc()
-                log.error(u'Run function exception: {0}'.format(t))
-                device.__dict__[wrapped.function_name].set_exception(t)
+                log.error(u'Command: function exception: {0}'.format(t))
+                try:
+                    device.__dict__[wrapped.function_name].set_exception(t)
+                except Exception as err:
+                    t = traceback.format_exc()
+                    log.error(u'Command: Exception in exception: {0}'.format(t))
+
         command_preparation(wrapped, func, **kwargs_c)
         return wrapped
     return decorator
@@ -78,14 +83,14 @@ def run(*argv_r, **kwargs_r):
     """
     def decorator(func):
         def wrapped(device):
-            try:
-                with device.mutex:
-                    if not device.flag_removing:
+            with device.mutex:
+                if not device.flag_removing:
+                    try:
+                        status_perform = True
                         time_start = time.time()
-
                         try:
                             func(device)
-                        except Exception, err:
+                        except Exception as err:
                             t = traceback.format_exc()
                             log.error(u'Run function exception: {0}'.format(t))
 
@@ -95,15 +100,25 @@ def run(*argv_r, **kwargs_r):
                                  format(func.func_name, time_spend, device.id))
 
                         period = getattr(device, kwargs_r.keys()[0]).val
-                        if time_spend < period:
-                            device.manager.tasks_pool.add_task(time_finish+period-time_spend,
+                        func.__dict__['mem_period'] = period
+
+                    except Exception as err:
+                        t = traceback.format_exc()
+                        log.error(u'system error in run decorator: {0}'.format(t))
+                        status_perform = False
+                    finally:
+                        if not status_perform:
+                            mem_period = func.__dict__['mem_period'] \
+                                if 'mem_period' in func.__dict__ \
+                                else kwargs_r.values()[0]
+                        else:
+                            mem_period = period
+
+                        if time_spend < mem_period:
+                            device.manager.tasks_pool.add_task(time_finish + mem_period - time_spend,
                                                                getattr(device, func.func_name))
                         else:
                             device.manager.tasks_pool.add_task(time_finish, getattr(device, func.func_name))
-
-            except Exception, err:
-                t = traceback.format_exc()
-                log.error(u'system error in run decorator: {0}'.format(t))
 
         wrapped.runnable = True
         wrapped.period_name = kwargs_r.keys()[0]

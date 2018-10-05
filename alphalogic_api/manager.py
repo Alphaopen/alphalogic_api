@@ -153,6 +153,8 @@ class AbstractManager(object):
 
 class Manager(AbstractManager):
     dict_type_objects = {}  # Dictionary of nodes classes. 'type' as a key
+    dict_user_name_type_objects = {}  # Dictionary of nodes classes. 'user display name in available_children' as a key
+                                      # value - is type of object
     nodes = {}  # Nodes dictionary. 'id' as a key
     components = {}  # All commands, parameters, events dictionary. 'id' as a key
     components_for_device = {}  # All commands, parameters, events of node. Node 'id' as a key
@@ -179,7 +181,7 @@ class Manager(AbstractManager):
 
         list_parameters_name_should_exists = map(lambda x: (getattr(object, x), x), list_parameters_name_should_exists)
         list_parameters_name_should_exists = list(zip(*sorted(list_parameters_name_should_exists,
-                                                         key=lambda x: x[0].index_number))[1])
+                                                              key=lambda x: x[0].index_number))[1])
         list_parameters_name_should_exists = list_parameters_name_should_exists + list_parameters_name_period
         list_parameters_name_should_exists = [name for name in list_parameters_name_should_exists
                                               if name not in list_parameters_name_already_exists]
@@ -202,17 +204,24 @@ class Manager(AbstractManager):
             object = class_name(class_name_str, child_id)
             Manager.components_for_device[child_id] = []
             self.prepare_for_work(object, child_id)
+            object.handle_prepare_for_work()
+
+        for child_id in super(Manager, self).children(id_parent):
             self.prepare_existing_devices(child_id)
 
-    def create_object(self, object_id):
+    def create_object(self, object_id, user_name_display):
         class_name_str = self.get_type(object_id)
-        class_name = Manager.dict_type_objects[class_name_str]
+        class_name = Manager.dict_user_name_type_objects[user_name_display]
         object = class_name(class_name_str, object_id)
         Manager.nodes[object_id] = object
         Manager.components_for_device[object_id] = []
         self.prepare_for_work(object, object_id)
+        object.handle_defaults_loaded(**object.__dict__['defaults_loaded_dict'])
+        object.handle_prepare_for_work()
 
     def delete_object(self, object_id):
+        self.tasks_pool.stop_operation_thread()
+
         with Manager.nodes[object_id].mutex:
             Manager.nodes[object_id].flag_removing = True
             Manager.nodes[object_id].handle_before_remove_device()
@@ -223,6 +232,8 @@ class Manager(AbstractManager):
             map(delete_id, Manager.components_for_device[object_id])
             del Manager.components_for_device[object_id]
             del Manager.nodes[object_id]
+            self.tasks_pool.restart_operation_thread()
+            self.recover_run_functions()
             log.info('Object {0} removed'.format(object_id))
 
     def get_available_children(self, id_device):
@@ -230,10 +241,16 @@ class Manager(AbstractManager):
         available_devices = device.handle_get_available_children()
         self.unregister_all_makers(id_object=id_device)
 
-        for class_name, type_when_create in available_devices:
-            self.register_maker(id_object=id_device, name=type_when_create, type_str=class_name.__name__)
-            if class_name.__name__ not in Manager.dict_type_objects:
-                Manager.dict_type_objects[class_name.__name__] = class_name
+        for callable_class_name, user_name_display in available_devices:
+            if hasattr(callable_class_name, 'cls'):
+                type_str = callable_class_name.cls
+            else:
+                type_str = callable_class_name
+
+            self.register_maker(id_object=id_device, name=user_name_display, type_str=type_str.__name__)
+
+            if user_name_display not in Manager.dict_user_name_type_objects:
+                Manager.dict_user_name_type_objects[user_name_display] = callable_class_name
 
     def get_type(self, node_id):
         type_str = self.type(node_id)[7:]  # cut string 'device.'
@@ -245,7 +262,7 @@ class Manager(AbstractManager):
                                                   list_id_parameters_already_exists)
         if is_copy and name in object.__dict__:
             parameter = object.__dict__[name].get_copy()
-        elif is_copy and name not in object.__dict__ and options.program_args.development_mode:
+        elif is_copy and name not in object.__dict__ and options.args.development_mode:
             return
         elif parameter is None:
             raise Exception('{0} is None'.format(name))
@@ -254,7 +271,7 @@ class Manager(AbstractManager):
         parameter.parameter_name = name
         parameter.set_multi_stub(self.multi_stub)
 
-        if name not in list_name_parameters_already_exists or options.args.development_mode: # if parameter doesn't exist
+        if name not in list_name_parameters_already_exists or options.args.development_mode:  # if parameter doesn't exist
             value_type = parameter.value_type
             id_parameter = getattr(self, utils.create_parameter_definer(value_type)) \
                 (id_object=object_id, name=name)
@@ -285,7 +302,7 @@ class Manager(AbstractManager):
 
     def create_command(self, name, command, object_id):
         list_name_commands_already_exists = map(lambda id: self.multi_stub.command_call('name', id=id).name,
-                                               self.commands(object_id))
+                                                self.commands(object_id))
         command.set_multi_stub(self.multi_stub)
         if name not in list_name_commands_already_exists or options.args.development_mode:  # if event doesn't exist
             result_type = command.result_type
@@ -312,9 +329,9 @@ class Manager(AbstractManager):
 
     def configure_single_event(self, name, event, object_id):
         list_name_events_already_exists = map(lambda id: self.multi_stub.event_call('name', id=id).name,
-                                                  self.events(object_id))
+                                              self.events(object_id))
         event.set_multi_stub(self.multi_stub)
-        if name not in list_name_events_already_exists or options.args.development_mode: # if event doesn't exist
+        if name not in list_name_events_already_exists or options.args.development_mode:  # if event doesn't exist
             event.id = self.create_event(id_object=object_id, name=name)
             getattr(event, event.priority.create_func)()
             event.clear()
@@ -362,7 +379,15 @@ class Manager(AbstractManager):
         ids = super(Manager, self).children(object_id)
         return list(Manager.nodes[id] for id in ids if id in Manager.nodes)
 
-    def configure_run_function(self, object, object_id, list_id_parameters_already_exists):
+    def recover_run_functions(self):
+        for id_object in Manager.nodes:
+            object = Manager.nodes[id_object]
+            self.configure_run_function(object, id_object)
+
+    def configure_run_function(self, object, object_id, list_id_parameters_already_exists=None):
+        if not list_id_parameters_already_exists:
+            list_id_parameters_already_exists = self.parameters(object_id)
+
         for name in object.run_function_names:
             time_stamp = time.time()
             period_name = getattr(object, name).period_name
@@ -390,12 +415,14 @@ class Manager(AbstractManager):
         Infinity loop: get state from adapter
         """
         try:
-            for r in self.multi_stub.stub_adapter.states(rpc_pb2.Empty()):
-                ack = r
+            for r in self.multi_stub.stub_service.states(rpc_pb2.Empty()):
                 try:
                     if r.state == rpc_pb2.StateStream.AFTER_CREATING_OBJECT:
                         log.info('Create device {0}'.format(r.id))
-                        self.create_object(r.id)
+                        id_name = self.parameter(r.id, 'type_when_create')
+                        rpc_value = self.multi_stub.parameter_call('get', id=id_name).value
+                        user_name_display = utils.value_from_rpc(rpc_value)
+                        self.create_object(r.id, user_name_display)
 
                     elif r.state == rpc_pb2.StateStream.BEFORE_REMOVING_OBJECT:
                         log.info('Remove device {0}'.format(r.id))
@@ -415,9 +442,9 @@ class Manager(AbstractManager):
                                     param = Manager.components[r.id]  # TODO check
                                     device = Manager.nodes[param.owner()]  # TODO check
                                     Manager.components[r.id].callback(device, param)
-                                except Exception, err:
+                                except Exception as err:
                                     t = traceback.format_exc()
-                                    self.log.error('After set parameter value callback error:\n{0}'.format(t))
+                                    log.error('After set parameter value callback error:\n{0}'.format(t))
                         else:
                             log.warn('Parameter {0} not found'.format(r.id))
 
@@ -427,13 +454,13 @@ class Manager(AbstractManager):
                         else:
                             log.warn('Command {0} not found'.format(r.id))
 
-                except Exception, err:
+                except Exception as err:
                     t = traceback.format_exc()
-                    self.log.error('grpc_thread error: {0}'.format(t))
+                    log.error('grpc_thread error: {0}'.format(t))
 
                 finally:
-                    self.multi_stub.stub_adapter.ack(ack)
+                    self.multi_stub.state_call('ack', id=r.id, state=r.state)
 
-        except Exception, err:
+        except Exception as err:
             t = traceback.format_exc()
-            self.log.error('grpc_thread error2: {0}'.format(t))
+            log.error('grpc_thread error2: {0}'.format(t))
