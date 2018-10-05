@@ -39,7 +39,6 @@ Overview
 * Java adapters.
 
 The alphalogic_api library allows to access Alphalogic Integration API for easily developing composite adapters in Python 2, providing the integration developer with opportunity to code at once the functional part of the adapter, knowing nothing about the core.
-The integration developer can use any popular Python code editor like Sublime Text, Notepad++, Visual Studio Code, Atom, etc.
 
 Every adapter has a tree-like structure of the adapter objects represented as a set of linked nodes. The object tree has a Root object which will be generated automatically after the adapter instance is started, and a number of parent/child objects forming the object architecture of the adapter.
 
@@ -68,13 +67,12 @@ Navigate to the ``\bin`` folder of the installed composite Alphalogic adapter an
    # -*- coding: utf-8 -*-
    from __future__ import unicode_literals
 
-   from alphalogic_api import options
    from alphalogic_api.objects import Root, Object
    from alphalogic_api.attributes import Visible, Access
+   from alphalogic_api.objects import MajorEvent
    from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
    from alphalogic_api.decorators import command, run
    from alphalogic_api.logger import log
-   from alphalogic_api import init
 
 
    class Engine(Root):
@@ -83,8 +81,7 @@ Navigate to the ``\bin`` folder of the installed composite Alphalogic adapter an
 
    if __name__ == '__main__':
       # main loop
-      host, port = init()
-      root = MailAdapter(host, port)
+      root = Engine()
       root.join()
 
 In the beginning of the file, there is a line of the unicode_literals import, which makes all string literals of unicode type, instead of string type.
@@ -116,7 +113,6 @@ The use of the library can be demonstrated via the following example of the Send
    from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
    from alphalogic_api.decorators import command, run
    from alphalogic_api.logger import log
-   from alphalogic_api import init
 
 
    #
@@ -197,8 +193,7 @@ The use of the library can be demonstrated via the following example of the Send
 
    if __name__ == '__main__':
       # main loop
-      host, port = init()
-      root = MailAdapter(host, port)
+      root = MailAdapter()
       root.join()
 
 

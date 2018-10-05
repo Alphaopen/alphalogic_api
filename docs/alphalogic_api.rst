@@ -156,7 +156,7 @@ Python allows you to pass functions as a parameters to another functions. In the
 
 Example of the event function without arguments:
 ::
-    alarm.clear()
+    alarm.emit()
 
 
 Here is the definition of the class Event:
@@ -229,7 +229,19 @@ The handler will be invoked when the specified parameter is changed.
 In the example above, this means that the function handle_after_set_double will be called if param_double is changed.
 In the case of parameter changes, you can use whichever name of the handler function you like.
 
+4) Handler for configure Object after creation
+::
+    number = ParameterLong(visible=Visible.setup)
+    def handle_defaults_loaded(self):
+        self.displayName.val = str(self.number.val)
 
+5) Handler is executed before work of object
+::
+    number = ParameterLong(visible=Visible.setup)
+    def handle_prepare_for_work(self):
+        self.displayName.val = str(self.number.val)
+
+        
 Exceptions
 ----------
 
