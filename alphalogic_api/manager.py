@@ -456,7 +456,10 @@ class Manager(AbstractManager):
 
                 except Exception as err:
                     t = traceback.format_exc()
-                    log.error('grpc_thread error: {0}'.format(t))
+                    try:
+                        log.error('grpc_thread error: {0}'.format(decode_string(t)))
+                    except Exception as ultimate_error:  # can't fall here
+                        pass
 
                 finally:
                     self.multi_stub.state_call('ack', id=r.id, state=r.state)
