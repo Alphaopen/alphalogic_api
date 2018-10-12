@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import traceback
 from alphalogic_api.protocol import rpc_pb2
 from alphalogic_api.multistub import MultiStub
 from alphalogic_api import utils
+from alphalogic_api.utils import decode_string
 from alphalogic_api.logger import log
-import traceback
 
 
 class AbstractCommand(object):
@@ -228,4 +229,4 @@ class Command(AbstractCommand):
 
         except Exception, err:
             t = traceback.format_exc()
-            log.error('Command \'{0}\' raise exception: {1}'.format(self.name(), t))
+            log.error('Command \'{0}\' raise exception: {1}'.format(self.name(), decode_string(t)))

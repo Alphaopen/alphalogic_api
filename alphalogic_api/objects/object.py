@@ -214,7 +214,7 @@ class Root(Object):
 
         except Exception, err:
             t = traceback.format_exc()
-            log.error(t)  # cause Exception can raise before super(Root)
+            log.error(decode_string(t))  # cause Exception can raise before super(Root)
             self.manager.tasks_pool.stop_operation_thread()
             log.info('The attempt of stub\'s run was failed')
             sys.exit(2)
@@ -242,7 +242,7 @@ class Root(Object):
                 log.info('Stub receive exit signal')
             except BaseException as err:
                 t = traceback.format_exc()
-                log.error('Root join error: {0}'.format(t))
+                log.error('Root join error: {0}'.format(decode_string(t)))
             finally:
                 self.manager.tasks_pool.stop_operation_thread()
                 self.manager.multi_stub.channel.close()

@@ -4,7 +4,7 @@ import datetime
 import traceback
 from alphalogic_api.attributes import Visible, Access, Priority
 from alphalogic_api.logger import log
-from alphalogic_api.utils import Exit, value_from_rpc
+from alphalogic_api.utils import Exit, value_from_rpc, decode_string
 
 
 class ConfInspector(object):
@@ -72,7 +72,7 @@ class ConfInspector(object):
             '''
         except Exception, err:
             t = traceback.format_exc()
-            log.error('Parameter discrepancy \'{0}\':\n{1}'.format(parameter_model.name(), t))
+            log.error('Parameter discrepancy \'{0}\':\n{1}'.format(parameter_model.name(), decode_string(t)))
             raise Exit
 
     def is_event_exist(self, name, object):
@@ -105,7 +105,7 @@ class ConfInspector(object):
 
         except Exception, err:
             t = traceback.format_exc()
-            log.error('Event discrepancy \'{0}\'\n{1}'.format(event_model.name(), t))
+            log.error('Event discrepancy \'{0}\'\n{1}'.format(event_model.name(), decode_string(t)))
             raise Exit
 
     def check_command_accordance(self, command_model):
@@ -137,7 +137,7 @@ class ConfInspector(object):
 
         except Exception, err:
             t = traceback.format_exc()
-            log.error('Command discrepancy \'{0}\': {1}'.format(command_model.name(), t))
+            log.error('Command discrepancy \'{0}\': {1}'.format(command_model.name(), decode_string(t)))
             raise Exit
 
     def check_value_type_accordance(self, arg_type_model, arg_type_real):

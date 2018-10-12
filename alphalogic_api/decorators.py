@@ -5,6 +5,7 @@ import time
 import traceback
 from alphalogic_api.logger import log
 from alphalogic_api import utils
+from alphalogic_api.utils import decode_string
 
 
 def command_preparation(wrapped, func, **kwargs_c):
@@ -55,12 +56,12 @@ def command(*argv_c, **kwargs_c):
                 return result
             except Exception as err:
                 t = traceback.format_exc()
-                log.error(u'Command: function exception: {0}'.format(t))
+                log.error(u'Command: function exception: {0}'.format(decode_string(t)))
                 try:
-                    device.__dict__[wrapped.function_name].set_exception(t)
+                    device.__dict__[wrapped.function_name].set_exception(decode_string(t))
                 except Exception as err:
                     t = traceback.format_exc()
-                    log.error(u'Command: Exception in exception: {0}'.format(t))
+                    log.error(u'Command: Exception in exception: {0}'.format(decode_string(t)))
 
         command_preparation(wrapped, func, **kwargs_c)
         return wrapped
@@ -92,7 +93,7 @@ def run(*argv_r, **kwargs_r):
                             func(device)
                         except Exception as err:
                             t = traceback.format_exc()
-                            log.error(u'Run function exception: {0}'.format(t))
+                            log.error(u'Run function exception: {0}'.format(decode_string(t)))
 
                         time_finish = time.time()
                         time_spend = time_finish-time_start
@@ -104,7 +105,7 @@ def run(*argv_r, **kwargs_r):
 
                     except Exception as err:
                         t = traceback.format_exc()
-                        log.error(u'system error in run decorator: {0}'.format(t))
+                        log.error(u'system error in run decorator: {0}'.format(decode_string(t)))
                         status_perform = False
                     finally:
                         if not status_perform:
