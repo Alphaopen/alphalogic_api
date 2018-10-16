@@ -109,6 +109,15 @@ class AbstractParameter(object):
         answer = self._call('is_bool')
         return answer.yes
 
+    def is_map(self):
+        """
+        Return True if parameter value type is map
+
+        :rtype: bool
+        """
+        answer = self._call('is_map')
+        return answer.yes
+
     def is_runtime(self):
         """
         Return True if parameter type is Visible.runtime
@@ -323,7 +332,7 @@ class Parameter(AbstractParameter):
         if 'value_type' not in kwargs:
             raise Exception('value_type not found in Parameter')
 
-        if kwargs['value_type'] not in [bool, int, long, float, datetime.datetime, unicode]:
+        if kwargs['value_type'] not in [bool, int, long, float, datetime.datetime, unicode, list, dict]:
             raise Exception('value_type={0} is unknown'.format(kwargs['value_type']))
 
         self.default = kwargs.get('default')
@@ -386,3 +395,12 @@ class ParameterString(Parameter):
     def __new__(cls, *args, **kwargs):
         return Parameter(*args, value_type=unicode, **kwargs)
 
+
+class ParameterList(Parameter):
+    def __new__(cls, *args, **kwargs):
+        return Parameter(*args, value_type=list, **kwargs)
+
+
+class ParameterDict(Parameter):
+    def __new__(cls, *args, **kwargs):
+        return Parameter(*args, value_type=dict, **kwargs)

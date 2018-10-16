@@ -106,6 +106,15 @@ class AbstractCommand(object):
         answer = self._call('is_bool')
         return answer.yes
 
+    def is_map(self):
+        """
+        Return True if command return type is map
+
+        :rtype: bool
+        """
+        answer = self._call('is_map')
+        return answer.yes
+
     def set_result(self, value):
         """
         Set command return value

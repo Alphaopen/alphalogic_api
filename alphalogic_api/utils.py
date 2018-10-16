@@ -38,6 +38,8 @@ def create_command_definer(result_type):
         return 'create_datetime_command'
     elif bool is result_type:
         return 'create_bool_command'
+    elif list is result_type or dict is result_type:
+        return 'create_map_command'
     else:
         raise Exception('Unknown type')
 
@@ -53,6 +55,8 @@ def create_parameter_definer(result_type):
         return 'create_datetime_parameter'
     elif bool is result_type:
         return 'create_bool_parameter'
+    elif list is result_type or dict is result_type:
+        return 'create_map_parameter'
     else:
         raise Exception('Unknown type')
 
@@ -89,9 +93,21 @@ def milliseconds_from_epoch(dt):
     return int((dt - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000)
 
 
-def get_rpc_value(value_type, value=None):
-    value_rpc = rpc_pb2.Value()
+def create_map_value(value_rpc, value):
+    for key, x in value.items():
+        value_type = type(x)
+        value_into = value_rpc.dict_value.value[key]
+        build_rpc_value(value_into, value_type, x)
 
+
+def create_list_value(value_rpc, value):
+    for x in value:
+        value_type = type(x)
+        value_into = value_rpc.list_value.value.add()
+        build_rpc_value(value_into, value_type, x)
+
+
+def build_rpc_value(value_rpc, value_type, value=None):
     if value_type == int or value_type == long:
         value_rpc.long_value = value if value else 0
     elif value_type == float:
@@ -106,9 +122,25 @@ def get_rpc_value(value_type, value=None):
         value_rpc.bool_value = value if value else False
     elif value_type == unicode:
         value_rpc.string_value = value if value else ''
+    elif value_type == list:
+        if value:
+            map(lambda x: build_rpc_value(value_rpc.list_value.value.add(), type(x), x), value)
+        else:
+            value_rpc.list_value.value.extend([])
+    elif value_type == dict:
+        if value:
+            map(lambda (key, x): build_rpc_value(value_rpc.dict_value.value[key], type(x), x), value.items())
+        else:
+            value_rpc.dict_value.value['a'].long_value = 1
+            del value_rpc.dict_value.value['a']
+
     elif value_type == str:
         raise Exception('\'str\' type using is prohibited')
 
+
+def get_rpc_value(value_type, value=None):
+    value_rpc = rpc_pb2.Value()
+    build_rpc_value(value_rpc, value_type, value)
     return value_rpc
 
 
@@ -124,6 +156,14 @@ def value_from_rpc(value_rpc):
                + datetime.timedelta(milliseconds=value_rpc.datetime_value % 1000)
     elif value_rpc.HasField('string_value'):
         return value_rpc.string_value
+    elif value_rpc.HasField('list_value'):
+        l = []
+        map(lambda x: l.append(value_from_rpc(x)), value_rpc.list_value.value)
+        return l
+    elif value_rpc.HasField('dict_value'):
+        d = dict()
+        map(lambda (key, x):  d.update({key: value_from_rpc(x)}), value_rpc.dict_value.value.items())
+        return d
 
 
 def shutdown(signum, frame):
