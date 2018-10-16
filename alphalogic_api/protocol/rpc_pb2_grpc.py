@@ -59,6 +59,11 @@ class ObjectServiceStub(object):
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
         response_deserializer=rpc__pb2.ObjectReply.FromString,
         )
+    self.create_map_parameter = channel.unary_unary(
+        '/adapter.rpc.ObjectService/create_map_parameter',
+        request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
+        response_deserializer=rpc__pb2.ObjectReply.FromString,
+        )
     self.create_event = channel.unary_unary(
         '/adapter.rpc.ObjectService/create_event',
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
@@ -86,6 +91,11 @@ class ObjectServiceStub(object):
         )
     self.create_bool_command = channel.unary_unary(
         '/adapter.rpc.ObjectService/create_bool_command',
+        request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
+        response_deserializer=rpc__pb2.ObjectReply.FromString,
+        )
+    self.create_map_command = channel.unary_unary(
+        '/adapter.rpc.ObjectService/create_map_command',
         request_serializer=rpc__pb2.ObjectRequest.SerializeToString,
         response_deserializer=rpc__pb2.ObjectReply.FromString,
         )
@@ -243,6 +253,13 @@ class ObjectServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def create_map_parameter(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def create_event(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -279,6 +296,13 @@ class ObjectServiceServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def create_bool_command(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def create_map_command(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -452,6 +476,11 @@ def add_ObjectServiceServicer_to_server(servicer, server):
           request_deserializer=rpc__pb2.ObjectRequest.FromString,
           response_serializer=rpc__pb2.ObjectReply.SerializeToString,
       ),
+      'create_map_parameter': grpc.unary_unary_rpc_method_handler(
+          servicer.create_map_parameter,
+          request_deserializer=rpc__pb2.ObjectRequest.FromString,
+          response_serializer=rpc__pb2.ObjectReply.SerializeToString,
+      ),
       'create_event': grpc.unary_unary_rpc_method_handler(
           servicer.create_event,
           request_deserializer=rpc__pb2.ObjectRequest.FromString,
@@ -479,6 +508,11 @@ def add_ObjectServiceServicer_to_server(servicer, server):
       ),
       'create_bool_command': grpc.unary_unary_rpc_method_handler(
           servicer.create_bool_command,
+          request_deserializer=rpc__pb2.ObjectRequest.FromString,
+          response_serializer=rpc__pb2.ObjectReply.SerializeToString,
+      ),
+      'create_map_command': grpc.unary_unary_rpc_method_handler(
+          servicer.create_map_command,
           request_deserializer=rpc__pb2.ObjectRequest.FromString,
           response_serializer=rpc__pb2.ObjectReply.SerializeToString,
       ),
@@ -630,6 +664,11 @@ class ParameterServiceStub(object):
         )
     self.is_bool = channel.unary_unary(
         '/adapter.rpc.ParameterService/is_bool',
+        request_serializer=rpc__pb2.ParameterRequest.SerializeToString,
+        response_deserializer=rpc__pb2.ParameterReply.FromString,
+        )
+    self.is_map = channel.unary_unary(
+        '/adapter.rpc.ParameterService/is_map',
         request_serializer=rpc__pb2.ParameterRequest.SerializeToString,
         response_deserializer=rpc__pb2.ParameterReply.FromString,
         )
@@ -813,6 +852,13 @@ class ParameterServiceServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def is_bool(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def is_map(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1023,6 +1069,11 @@ def add_ParameterServiceServicer_to_server(servicer, server):
       ),
       'is_bool': grpc.unary_unary_rpc_method_handler(
           servicer.is_bool,
+          request_deserializer=rpc__pb2.ParameterRequest.FromString,
+          response_serializer=rpc__pb2.ParameterReply.SerializeToString,
+      ),
+      'is_map': grpc.unary_unary_rpc_method_handler(
+          servicer.is_map,
           request_deserializer=rpc__pb2.ParameterRequest.FromString,
           response_serializer=rpc__pb2.ParameterReply.SerializeToString,
       ),
@@ -1601,6 +1652,11 @@ class CommandServiceStub(object):
         request_serializer=rpc__pb2.CommandRequest.SerializeToString,
         response_deserializer=rpc__pb2.CommandReply.FromString,
         )
+    self.is_map = channel.unary_unary(
+        '/adapter.rpc.CommandService/is_map',
+        request_serializer=rpc__pb2.CommandRequest.SerializeToString,
+        response_deserializer=rpc__pb2.CommandReply.FromString,
+        )
     self.set_result = channel.unary_unary(
         '/adapter.rpc.CommandService/set_result',
         request_serializer=rpc__pb2.CommandRequest.SerializeToString,
@@ -1712,6 +1768,13 @@ class CommandServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def is_map(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def set_result(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -1811,6 +1874,11 @@ def add_CommandServiceServicer_to_server(servicer, server):
       ),
       'is_bool': grpc.unary_unary_rpc_method_handler(
           servicer.is_bool,
+          request_deserializer=rpc__pb2.CommandRequest.FromString,
+          response_serializer=rpc__pb2.CommandReply.SerializeToString,
+      ),
+      'is_map': grpc.unary_unary_rpc_method_handler(
+          servicer.is_map,
           request_deserializer=rpc__pb2.CommandRequest.FromString,
           response_serializer=rpc__pb2.CommandReply.SerializeToString,
       ),
