@@ -23,6 +23,8 @@ def value_type_field_definer(value_type):
         return 'tuple'
     elif list is value_type:
         return 'list'
+    elif dict is value_type:
+        return 'dict'
     else:
         raise Exception('Unknown type')
 

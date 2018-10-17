@@ -254,8 +254,7 @@ class AbstractParameter(object):
         :rtype: List of values of long, float, datetime, bool or unicode type in a tuple as (value1, value2, value3 ….)
         """
         answer = self._call('enums')
-        value_type_proto = utils.value_type_field_definer(self.value_type)
-        return [(getattr(answer.enums[key], value_type_proto), key) for key in answer.enums]
+        return [utils.value_from_rpc(key.value) for key in answer.enums]
 
     def set_enum(self, value, enum_name):
         """
@@ -265,9 +264,8 @@ class AbstractParameter(object):
         :param value: The value type: long, float, datetime, bool or unicode
         :param enum_name: enumeration member name
         """
-        value_type_proto = utils.value_type_field_definer(self.value_type)
         value_rpc = rpc_pb2.Value()
-        setattr(value_rpc, value_type_proto, value)
+        utils.build_rpc_value(value_rpc, type(value), value)
         answer = self._call('set_enum', enum_name=enum_name, value=value_rpc)
 
     def set_enums(self, values):
@@ -280,15 +278,14 @@ class AbstractParameter(object):
         """
         value_type = self.value_type
         req = rpc_pb2.ParameterRequest(id=self.id)
-        attr_type = utils.value_type_field_definer(value_type)
         for val in values:
             e = req.enums.add()
             if isinstance(val, tuple):
                 e.name = unicode(val[1])
-                setattr(e.value, attr_type, val[0])
+                utils.build_rpc_value(e.value, type(val[0]), val[0])
             else:
                 e.name = unicode(val)
-                setattr(e.value, attr_type, val)
+                utils.build_rpc_value(e.value, type(val), val)
 
         self.multi_stub.call_helper('set_enums', fun_set=MultiStub.parameter_fun_set, request=req,
                                     stub=self.multi_stub.stub_parameter)

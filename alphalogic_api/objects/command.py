@@ -165,25 +165,21 @@ class AbstractCommand(object):
         :arg name_arg: command argument name
         :arg value: command argument value
         """
-        value_type = utils.value_type_field_definer(type(value))
         cur_choices = self.choices[name_arg] if name_arg in self.choices else None
         if cur_choices is None:
             value_rpc = utils.get_rpc_value(type(value), value)
             self._call('set_argument', argument=name_arg, value=value_rpc)
         else:
             req = rpc_pb2.CommandRequest(id=self.id, argument=name_arg)
-            val_type = utils.value_type_field_definer(type(value))
-            setattr(req.value, val_type, value)
+            utils.build_rpc_value(req.value, type(value), value)
             for val in cur_choices:
                 e = req.enums.add()
                 if isinstance(val, tuple):
                     e.name = val[1]
-                    val_type = utils.value_type_field_definer(type(val[0]))
-                    setattr(e.value, val_type, val[0])
+                    utils.build_rpc_value(e.value, type(val[0]), val[0])
                 else:
                     e.name = unicode(val)
-                    val_type = utils.value_type_field_definer(type(val))
-                    setattr(e.value, val_type, val)
+                    utils.build_rpc_value(e.value, type(val), val)
 
             self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set,
                                         request=req, stub=self.multi_stub.stub_command)
