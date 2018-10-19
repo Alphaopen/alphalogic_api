@@ -22,7 +22,7 @@ if __name__ == '__main__':
         long_description = fh.read()
 
     setup(
-        name='alphalogic_api',
+        name='alphalogic-api',
         version=__version__,
         description=__doc__.replace('\n', '').strip(),
         long_description=long_description,
