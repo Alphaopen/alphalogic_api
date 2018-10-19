@@ -126,12 +126,14 @@ def build_rpc_value(value_rpc, value_type, value=None):
         value_rpc.string_value = value if value else ''
     elif value_type == list:
         if value:
-            map(lambda x: build_rpc_value(value_rpc.list_value.value.add(), type(x), x), value)
+            map(lambda x: build_rpc_value(value_rpc.list_value.value.add(), type(x), x),
+                filter(lambda x: x is not None, value))
         else:
             value_rpc.list_value.value.extend([])
     elif value_type == dict:
         if value:
-            map(lambda (key, x): build_rpc_value(value_rpc.dict_value.value[key], type(x), x), value.items())
+            map(lambda item: build_rpc_value(value_rpc.dict_value.value[item[0]], type(item[1]), item[1]),
+                filter(lambda item: item[0] is not None and item[1] is not None, value.items()))
         else:
             value_rpc.dict_value.value['a'].long_value = 1
             del value_rpc.dict_value.value['a']
