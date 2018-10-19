@@ -1,13 +1,13 @@
 .. _alphalogic_api:
 
 API Documentation
-=================
+*****************
 
 .. py:module:: alphalogic_api.objects
 
 
 Objects
--------
+=======
 
 .. _root_link:
 
@@ -15,11 +15,10 @@ Root
 ~~~~
 To specify a root object of the user-written adapter, you must create a class that inherits from class Root:
 ::
-    ...
     from alphalogic_api.objects import Root
-    ...
+    ......
     class MyRoot(Root):
-        ...
+        ......
 
 .. autoclass:: Root
    :members:
@@ -30,14 +29,15 @@ Object
 ~~~~~~
 To specify an adapter object (not Root object), create a class that inherits from the class Object:
 ::
-    ...
     from alphalogic_api.objects import Object
-    ...
+    ......
     class Controller(Object):
-        ...
+        ......
 
 .. autoclass:: Object
    :members:
+
+
 
 .. _parameter_link:
 
@@ -48,7 +48,16 @@ Parameter
 
 Example of parameter definition:
 ::
-    hostname = ParameterString(visible=Visible.setup, access=Access.read_write, default='1', choices=('1', '2'))
+    from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
+    ...
+
+    message = ParameterString(default='Hello world!')
+
+Example of setting and gettings value:
+::
+    self.message.val = 'Me too'
+    self.param_str.val = self.message.val
+
 
 Parameter arguments are optional.
 
@@ -114,7 +123,7 @@ Parameter arguments are optional.
 
 To build a value list for the parameter, it is required that both arguments 'choices' and 'default' are specified.
 ::
-    param_tmp = ParameterString(default='ster 31', choices=('ster 31', 'ster 25', 'ster 23'))
+    param_tmp = ParameterLong(visible=Visible.setup, access=Access.read_write, default=1, choices=((1, 'First'), (2, 'Second')))
 
 Be careful to assign a value (not an enumeration member's name) to 'default' argument if the 'choices' argument provides enumeration with descriptions:
 ::
@@ -153,7 +162,6 @@ Python allows you to pass functions as a parameters to another functions. In the
 ::
     alarm.emit(where="Red Square, Moscow", when=datetime.datetime.utcnow(), why=123456)
 
-
 Example of the event function without arguments:
 ::
     alarm.emit()
@@ -184,7 +192,7 @@ Here is the definition of the class Command:
    :members:
 
 run
-~~~~~
+~~~
 
 .. autoclass:: run
    :members:
@@ -193,7 +201,7 @@ run
 .. py:module:: alphalogic_api.exceptions
 
 Handlers
--------
+--------
 
 The handlers are executed when the corresponding condition occurs.
 There are three types of handlers which can be installed to control the workflow of the adapter before or after calling some functions:
@@ -201,18 +209,18 @@ There are three types of handlers which can be installed to control the workflow
 1) Request on child objects of the adapter object:
 ::
     def handle_get_available_children(self):
-    return [
-        (Controller, 'Controller'),
-        (MyObject, 'MyObject')
-    ]
+        return [
+            (Controller, 'Controller'),
+            (MyObject, 'MyObject')
+        ]
 
 You can define and implement this function in the object class to return an array of the child adapter objects.
 You must use the exact name of the handler as in the example above.
 
 2) Request on deletion of the adapter object(s):
 ::
-        def handle_before_remove_device(self):
-            do something
+    def handle_before_remove_device(self):
+        do something
 
 You can use this handler to do something before the adapter object will be deleted.
 You must use the exact name of the handler as in the example above.
@@ -229,7 +237,7 @@ The handler will be invoked when the specified parameter is changed.
 In the example above, this means that the function handle_after_set_double will be called if param_double is changed.
 In the case of parameter changes, you can use whichever name of the handler function you like.
 
-4) Handler for configure Object after creation
+4) Handler for configure Object after creation by user
 ::
     number = ParameterLong(visible=Visible.setup)
     def handle_defaults_loaded(self):
@@ -241,7 +249,56 @@ In the case of parameter changes, you can use whichever name of the handler func
     def handle_prepare_for_work(self):
         self.displayName.val = str(self.number.val)
 
-        
+
+Оbject lifetime
+~~~~~~~~~~~~~~
+
+Created by user
+--------------
+
+1. ``__init__``. You can't do anything with parameters, events, commands here.
+2. Create parameters, events, commands
+3. Accept values from ``__init__`` kwargs. See `Advanced using` p.1.
+4. ``handle_defaults_loaded`` handle
+5. ``handle_prepare_for_work`` handle
+
+Loaded from configuration
+-----------------------
+1. ``__init__``. You can't do anything with parameters, events, commands here.
+2. Create parameters, events, commands
+3. ``handle_prepare_for_work`` handle
+
+Removed by user
+---------------
+1. ``handle_before_remove_device``
+
+Advanced using
+~~~~~~~~~~~~~~
+1) Create a child object with predefault values:
+::
+    class Controller(Object, DiagHelper):
+        some_parameter_title = ParameterLong(default=0)
+
+
+    def handle_get_available_children(self):
+        children = []  # return empty list if exception
+        try:
+            p = partial(Controller, some_parameter_title=0)
+            p.cls = Controller
+            children.append((p, 'Controller 0'))
+
+            # You can set parameter values in
+            p = partial(Controller, some_parameter_title=1, displayName=h['name'])
+            p.cls = Controller
+            children.append((p, 'Controller 1'))
+
+        except Exception as err:
+            log.error(err.message)
+        return children
+
+The partial ``kwargs`` will be in the object ``__init__`` ``kwargs``.
+
+
 Exceptions
 ----------
 

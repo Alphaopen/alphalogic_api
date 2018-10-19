@@ -258,7 +258,6 @@ class AbstractParameter(object):
 
     def set_enum(self, value, enum_name):
         """
-
         Add/replace enumeration member – a pair (value, name) – for the 'choices' argument of the parameter
 
         :param value: The value type: long, float, datetime, bool or unicode
@@ -275,6 +274,7 @@ class AbstractParameter(object):
         :param values: An array of values can be one of the following:
         * List of values of long, float, datetime, bool or unicode type in a tuple as (value1, value2, value3 ….)
         * List of enumeration members in a tuple of tuples as ((value1, 'enum_name1'), (value2, 'enum_name2'), ...)
+
         """
         value_type = self.value_type
         req = rpc_pb2.ParameterRequest(id=self.id)
