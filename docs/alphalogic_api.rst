@@ -298,7 +298,7 @@ Advanced using
 
 Handlers order example
 ----------------------
-1) Situation 1: Create object by user
+1) Situation 1: User creates object
 ::
     class Controller(Object):
 
@@ -315,7 +315,7 @@ Handlers order example
         def handle_before_remove_device(self):
             # remove object by user
 
-2) Situation 2: Load object from configuration
+2) Situation 2: Object has been loaded from configuration
 ::
     class Controller(Object):
 
