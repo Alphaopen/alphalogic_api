@@ -280,8 +280,6 @@ Advanced using
     class Controller(Object, DiagHelper):
         some_parameter_title = ParameterLong(default=0)
 
-        def __init__(
-
     def handle_get_available_children(self):
         children = []  # return empty list if exception
         try:
@@ -298,7 +296,39 @@ Advanced using
             log.error(err.message)
         return children
 
-The partial ``kwargs`` will be in the object ``__init__`` ``kwargs``.
+Handlers order example
+----------------------
+1) Situation 1: Create object by user
+::
+    class Controller(Object):
+
+        def __init__(self, type_device, id_device, **kwargs):
+            super(Controller, self).__init__(type_device, id_device, **kwargs)
+            # 1: Partial arguments in the kwargs
+
+        def handle_defaults_loaded(self, **kwargs):
+            # 2: Partial arguments in the kwargs
+
+        def handle_prepare_for_work(self):
+            # 3: Parameters, commands, events created and have default values
+
+        def handle_before_remove_device(self):
+            # remove object by user
+
+2) Situation 2: Load object from configuration
+::
+    class Controller(Object):
+
+        def __init__(self, type_device, id_device, **kwargs):
+            super(Controller, self).__init__(type_device, id_device, **kwargs)
+            # 1: nothing in the kwargs
+
+        def handle_defaults_loaded(self, **kwargs):
+            # Not called
+
+        def handle_prepare_for_work(self):
+            # 2: Parameters, commands, events created.
+            #    Values from configuration loaded.
 
 
 Exceptions
