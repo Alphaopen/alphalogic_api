@@ -3,8 +3,5 @@
     <img src="https://readthedocs.org/projects/alphalogic_api/badge/?version=latest" alt="Documentation Status" />
 </a>
 </h1>
-The official library to develop the Alphalogic system adapters in Python 2.
+The official library to develop the Alphalogic system adapters with Python2. <a href="https://alphalogic_api.readthedocs.io">   Documentation</a>
 
-<a href="https://alphalogic_api.readthedocs.io">
-    Documentation
-</a>
