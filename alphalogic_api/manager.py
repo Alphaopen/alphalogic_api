@@ -320,7 +320,7 @@ class Manager(AbstractManager):
             command.clear()
             for arg in command.arguments:
                 name_arg, value_arg = arg
-                command.set_argument(name_arg, value_arg)
+                command.update_or_create_argument(name_arg, value_arg)
         elif name in list_name_commands_already_exists and not options.args.development_mode:
             id_command = self.command(object_id, name)
             command.id = id_command
@@ -345,7 +345,7 @@ class Manager(AbstractManager):
             event.clear()
             for name_arg, value_type in event.arguments:
                 value_arg = utils.value_from_rpc(utils.get_rpc_value(value_type))
-                event.set_argument(name_arg, value_arg)
+                event.update_or_create_argument(name_arg, value_arg)
         elif name in list_name_events_already_exists and not options.args.development_mode:
             id_event = self.event(object_id, name)
             event.id = id_event

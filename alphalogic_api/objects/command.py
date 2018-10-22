@@ -158,7 +158,7 @@ class AbstractCommand(object):
         answer = self._call('argument', argument=name_argument)
         return answer.name, answer.value
 
-    def set_argument(self, name_arg, value):
+    def update_or_create_argument(self, name_arg, value):
         """
         Add command argument / overwrite argument value
 
@@ -168,7 +168,7 @@ class AbstractCommand(object):
         cur_choices = self.choices[name_arg] if name_arg in self.choices else None
         if cur_choices is None:
             value_rpc = utils.get_rpc_value(type(value), value)
-            self._call('set_argument', argument=name_arg, value=value_rpc)
+            self._call('update_or_create_argument', argument=name_arg, value=value_rpc)
         else:
             req = rpc_pb2.CommandRequest(id=self.id, argument=name_arg)
             utils.build_rpc_value(req.value, type(value), value)
@@ -181,7 +181,7 @@ class AbstractCommand(object):
                     e.name = unicode(val)
                     utils.build_rpc_value(e.value, type(val), val)
 
-            self.multi_stub.call_helper('set_argument', fun_set=MultiStub.command_fun_set,
+            self.multi_stub.call_helper('update_or_create_argument', fun_set=MultiStub.command_fun_set,
                                         request=req, stub=self.multi_stub.stub_command)
 
     def owner(self):

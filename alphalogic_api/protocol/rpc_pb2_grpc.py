@@ -1303,8 +1303,13 @@ class EventServiceStub(object):
         request_serializer=rpc__pb2.EventRequest.SerializeToString,
         response_deserializer=rpc__pb2.EventReply.FromString,
         )
-    self.set_argument = channel.unary_unary(
-        '/adapter.rpc.EventService/set_argument',
+    self.update_or_create_argument = channel.unary_unary(
+        '/adapter.rpc.EventService/update_or_create_argument',
+        request_serializer=rpc__pb2.EventRequest.SerializeToString,
+        response_deserializer=rpc__pb2.EventReply.FromString,
+        )
+    self.set_argument_value = channel.unary_unary(
+        '/adapter.rpc.EventService/set_argument_value',
         request_serializer=rpc__pb2.EventRequest.SerializeToString,
         response_deserializer=rpc__pb2.EventReply.FromString,
         )
@@ -1459,7 +1464,14 @@ class EventServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def set_argument(self, request, context):
+  def update_or_create_argument(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def set_argument_value(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1576,8 +1588,13 @@ def add_EventServiceServicer_to_server(servicer, server):
           request_deserializer=rpc__pb2.EventRequest.FromString,
           response_serializer=rpc__pb2.EventReply.SerializeToString,
       ),
-      'set_argument': grpc.unary_unary_rpc_method_handler(
-          servicer.set_argument,
+      'update_or_create_argument': grpc.unary_unary_rpc_method_handler(
+          servicer.update_or_create_argument,
+          request_deserializer=rpc__pb2.EventRequest.FromString,
+          response_serializer=rpc__pb2.EventReply.SerializeToString,
+      ),
+      'set_argument_value': grpc.unary_unary_rpc_method_handler(
+          servicer.set_argument_value,
           request_deserializer=rpc__pb2.EventRequest.FromString,
           response_serializer=rpc__pb2.EventReply.SerializeToString,
       ),
@@ -1682,8 +1699,8 @@ class CommandServiceStub(object):
         request_serializer=rpc__pb2.CommandRequest.SerializeToString,
         response_deserializer=rpc__pb2.CommandReply.FromString,
         )
-    self.set_argument = channel.unary_unary(
-        '/adapter.rpc.CommandService/set_argument',
+    self.update_or_create_argument = channel.unary_unary(
+        '/adapter.rpc.CommandService/update_or_create_argument',
         request_serializer=rpc__pb2.CommandRequest.SerializeToString,
         response_deserializer=rpc__pb2.CommandReply.FromString,
         )
@@ -1810,7 +1827,7 @@ class CommandServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def set_argument(self, request, context):
+  def update_or_create_argument(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1907,8 +1924,8 @@ def add_CommandServiceServicer_to_server(servicer, server):
           request_deserializer=rpc__pb2.CommandRequest.FromString,
           response_serializer=rpc__pb2.CommandReply.SerializeToString,
       ),
-      'set_argument': grpc.unary_unary_rpc_method_handler(
-          servicer.set_argument,
+      'update_or_create_argument': grpc.unary_unary_rpc_method_handler(
+          servicer.update_or_create_argument,
           request_deserializer=rpc__pb2.CommandRequest.FromString,
           response_serializer=rpc__pb2.CommandReply.SerializeToString,
       ),

@@ -139,13 +139,12 @@ class AbstractEvent(object):
 
         :param kwargs: name/value pairs of event arguments separated by commas, each argument name followed by an equal sign
         """
-        self.clear()
         for arg_name, arg_type in self.arguments:
             if arg_name not in kwargs:
                 raise Exception('Incorrect argument name of event {0}'.format(self.name))
 
             value_rpc = utils.get_rpc_value(arg_type, kwargs[arg_name])
-            self._call('set_argument', argument=arg_name, value=value_rpc)
+            self._call('set_argument_value', argument=arg_name, value=value_rpc)
 
         self._call('emit')
 
@@ -175,7 +174,7 @@ class AbstractEvent(object):
         answer = self._call('argument', argument=name_argument)
         return answer.name, answer.value
 
-    def set_argument(self, name_arg, value):
+    def update_or_create_argument(self, name_arg, value):
         """
         Add event argument / overwrite argument value
 
@@ -186,7 +185,22 @@ class AbstractEvent(object):
 
         if value_type not in ['list', 'tuple']:
             value_rpc = utils.get_rpc_value(type(value), value)
-            self._call('set_argument', argument=name_arg, value=value_rpc)
+            self._call('update_or_create_argument', argument=name_arg, value=value_rpc)
+        else:
+            raise Exception('Event argument type not supported')
+
+    def set_argument_value(self, name_arg, value):
+        """
+        Set argument value
+
+        :arg name_arg: event argument name
+        :arg value: event argument value
+        """
+        value_type = utils.value_type_field_definer(type(value))
+
+        if value_type not in ['list', 'tuple']:
+            value_rpc = utils.get_rpc_value(type(value), value)
+            self._call('set_argument_value', argument=name_arg, value=value_rpc)
         else:
             raise Exception('Event argument type not supported')
 

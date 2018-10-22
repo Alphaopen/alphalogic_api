@@ -194,8 +194,9 @@ service EventService {
     // arguments
     rpc clear(EventRequest) returns (EventReply) {} // remove event arguments (all or one)
     rpc argument_list(EventRequest) returns (EventReply) {}
-    rpc argument(EventRequest) returns (EventReply) {}
-    rpc set_argument(EventRequest) returns (EventReply) {}
+    rpc argument(EventRequest) returns (EventReply) {} // only for get
+    rpc update_or_create_argument(EventRequest) returns (EventReply) {}
+    rpc set_argument_value(EventRequest) returns (EventReply) {}
 
     // owner
     rpc owner(EventRequest) returns (EventReply) {}
@@ -207,9 +208,9 @@ message EventRequest {
     string desc = 3; // rpc set_desc
     uint64 time = 4; // rpc set_time
 
-    string argument = 5; // rpc argument, set_argument, has_argument
-    Value value = 6; // prc set_argument
-    repeated NamedValue enums = 7; // optional for rpc set_argument
+    string argument = 5; // rpc argument, update_or_create_argument, has_argument
+    Value value = 6; // prc update_or_create_argument
+    repeated NamedValue enums = 7; // optional for rpc update_or_create_argument
 }
 
 message EventReply {
@@ -248,8 +249,8 @@ service CommandService {
     // arguments
     rpc clear(CommandRequest) returns (CommandReply) {} // remove command arguments (all or one)
     rpc argument_list(CommandRequest) returns (CommandReply) {}
-    rpc argument(CommandRequest) returns (CommandReply) {}
-    rpc set_argument(CommandRequest) returns (CommandReply) {}
+    rpc argument(CommandRequest) returns (CommandReply) {} // only for get
+    rpc update_or_create_argument(CommandRequest) returns (CommandReply) {}
 
     // owner
     rpc owner(CommandRequest) returns (CommandReply) {}
@@ -261,9 +262,9 @@ message CommandRequest {
     string desc = 3; // rpc set_desc
     string exception = 4; // rpc set_exception
 
-    string argument = 5; // rpc argument, set_argument, has_argument
-    Value value = 6; // prc set_argument, set_result
-    repeated NamedValue enums = 7; // optional for rpc set_argument
+    string argument = 5; // rpc argument, update_or_create_argument, has_argument
+    Value value = 6; // prc update_or_create_argument, set_result
+    repeated NamedValue enums = 7; // optional for rpc update_or_create_argument
 }
 
 message CommandReply {
