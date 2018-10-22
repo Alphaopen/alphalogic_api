@@ -139,6 +139,7 @@ class AbstractEvent(object):
 
         :param kwargs: name/value pairs of event arguments separated by commas, each argument name followed by an equal sign
         """
+        self.clear()
         for arg_name, arg_type in self.arguments:
             if arg_name not in kwargs:
                 raise Exception('Incorrect argument name of event {0}'.format(self.name))
