@@ -59,6 +59,13 @@ class MyRoot(Root):
 
         r.append((ControllerA, 'ControllerA'))
 
+        def handler():
+            print 'Controller D created'
+
+        f = partial(ControllerD, param=handler)
+        f.cls = ControllerD
+        r.append((f, 'ControllerD'))
+
         return r
 
 
@@ -94,6 +101,14 @@ class ControllerC(Object):
     def handle_prepare_for_work(self):
         self.displayName.val = str(self.number.val) +'_'+ str(ControllerC.counter)
         ControllerC.counter = ControllerC.counter + 1
+
+
+class ControllerD(Object):
+
+    def __init__(self, type_device, id_device, **kwargs):
+        super(ControllerD, self).__init__(type_device, id_device, **kwargs)
+        assert 'param' in kwargs
+        kwargs['param']()
 
 
 if __name__ == '__main__':

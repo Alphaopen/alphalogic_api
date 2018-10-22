@@ -191,8 +191,9 @@ Here is the definition of the class Command:
 .. autoclass:: command
    :members:
 
-run
+Run functions
 ~~~
+There is easy way to do some job periodicaly. You can define a lot of run functions in the root or object.
 
 .. autoclass:: run
    :members:
@@ -279,6 +280,7 @@ Advanced using
     class Controller(Object, DiagHelper):
         some_parameter_title = ParameterLong(default=0)
 
+        def __init__(
 
     def handle_get_available_children(self):
         children = []  # return empty list if exception
@@ -300,7 +302,7 @@ The partial ``kwargs`` will be in the object ``__init__`` ``kwargs``.
 
 
 Exceptions
-----------
+~~~~~~~~~~~~~~
 
 .. autoclass:: IncorrectRPCRequest
 

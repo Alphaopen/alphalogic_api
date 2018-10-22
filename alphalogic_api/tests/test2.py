@@ -47,6 +47,5 @@ class TreeChecker(Object):
 
 if __name__ == '__main__':
     # python loop
-    host, port = init()
-    root = MyRoot(host, port)
+    root = MyRoot()
     root.join()

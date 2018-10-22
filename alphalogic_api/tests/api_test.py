@@ -153,7 +153,7 @@ class Controller(Object):
 
     @run(period=20)
     def run_third(self):
-        self.log.info(unicode(self.id) + ' c_run')
+        self.log.info(str(self.id) + ' c_run')
         val = self.counter_spec.val
         self.counter_spec.val = val+1
 
@@ -163,21 +163,17 @@ class Controller(Object):
         ]
 
 
-
 if __name__ == '__main__':
-    # python loop
-    host, port = init()
-
 
     # python loop
-    root = MyRoot(host, port)
+    root = MyRoot()
     root.alarm.emit(where='asdadsadg', why=3, when=datetime.datetime.now())
 
     # Parameters
     try:
         root.parameter('asgasdgg')
         assert False, 'ComponentNotFound doesnt\' works'
-    except ComponentNotFound, err:
+    except ComponentNotFound as err:
         pass
 
     pars = root.parameters()
@@ -191,7 +187,7 @@ if __name__ == '__main__':
     try:
         root.event('asgasdgg')
         assert False, 'ComponentNotFound doesnt\' works'
-    except ComponentNotFound, err:
+    except ComponentNotFound as err:
         pass
 
     events = root.events()
@@ -203,14 +199,13 @@ if __name__ == '__main__':
     try:
         root.command('asgasdgg')
         assert False, 'ComponentNotFound doesnt\' works'
-    except ComponentNotFound, err:
+    except ComponentNotFound as err:
         pass
 
     cmds = root.commands()
     assert list(x.name() == 'cmd_simple_event' for x in cmds)
     cmd = root.command('cmd_simple_event')
     cmd = root.command('check')
-
 
     root.join()
 
