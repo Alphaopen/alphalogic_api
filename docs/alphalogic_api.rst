@@ -53,7 +53,7 @@ Example of parameter definition:
 
     message = ParameterString(default='Hello world!')
 
-Example of setting and gettings value:
+Read and write parameter value:
 ::
     self.message.val = 'Me too'
     self.param_str.val = self.message.val
