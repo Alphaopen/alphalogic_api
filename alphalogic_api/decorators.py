@@ -45,6 +45,13 @@ def command(*argv_c, **kwargs_c):
         def cmd_alarm(self, where='here', when=datetime.datetime.now(), why=2):
             return where
 
+    Example 3::
+
+        # The command hasn't arguments and return dict type
+        @command(result_type=dict)
+        def cmd_alarm(self):
+            return {'a': 1, 'b': 'second', 'c': [1,2,3], 'd' : [1, {'2': 3}, 3]}
+
 
     :arg result_type: Command return type
     """

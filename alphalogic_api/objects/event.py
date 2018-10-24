@@ -216,7 +216,7 @@ class AbstractEvent(object):
 
 class Event(AbstractEvent):
     """
-    Class Event inherits inherits all data elements and methods from :class:`~alphalogic_api.objects.event.AbstractEvent`.
+    Class Event inherits all data elements and methods from :class:`~alphalogic_api.objects.event.AbstractEvent`.
 
     :arg priority: trivial, minor, major, critical or blocker
     :arg args: name/type pairs in a tuple of tuples (argument name, argument type)

@@ -44,11 +44,11 @@ To specify an adapter object (not Root object), create a class that inherits fro
 Parameter
 ~~~~~~~~~
 | You have to define parameter, depending on its value type:
-| ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
+| ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString, ParameterList, ParameterDict
 
 Example of parameter definition:
 ::
-    from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
+    from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString, ParameterList, ParameterDict
     ...
 
     message = ParameterString(default='Hello world!')
@@ -75,6 +75,10 @@ Parameter arguments are optional.
 |             |                           | 0 (ParameterDatetime)|                            |
 |             |                           |----------------------|                            |
 |             |                           | "" (ParameterString) |                            |
+|             |                           |----------------------|                            |
+|             |                           | [] (ParameterList)   |                            |
+|             |                           |----------------------|                            |
+|             |                           | {} (ParameterDict)   |                            |
 +-------------+---------------------------+----------------------+----------------------------+
 | visible     | | A parameter type that   | Visible.runtime      | | Visible.runtime - used   |
 |             | | specifies its features  |                      | | to transfer data from    |
@@ -124,6 +128,10 @@ Parameter arguments are optional.
 To build a value list for the parameter, it is required that both arguments 'choices' and 'default' are specified.
 ::
     param_tmp = ParameterLong(visible=Visible.setup, access=Access.read_write, default=1, choices=((1, 'First'), (2, 'Second')))
+
+Second approach to build value list for parameter:
+::
+    param_tmp = ParameterLong(visible=Visible.setup, access=Access.read_write, default=1, choices=(1, 2))
 
 Be careful to assign a value (not an enumeration member's name) to 'default' argument if the 'choices' argument provides enumeration with descriptions:
 ::
@@ -186,13 +194,15 @@ The @ special character is used to indicate a decorator.
 
 Command
 ~~~~~~~
+Possible values for result type are: unicode, datetime.datetime, int, float, bool, list, dict.
 Here is the definition of the class Command:
 
 .. autoclass:: command
    :members:
 
+
 Run functions
-~~~
+~~~~~~~
 There is easy way to do some job periodicaly. You can define a lot of run functions in the root or object.
 
 .. autoclass:: run
@@ -241,7 +251,7 @@ In the case of parameter changes, you can use whichever name of the handler func
 4) Handler for configure Object after creation by user
 ::
     number = ParameterLong(visible=Visible.setup)
-    def handle_defaults_loaded(self):
+    def handle_defaults_loaded(self, **kwargs):
         self.displayName.val = str(self.number.val)
 
 5) Handler is executed before work of object
