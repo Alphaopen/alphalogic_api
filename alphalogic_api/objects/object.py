@@ -245,8 +245,12 @@ class Root(Object):
                 t = traceback.format_exc()
                 log.error('Root join error: {0}'.format(decode_string(t)))
             finally:
-                self.manager.tasks_pool.stop_operation_thread()
-                self.manager.multi_stub.channel.close()
-                if self.manager.g_thread.is_alive():
-                    self.manager.g_thread.join()
+                try:
+                    self.manager.tasks_pool.stop_operation_thread()
+                    self.manager.multi_stub.channel.close()
+                    if self.manager.g_thread.is_alive():
+                        self.manager.g_thread.join()
+                except BaseException as err:
+                    t = traceback.format_exc()
+                    log.error('Root finally join error: {0}'.format(decode_string(t)))
             log.info('Stub has stopped successfully')
