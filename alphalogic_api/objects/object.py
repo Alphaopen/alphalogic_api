@@ -212,7 +212,7 @@ class Root(Object):
             self.joinable = True
             log.info('Root connected OK')
 
-        except Exception, err:
+        except Exception as err:
             t = traceback.format_exc()
             log.error(decode_string(t))  # cause Exception can raise before super(Root)
             self.manager.tasks_pool.stop_operation_thread()

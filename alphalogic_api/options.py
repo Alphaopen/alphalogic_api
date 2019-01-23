@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+#from __future__ import unicode_literals
+# python3 не нравится str.lower
+
 import os
 import sys
 import argparse
