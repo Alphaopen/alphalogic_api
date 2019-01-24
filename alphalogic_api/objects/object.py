@@ -226,8 +226,9 @@ class Root(Object):
         map(self.manager.delete_object, list_need_to_delete)
         Manager.components_for_device[id_root] = []
         self.manager.prepare_for_work(self, id_root)
-        self.handle_prepare_for_work()
         self.manager.prepare_existing_devices(id_root)
+        self.handle_prepare_for_work()
+        self.manager.call_handle_prepare_for_work(id_root)
 
     def join(self):
         """
