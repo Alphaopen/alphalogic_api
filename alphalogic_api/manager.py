@@ -217,26 +217,10 @@ class Manager(AbstractManager):
             self.prepare_existing_devices(child_id)
 
     def call_handle_prepare_for_work(self, id_parent):
-        dict_nodes = {}
-        deep_count = 0
-        self.__call_handle_prepare_for_work_helper(id_parent, dict_nodes, deep_count)
-        dict_nodes = sorted(dict_nodes.items(), key=lambda t: t[0], reverse=True)
-        list_nodes = reduce(lambda x,y: x+y, zip(*dict_nodes)[1])
-
-        for id_object in list_nodes:
-            object = self.nodes[id_object]
-            object.handle_prepare_for_work()
-
-    def __call_handle_prepare_for_work_helper(self, id_parent, dict_nodes, deep_count):
-        if deep_count not in dict_nodes:
-            dict_nodes[deep_count] = [id_parent]
-        else:
-            dict_nodes[deep_count].append(id_parent)
-
-        deep_count += 1
         for child_id in super(Manager, self).children(id_parent):
-            self.__call_handle_prepare_for_work_helper(child_id, dict_nodes, deep_count)
-        deep_count -= 1
+            self.call_handle_prepare_for_work(child_id)
+            object = self.nodes[child_id]
+            object.handle_prepare_for_work()
 
     def create_object(self, object_id, user_name_display):
         class_name_str = self.get_type(object_id)
