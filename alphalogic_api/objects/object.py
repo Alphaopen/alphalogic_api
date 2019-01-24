@@ -227,7 +227,6 @@ class Root(Object):
         Manager.components_for_device[id_root] = []
         self.manager.prepare_for_work(self, id_root)
         self.manager.prepare_existing_devices(id_root)
-        self.handle_prepare_for_work()
         self.manager.call_handle_prepare_for_work(id_root)
 
     def join(self):
