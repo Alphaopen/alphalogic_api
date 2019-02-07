@@ -184,7 +184,6 @@ class Object(object):
                     raise Exception('Unknown parameter {0}'.format(param_name))
 
 
-
 class Root(Object):
     """
     Root object inherits from :class:`~alphalogic_api.objects.Object`.
