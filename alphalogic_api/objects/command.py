@@ -232,6 +232,6 @@ class Command(AbstractCommand):
                      .format(self.name(), '; '.join(info), self.device.id))
             self.function(self.device, **function_dict)
 
-        except Exception, err:
+        except Exception as err:
             t = traceback.format_exc()
             log.error('Command \'{0}\' raise exception: {1}'.format(self.name(), decode_string(t)))

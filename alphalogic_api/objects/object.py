@@ -184,7 +184,6 @@ class Object(object):
                     raise Exception('Unknown parameter {0}'.format(param_name))
 
 
-
 class Root(Object):
     """
     Root object inherits from :class:`~alphalogic_api.objects.Object`.
@@ -212,7 +211,7 @@ class Root(Object):
             self.joinable = True
             log.info('Root connected OK')
 
-        except Exception, err:
+        except Exception as err:
             t = traceback.format_exc()
             log.error(decode_string(t))  # cause Exception can raise before super(Root)
             self.manager.tasks_pool.stop_operation_thread()
@@ -226,8 +225,9 @@ class Root(Object):
         map(self.manager.delete_object, list_need_to_delete)
         Manager.components_for_device[id_root] = []
         self.manager.prepare_for_work(self, id_root)
-        self.handle_prepare_for_work()
         self.manager.prepare_existing_devices(id_root)
+        self.manager.call_handle_prepare_for_work(id_root)
+        self.handle_prepare_for_work()
 
     def join(self):
         """
@@ -244,8 +244,12 @@ class Root(Object):
                 t = traceback.format_exc()
                 log.error('Root join error: {0}'.format(decode_string(t)))
             finally:
-                self.manager.tasks_pool.stop_operation_thread()
-                self.manager.multi_stub.channel.close()
-                if self.manager.g_thread.is_alive():
-                    self.manager.g_thread.join()
+                try:
+                    self.manager.tasks_pool.stop_operation_thread()
+                    self.manager.multi_stub.channel.close()
+                    if self.manager.g_thread.is_alive():
+                        self.manager.g_thread.join()
+                except BaseException as err:
+                    t = traceback.format_exc()
+                    log.error('Root finally join error: {0}'.format(decode_string(t)))
             log.info('Stub has stopped successfully')

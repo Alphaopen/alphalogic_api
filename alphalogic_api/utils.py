@@ -91,8 +91,12 @@ def decode_string(s):
     return unicode(s)
 
 
+def epoch():
+    return datetime.datetime.utcfromtimestamp(0)
+
+
 def milliseconds_from_epoch(dt):
-    return int((dt - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000)
+    return int((dt - epoch()).total_seconds() * 1000)
 
 
 def create_map_value(value_rpc, value):
@@ -166,7 +170,7 @@ def value_from_rpc(value_rpc):
         return l
     elif value_rpc.HasField('dict_value'):
         d = dict()
-        map(lambda (key, x):  d.update({key: value_from_rpc(x)}), value_rpc.dict_value.value.items())
+        map(lambda key, x:  d.update({key: value_from_rpc(x)}), value_rpc.dict_value.value.items())
         return d
 
 

@@ -212,10 +212,15 @@ class Manager(AbstractManager):
             object = class_name(class_name_str, child_id)
             Manager.components_for_device[child_id] = []
             self.prepare_for_work(object, child_id)
-            object.handle_prepare_for_work()
 
         for child_id in super(Manager, self).children(id_parent):
             self.prepare_existing_devices(child_id)
+
+    def call_handle_prepare_for_work(self, id_parent):
+        for child_id in super(Manager, self).children(id_parent):
+            self.call_handle_prepare_for_work(child_id)
+            object = self.nodes[child_id]
+            object.handle_prepare_for_work()
 
     def create_object(self, object_id, user_name_display):
         class_name_str = self.get_type(object_id)

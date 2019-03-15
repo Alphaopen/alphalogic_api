@@ -84,7 +84,7 @@ Navigate to the ``\bin`` folder of the installed composite Alphalogic adapter an
    from alphalogic_api.objects import Root, Object
    from alphalogic_api.attributes import Visible, Access
    from alphalogic_api.objects import MajorEvent
-   from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
+   from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString, ParameterList, ParameterDict
    from alphalogic_api.decorators import command, run
    from alphalogic_api.logger import log
 
@@ -124,7 +124,7 @@ The use of the library can be demonstrated via the following example of the Send
    from alphalogic_api import options
    from alphalogic_api.objects import Root, Object
    from alphalogic_api.attributes import Visible, Access
-   from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString
+   from alphalogic_api.objects import ParameterBool, ParameterLong, ParameterDouble, ParameterDatetime, ParameterString, ParameterList, ParameterDict
    from alphalogic_api.decorators import command, run
    from alphalogic_api.logger import log
 

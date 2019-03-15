@@ -45,6 +45,13 @@ def command(*argv_c, **kwargs_c):
         def cmd_alarm(self, where='here', when=datetime.datetime.now(), why=2):
             return where
 
+    Example 3::
+
+        # The command hasn't arguments and return dict type
+        @command(result_type=dict)
+        def cmd_alarm(self):
+            return {'a': 1, 'b': 'second', 'c': [1,2,3], 'd' : [1, {'2': 3}, 3]}
+
 
     :arg result_type: Command return type
     """
@@ -83,7 +90,7 @@ def run(*argv_r, **kwargs_r):
             self.counter.val += 1
     """
     def decorator(func):
-        def wrapped(device):
+        def wrapped(device, call_again=False):
             with device.mutex:
                 if not device.flag_removing:
                     try:
@@ -115,11 +122,12 @@ def run(*argv_r, **kwargs_r):
                         else:
                             mem_period = period
 
-                        if time_spend < mem_period:
-                            device.manager.tasks_pool.add_task(time_finish + mem_period - time_spend,
-                                                               getattr(device, func.func_name))
-                        else:
-                            device.manager.tasks_pool.add_task(time_finish, getattr(device, func.func_name))
+                        if call_again:
+                            if time_spend < mem_period:
+                                device.manager.tasks_pool.add_task(time_finish + mem_period - time_spend,
+                                                                   getattr(device, func.func_name))
+                            else:
+                                device.manager.tasks_pool.add_task(time_finish, getattr(device, func.func_name))
 
         wrapped.runnable = True
         wrapped.period_name = kwargs_r.keys()[0]

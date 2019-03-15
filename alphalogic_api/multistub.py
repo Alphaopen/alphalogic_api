@@ -79,7 +79,7 @@ class MultiStub(object):
                 answer = getattr(kwargs['stub'], function_name)(kwargs['request'], timeout=options.args.timeout)
                 return answer
 
-            except grpc.RpcError, err:
+            except grpc.RpcError as err:
                 if err.code() == grpc.StatusCode.NOT_FOUND:
                     raise ComponentNotFound(err.message + ' ' + err.details())
                 elif err.code() == grpc.StatusCode.DEADLINE_EXCEEDED:

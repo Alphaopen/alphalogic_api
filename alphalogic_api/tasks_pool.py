@@ -73,7 +73,7 @@ class TasksPool(object):
         while not self.shutdown_flag.is_set():
             tasks = self.queue_tasks.get_tasks(time.time())
             if not(tasks is None):
-                result = self.thread_pool.map_async(lambda f: f(), tasks)
+                result = self.thread_pool.map_async(lambda f: f(call_again=True), tasks)
                 self.list_futures.append(result)
             self.clear_done_futures()
             time.sleep(0.001)
