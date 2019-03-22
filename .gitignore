@@ -12,3 +12,4 @@ logs/
 Output
 *.egg-info
 dist/
+sandbox
