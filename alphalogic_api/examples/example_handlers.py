@@ -60,7 +60,7 @@ class MyRoot(Root):
         r.append((ControllerA, 'ControllerA'))
 
         def handler():
-            print 'Controller D created'
+            print('Controller D created')
 
         f = partial(ControllerD, param=handler)
         f.cls = ControllerD
@@ -99,7 +99,7 @@ class ControllerC(Object):
 
     # Will be called second after creation
     def handle_prepare_for_work(self):
-        self.displayName.val = str(self.number.val) +'_'+ str(ControllerC.counter)
+        self.displayName.val = str(self.number.val) + '_' + str(ControllerC.counter)
         ControllerC.counter = ControllerC.counter + 1
 
 
