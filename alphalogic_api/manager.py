@@ -226,11 +226,11 @@ class Manager(AbstractManager):
         class_name_str = self.get_type(object_id)
         class_name = Manager.dict_user_name_type_objects[user_name_display]
         object = class_name(class_name_str, object_id)
-        Manager.nodes[object_id] = object
         Manager.components_for_device[object_id] = []
         self.prepare_for_work(object, object_id)
         object.handle_defaults_loaded(**object.__dict__['defaults_loaded_dict'])
         object.handle_prepare_for_work()
+        Manager.nodes[object_id] = object
 
     def delete_object(self, object_id):
         self.tasks_pool.stop_operation_thread()
