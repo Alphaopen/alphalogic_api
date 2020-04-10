@@ -362,6 +362,7 @@ class Manager(AbstractManager):
     def configure_events(self, object, object_id):
         list_events = filter(lambda attr: type(getattr(object, attr)) is Event, dir(object))
         for name in list_events:
+            object.__dict__[name] = object.__dict__[name].get_copy()
             event = object.__dict__[name]
             self.configure_single_event(name, event, object_id)
 
