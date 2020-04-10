@@ -95,7 +95,13 @@ class ConfInspector(object):
             elif event_model.priority == Priority.minor and not(event_model.is_minor()):
                 raise Exception('Real and model priority are different')
 
-            # 2 check argument list and check type in argument_list
+            # 2 check argument list in code and configuration
+            code_arguments_list = set([x[0] for x in event_model.arguments])
+            conf_arguments_list = set(event_model.argument_list())
+            if code_arguments_list != conf_arguments_list:
+                raise Exception('Event arguments list mismathcing: {0}'.format(conf_arguments_list^code_arguments_list))
+
+            # 3 check argument list and check type in argument_list
             for arg_name_model, arg_type_model in event_model.arguments:
                 arg_name_real, arg_value = event_model.argument(arg_name_model)
                 arg_type_real = type(value_from_rpc(arg_value))

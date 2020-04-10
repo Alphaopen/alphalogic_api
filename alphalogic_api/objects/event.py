@@ -221,14 +221,17 @@ class Event(AbstractEvent):
     :arg priority: trivial, minor, major, critical or blocker
     :arg args: name/type pairs in a tuple of tuples (argument name, argument type)
     """
-    def __init__(self, priority, *args):
+    def __init__(self, priority, *args, **kwargs):
         self.arguments = args
-        self.id = None
+        self.id = kwargs.get('id', None)
         self.priority = priority
         self.multi_stub = None
 
     def set_multi_stub(self, multi_stub):
         self.multi_stub = multi_stub
+
+    def get_copy(self):
+        return Event(self.priority, *self.arguments, id=self.id)
 
 
 class TrivialEvent(Event):

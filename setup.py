@@ -26,6 +26,7 @@ if __name__ == '__main__':
         version=__version__,
         description=__doc__.replace('\n', '').strip(),
         long_description=long_description,
+        long_description_content_type='text/markdown',
         author='Alphaopen',
         author_email='mo@alphaopen.com',
         url='https://github.com/Alphaopen/alphalogic_api',
