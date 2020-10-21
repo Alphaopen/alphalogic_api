@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import time
+
 import sys
 import traceback
-from threading import Lock, Thread
+from threading import Lock
 from alphalogic_api.objects.event import Event
 from alphalogic_api.objects.command import Command
 from alphalogic_api.objects.parameter import Parameter, ParameterString, ParameterBool, ParameterLong
@@ -12,7 +12,6 @@ from alphalogic_api.attributes import Visible, Access
 from alphalogic_api.manager import Manager
 from alphalogic_api.logger import log
 from alphalogic_api.utils import Exit, decode_string
-from alphalogic_api.tasks_pool import TasksPool
 from alphalogic_api import init
 
 

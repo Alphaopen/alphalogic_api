@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 import locale
 import datetime
+import inspect
 from alphalogic_api.protocol import rpc_pb2
 from alphalogic_api.logger import log
-import inspect
 from alphalogic_api.exceptions import Exit
 
 
@@ -185,4 +185,7 @@ def get_class_name_from_str(class_name_str):
         if class_name_str in frame.f_locals:
             return frame.f_locals[class_name_str]
         frame = frame.f_back
-    raise Exception('{0} is not a class of device'.format(class_name_str))
+
+    log.warn('{0} is not a class of device.'.format(class_name_str))
+
+    #raise Exception('{0} is not a class of device'.format(class_name_str))

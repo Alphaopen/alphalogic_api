@@ -209,9 +209,11 @@ class Manager(AbstractManager):
             if class_name_str not in Manager.dict_type_objects:
                 Manager.dict_type_objects[class_name_str] = utils.get_class_name_from_str(class_name_str)
             class_name = Manager.dict_type_objects[class_name_str]
-            object = class_name(class_name_str, child_id)
-            Manager.components_for_device[child_id] = []
-            self.prepare_for_work(object, child_id)
+
+            if class_name:
+                object = class_name(class_name_str, child_id)
+                Manager.components_for_device[child_id] = []
+                self.prepare_for_work(object, child_id)
 
         for child_id in super(Manager, self).children(id_parent):
             self.prepare_existing_devices(child_id)
@@ -219,8 +221,9 @@ class Manager(AbstractManager):
     def call_handle_prepare_for_work(self, id_parent):
         for child_id in super(Manager, self).children(id_parent):
             self.call_handle_prepare_for_work(child_id)
-            object = self.nodes[child_id]
-            object.handle_prepare_for_work()
+            if child_id in self.nodes:
+                object = self.nodes[child_id]
+                object.handle_prepare_for_work()
 
     def create_object(self, object_id, user_name_display):
         class_name_str = self.get_type(object_id)
