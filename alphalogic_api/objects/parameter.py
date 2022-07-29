@@ -118,6 +118,21 @@ class AbstractParameter(object):
         answer = self._call('is_map')
         return answer.yes
 
+    def is_list(self):
+        """
+        Return True if parameter value type is list
+
+        :rtype: bool
+        """
+        answer = self._call('is_list')
+        return answer.yes
+
+    def set_list(self):
+        """
+        Set value_type LIST
+        """
+        answer = self._call('set_list')
+
     def is_runtime(self):
         """
         Return True if parameter type is Visible.runtime

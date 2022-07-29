@@ -40,8 +40,10 @@ def create_command_definer(result_type):
         return 'create_datetime_command'
     elif bool is result_type:
         return 'create_bool_command'
-    elif list is result_type or dict is result_type:
+    elif dict is result_type:
         return 'create_map_command'
+    elif list is result_type:
+        return 'create_list_command'
     else:
         raise Exception('Unknown type')
 
@@ -57,8 +59,10 @@ def create_parameter_definer(result_type):
         return 'create_datetime_parameter'
     elif bool is result_type:
         return 'create_bool_parameter'
-    elif list is result_type or dict is result_type:
+    elif dict is result_type:
         return 'create_map_parameter'
+    elif list is result_type:
+        return 'create_list_parameter'
     else:
         raise Exception('Unknown type')
 

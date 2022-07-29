@@ -67,6 +67,10 @@ class AbstractManager(object):
         answer = self._call('create_map_parameter', id_object, name=name)
         return answer.id
 
+    def create_list_parameter(self, id_object, name):
+        answer = self._call('create_list_parameter', id_object, name=name)
+        return answer.id
+
     def create_event(self, id_object, name):
         answer = self._call('create_event', id_object, name=name)
         return answer.id
@@ -93,6 +97,10 @@ class AbstractManager(object):
 
     def create_map_command(self, id_object, name):
         answer = self._call('create_map_command', id_object, name=name)
+        return answer.id
+
+    def create_list_command(self, id_object, name):
+        answer = self._call('create_list_command', id_object, name=name)
         return answer.id
 
     def parameters(self, id_object):
@@ -129,7 +137,8 @@ class AbstractManager(object):
 
     def register_maker(self, id_object, name, type_str):
         answer = self._call('register_maker', id_object, name=name, type=type_str)
-        return answer.yes
+        # Return (yes, maker_id)
+        return answer.yes, answer.id
 
     def unregister_all_makers(self, id_object):
         self._call('unregister_all_makers', id_object)
@@ -161,12 +170,19 @@ class AbstractManager(object):
 
 class Manager(AbstractManager):
     dict_type_objects = {}  # Dictionary of nodes classes. 'type' as a key
-    dict_user_name_type_objects = {}  # Dictionary of nodes classes. 'user display name in available_children' as a key
-                                      # value - is type of object
     nodes = {}  # Nodes dictionary. 'id' as a key
     components = {}  # All commands, parameters, events dictionary. 'id' as a key
     components_for_device = {}  # All commands, parameters, events of node. Node 'id' as a key
     inspector = ConfInspector()
+
+    # Dictionary of dictionaries of node classes (types of objects), keys are node_id and maker_id respectively
+    maker_ids = {}
+
+    @staticmethod
+    def get_node_class(maker_id):
+        for device_maker_ids in Manager.maker_ids.values():
+            if maker_id in device_maker_ids:
+                return device_maker_ids[maker_id]
 
     def __init__(self):
         signal.signal(signal.SIGTERM, shutdown)
@@ -225,9 +241,9 @@ class Manager(AbstractManager):
                 object = self.nodes[child_id]
                 object.handle_prepare_for_work()
 
-    def create_object(self, object_id, user_name_display):
+    def create_object(self, object_id, maker_id):
         class_name_str = self.get_type(object_id)
-        class_name = Manager.dict_user_name_type_objects[user_name_display]
+        class_name = Manager.get_node_class(maker_id)
         object = class_name(class_name_str, object_id)
         Manager.components_for_device[object_id] = []
         self.prepare_for_work(object, object_id)
@@ -256,6 +272,7 @@ class Manager(AbstractManager):
         device = Manager.nodes[id_device]
         available_devices = device.handle_get_available_children()
         self.unregister_all_makers(id_object=id_device)
+        Manager.maker_ids[id_device] = {}
 
         for callable_class_name, user_name_display in available_devices:
             if hasattr(callable_class_name, 'cls'):
@@ -263,10 +280,10 @@ class Manager(AbstractManager):
             else:
                 type_str = callable_class_name
 
-            self.register_maker(id_object=id_device, name=user_name_display, type_str=type_str.__name__)
-
-            if user_name_display not in Manager.dict_user_name_type_objects:
-                Manager.dict_user_name_type_objects[user_name_display] = callable_class_name
+            yes, maker_id = self.register_maker(id_object=id_device,
+                                                name=user_name_display,
+                                                type_str=type_str.__name__)
+            Manager.maker_ids[id_device][maker_id] = callable_class_name
 
     def get_type(self, node_id):
         type_str = self.type(node_id)[7:]  # cut string 'device.'
@@ -436,10 +453,7 @@ class Manager(AbstractManager):
                 try:
                     if r.state == rpc_pb2.StateStream.AFTER_CREATING_OBJECT:
                         log.info('Create device {0}'.format(r.id))
-                        id_name = self.parameter(r.id, 'type_when_create')
-                        rpc_value = self.multi_stub.parameter_call('get', id=id_name).value
-                        user_name_display = utils.value_from_rpc(rpc_value)
-                        self.create_object(r.id, user_name_display)
+                        self.create_object(r.id, r.maker_id)
 
                     elif r.state == rpc_pb2.StateStream.BEFORE_REMOVING_OBJECT:
                         log.info('Remove device {0}'.format(r.id))
