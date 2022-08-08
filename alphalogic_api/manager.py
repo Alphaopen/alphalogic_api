@@ -269,20 +269,34 @@ class Manager(AbstractManager):
             log.info('Object {0} removed'.format(object_id))
 
     def get_available_children(self, id_device):
+        # Request available children list from given device, return it by gRPC and store in the
+        # Manager itself
         device = Manager.nodes[id_device]
         available_devices = device.handle_get_available_children()
         self.unregister_all_makers(id_object=id_device)
         Manager.maker_ids[id_device] = {}
 
-        for callable_class_name, user_name_display in available_devices:
-            if hasattr(callable_class_name, 'cls'):
-                type_str = callable_class_name.cls
+        for item in available_devices:
+            if len(item) == 2:
+                (callable_class_name, user_name_display) = item
+                device_type = ""
+            elif len(item) == 3:
+                (callable_class_name, user_name_display, device_type) = item
             else:
-                type_str = callable_class_name
+                raise ValueError('get_available_children(): Wrong number of items in tuple ({}), '
+                                 'must be 2 or 3'.format(len(item)))
 
-            yes, maker_id = self.register_maker(id_object=id_device,
-                                                name=user_name_display,
-                                                type_str=type_str.__name__)
+            # for callable_class_name, user_name_display in available_devices:
+            if device_type:
+                type_str = device_type
+            else:
+                if hasattr(callable_class_name, 'cls'):
+                    type_str = callable_class_name.cls
+                else:
+                    type_str = callable_class_name
+                type_str = type_str.__name__
+
+            yes, maker_id = self.register_maker(id_device, user_name_display, type_str)
             Manager.maker_ids[id_device][maker_id] = callable_class_name
 
     def get_type(self, node_id):
@@ -431,6 +445,17 @@ class Manager(AbstractManager):
                                   is_copy=False, parameter=parameter_period)
             period = parameter_period.val  # Если параметр все-таки существует
             self.tasks_pool.add_task(time_stamp + period, getattr(object, name))
+
+    @staticmethod
+    def add_device(device_type, class_name):
+        """
+        Add device with a custom type
+        Should be called before a creation of Root device
+        (usually in the beginning of main section)
+        Needed only for devices whose names are different from class names,
+        like device "access.wipepoint"
+        """
+        Manager.dict_type_objects[device_type] = class_name
 
     def get_all_device(self, object_id, result):
         list_children = super(Manager, self).children(object_id)

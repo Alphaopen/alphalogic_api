@@ -156,7 +156,14 @@ class Object(object):
             self.__dict__[name] = value
     '''
     def handle_get_available_children(self):
-
+        """
+        Handler is executed when an adapter's client requests new available child objects
+        Return list of tuples, each tuple can be either (class_name, user_name_display) or
+        (class_name, user_name_display, device_type).
+        Second choice is meant for devices with a type containing dots, like "access.passpoint".
+        Otherwise, if class_name is not the actual name of a class (usually if "partial" is used),
+        class_name must contain attribute "cls" with the actual class name
+        """
         return []
 
     def handle_before_remove_device(self):
