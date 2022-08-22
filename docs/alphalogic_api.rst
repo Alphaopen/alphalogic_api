@@ -262,10 +262,10 @@ In the case of parameter changes, you can use whichever name of the handler func
 
 
 Оbject lifetime
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 Created by user
---------------
+---------------
 
 1. ``__init__``. You can't do anything with parameters, events, commands here.
 2. Create parameters, events, commands
@@ -274,7 +274,7 @@ Created by user
 5. ``handle_prepare_for_work`` handle
 
 Loaded from configuration
------------------------
+-------------------------
 1. ``__init__``. You can't do anything with parameters, events, commands here.
 2. Create parameters, events, commands
 3. ``handle_prepare_for_work`` handle
@@ -340,6 +340,61 @@ Handlers order example
             # 2: Parameters, commands, events created.
             #    Values from configuration loaded.
 
+Dynamic object components
+-------------------------
+Besides adding a component (parameter, command, event) as a class attribute, components can be added dynamically since alphalogic_api v0.0.23.
+Repeated addition overwrites the previous one.
+::
+    @run(period_one=3)
+    def run_function(self):
+        # Dynamic switching of attributes and parameters of dynamic_event
+        event_class = random.choice([TrivialEvent, MinorEvent, MajorEvent, CriticalEvent,
+                                     BlockerEvent])
+        param_type = random.choice([int, bool, unicode])
+        param_name = random.choice(["foo", "bar", "baz"])
+        if param_type is int:
+            param_value = random.randint(0, 10)
+        elif param_type is bool:
+            param_value = random.choice([True, False])
+        elif param_type is unicode:
+            param_value = random.choice(["value1", "value2", "value3", "value4", "value5"])
+        else:
+            assert False, "Impossible branch"
+
+        event = event_class((param_name, param_type))
+        
+        # Add dynamic event (not added as class attribute)
+        # Can be called after Object's constructor
+        Object.manager.add_event_to_object(self, "dynamic_event", event)
+        event.emit(**{param_name: param_value})
+
+        # Dynamic command example
+        # Handler, parameters, choices, default values can be changed
+        # Result type MUST NOT be changed
+        @command(result_type=bool, param1={"default": "default", "val1": "value1", "val2": "value2"})
+        def dynamic_command1(self, param1="default", param2=0):
+            log.info("param1={}, param2={}".format(param1, param2))
+            return True
+
+        @command(result_type=unicode, p1={"default": 0, "v1": 1, "v2": 2})
+        def dynamic_command2(self, p1=0, p2=True):
+            log.info("p1={}, p2={}".format(p1, p2))
+            return "OK"
+
+        # Can be called after Object's constructor
+        Object.manager.add_command_to_object(self, "dynamic_command",
+                                             random.choice([dynamic_command1, dynamic_command2]))
+
+
+        # Dynamic parameter: attributes and choices can be changed
+        # Type MUST NOT be changed
+        p = random.choice([ParameterLong(visible=Visible.setup, access=Access.read_write,
+                                         choices=((1, "one"), (2, "two"))),
+                           ParameterLong(visible=Visible.runtime, access=Access.read_only,
+                                         choices=((1, "ONE"), (2, "TWO")))])
+        
+        # Can be called after Object's constructor
+        Object.manager.add_parameter_to_object(self, "dynamic_parameter", p)
 
 Exceptions
 ~~~~~~~~~~~~~~

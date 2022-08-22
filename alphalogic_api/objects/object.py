@@ -225,6 +225,9 @@ class Root(Object):
             sys.exit(2)
 
     def init(self, id_root):
+        """
+        Called from Root constructor
+        """
         list_id_device_exist = []
         self.manager.get_all_device(id_root, list_id_device_exist)
         list_need_to_delete = set(Manager.nodes.keys()) - set(list_id_device_exist)

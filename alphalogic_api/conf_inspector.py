@@ -13,38 +13,55 @@ class ConfInspector(object):
         try:
             parameter = object.parameter(name)
             return parameter
-        except Exception, err:
+        except Exception:
             return None
+
+    def check_parameter_type_accordance(self, parameter_model):
+        try:
+            id_parameter = parameter_model.id
+            # 1 check value_type
+            if parameter_model.value_type is bool and not parameter_model.is_bool():
+                raise Exception('Real and model type are different')
+            elif parameter_model.value_type is int and not parameter_model.is_long():
+                raise Exception('Real and model type are different')
+            elif parameter_model.value_type is float and not parameter_model.is_double():
+                raise Exception('Real and model type are different')
+            elif parameter_model.value_type is datetime.datetime \
+                    and not parameter_model.is_datetime():
+                raise Exception('Real and model type are different')
+            elif parameter_model.value_type is unicode and not parameter_model.is_string():
+                raise Exception('Real and model type are different')
+
+            # Fix value type MAP -> LIST
+            if parameter_model.value_type == list and parameter_model.is_map():
+                parameter_model.set_list()
+
+        except Exception:
+            t = traceback.format_exc()
+            log.error("Parameter type discrepancy '{}':\n{}".format(parameter_model.name(),
+                                                                    decode_string(t)))
+            raise Exit
 
     def check_parameter_accordance(self, parameter_model):
         try:
-            id_parameter = parameter_model.id
-            #1 check value_type
-            if parameter_model.value_type is bool and not(parameter_model.is_bool()):
-                raise Exception('Real and model type are different')
-            elif parameter_model.value_type is int and not(parameter_model.is_long()):
-                raise Exception('Real and model type are different')
-            elif parameter_model.value_type is float and not(parameter_model.is_double()):
-                raise Exception('Real and model type are different')
-            elif parameter_model.value_type is datetime.datetime and not(parameter_model.is_datetime()):
-                raise Exception('Real and model type are different')
-            elif parameter_model.value_type is unicode and not(parameter_model.is_string()):
-                raise Exception('Real and model type are different')
+            # 1 check value_type
+            self.check_parameter_type_accordance(parameter_model)
 
-            #2 check visible
-            if parameter_model.visible == Visible.runtime and not(parameter_model.is_runtime()):
+            # 2 check visible
+            if parameter_model.visible == Visible.runtime and not parameter_model.is_runtime():
                 raise Exception('Real and model visible are different')
-            elif parameter_model.visible == Visible.setup and not(parameter_model.is_setup()):
+            elif parameter_model.visible == Visible.setup and not parameter_model.is_setup():
                 raise Exception('Real and model visible are different')
-            elif parameter_model.visible == Visible.hidden and not(parameter_model.is_hidden()):
+            elif parameter_model.visible == Visible.hidden and not parameter_model.is_hidden():
                 raise Exception('Real and model visible are different')
-            elif parameter_model.visible == Visible.common and not(parameter_model.is_common()):
+            elif parameter_model.visible == Visible.common and not parameter_model.is_common():
                 raise Exception('Real and model visible are different')
 
             # 3 check access
-            if parameter_model.access == Access.read_only and not(parameter_model.is_read_only()):
+            if parameter_model.access == Access.read_only and not parameter_model.is_read_only():
                 raise Exception('Real and model access are different')
-            elif parameter_model.access == Access.read_write and not(parameter_model.is_read_write()):
+            elif parameter_model.access == Access.read_write \
+                    and not parameter_model.is_read_write():
                 raise Exception('Real and model access are different')
 
             # 4 check enums
@@ -71,71 +88,82 @@ class ConfInspector(object):
                             raise Exception('Real and model enums are different')
             '''
 
-            # Fix value type MAP -< LIST
-            if parameter_model.value_type == list and parameter_model.is_map():
-                parameter_model.set_list()
-
-        except Exception, err:
+        except Exception:
             t = traceback.format_exc()
-            log.error('Parameter discrepancy \'{0}\':\n{1}'.format(parameter_model.name(), decode_string(t)))
+            log.error("Parameter discrepancy '{}':\n{}".format(parameter_model.name(),
+                                                               decode_string(t)))
             raise Exit
 
     def is_event_exist(self, name, object):
         try:
             event = object.event(name)
             return event
-        except Exception, err:
+        except Exception:
             return None
 
     def check_event_accordance(self, event_model):
+        """
+        Check that given event_model and event in the C++ core has:
+        - the same priority,
+        - same argument names, types and amount.
+        Also check that event_model has attribute id.
+        Notice: corresponding event in the C++ core is searched by event id from event_model
+        """
         try:
             id_event = event_model.id
             # 1 check priority
-            if event_model.priority == Priority.blocker and not(event_model.is_blocker()):
+            if event_model.priority == Priority.blocker and not event_model.is_blocker():
                 raise Exception('Real and model priority are different')
-            elif event_model.priority == Priority.critical and not(event_model.is_critical()):
+            elif event_model.priority == Priority.critical and not event_model.is_critical():
                 raise Exception('Real and model priority are different')
-            elif event_model.priority == Priority.major and not(event_model.is_major()):
+            elif event_model.priority == Priority.major and not event_model.is_major():
                 raise Exception('Real and model priority are different')
-            elif event_model.priority == Priority.minor and not(event_model.is_minor()):
+            elif event_model.priority == Priority.minor and not event_model.is_minor():
                 raise Exception('Real and model priority are different')
 
             # 2 check argument list in code and configuration
             code_arguments_list = set([x[0] for x in event_model.arguments])
             conf_arguments_list = set(event_model.argument_list())
             if code_arguments_list != conf_arguments_list:
-                raise Exception('Event arguments list mismathcing: {0}'.format(conf_arguments_list^code_arguments_list))
+                raise Exception('Event arguments list mismathcing: {0}'.format(
+                    conf_arguments_list ^ code_arguments_list))
 
             # 3 check argument list and check type in argument_list
             for arg_name_model, arg_type_model in event_model.arguments:
                 arg_name_real, arg_value = event_model.argument(arg_name_model)
                 arg_type_real = type(value_from_rpc(arg_value))
                 if arg_name_model != arg_name_real or \
-                        not(self.check_value_type_accordance(arg_type_model, arg_type_real)):
+                        not (self.check_value_type_accordance(arg_type_model, arg_type_real)):
                     raise Exception('Real and model arguments are different')
 
         except Exception, err:
             t = traceback.format_exc()
-            log.error('Event discrepancy \'{0}\'\n{1}'.format(event_model.name(), decode_string(t)))
+            log.error(
+                'Event discrepancy \'{0}\'\n{1}'.format(event_model.name(), decode_string(t)))
             raise Exit
 
     def check_command_accordance(self, command_model):
+        """
+        Check that given command_model and command in the C++ core has same argument names, types
+        and amount.
+        Also check that command_model has attribute id.
+        Notice: corresponding command in the C++ core is searched by command id from command_model.
+        Attention: supported argument types: unicode, int, long, float, datetime, bool.
+        """
         try:
             id_command = command_model.id
             # 1 check return type
-            '''
-            model_result_type = command_model.result_type
-            if model_result_type is bool and not(command_model.is_bool()):
-                raise Exception('Real and model result type are different')
-            elif model_result_type is int and not(command_model.is_long()):
-                raise Exception('Real and model result type are different')
-            elif model_result_type is float and not(command_model.is_double()):
-                raise Exception('Real and model result type are different')
-            elif model_result_type is datetime.datetime and not(command_model.is_datetime()):
-                raise Exception('Real and model result type are different')
-            elif model_result_type is unicode and not(command_model.is_string()):
-                raise Exception('Real and model result type are different')
-            '''
+            # model_result_type = command_model.result_type
+            # if model_result_type is bool and not(command_model.is_bool()):
+            #     raise Exception('Real and model result type are different')
+            # elif model_result_type is int and not(command_model.is_long()):
+            #     raise Exception('Real and model result type are different')
+            # elif model_result_type is float and not(command_model.is_double()):
+            #     raise Exception('Real and model result type are different')
+            # elif model_result_type is datetime.datetime and not(command_model.is_datetime()):
+            #     raise Exception('Real and model result type are different')
+            # elif model_result_type is unicode and not(command_model.is_string()):
+            #     raise Exception('Real and model result type are different')
 
             # 2 check argument list and check type in argument_list
             for arg_name_model, _ in command_model.arguments:
@@ -143,12 +171,13 @@ class ConfInspector(object):
                 arg_name_real, arg_value = command_model.argument(arg_name_model)
                 arg_type_real = type(value_from_rpc(arg_value))
                 if arg_name_model != arg_name_real or \
-                        not(self.check_value_type_accordance(arg_type_model, arg_type_real)):
-                    raise Exception('Real and model arguments are different')
+                        not self.check_value_type_accordance(arg_type_model, arg_type_real):
+                    raise Exception("Real and model arguments are different")
 
-        except Exception, err:
+        except Exception:
             t = traceback.format_exc()
-            log.error('Command discrepancy \'{0}\': {1}'.format(command_model.name(), decode_string(t)))
+            log.error("Command discrepancy '{0}': {1}".format(command_model.name(),
+                                                              decode_string(t)))
             raise Exit
 
     def check_value_type_accordance(self, arg_type_model, arg_type_real):

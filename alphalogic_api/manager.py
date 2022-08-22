@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import datetime
 import signal
 import time
 from threading import Thread
 import traceback
 from alphalogic_api.protocol import rpc_pb2
 from alphalogic_api.multistub import MultiStub
-from alphalogic_api.objects.parameter import Parameter, ParameterDouble
+from alphalogic_api.objects.parameter import Parameter, ParameterDouble, AbstractParameter
 from alphalogic_api.objects.event import Event
 from alphalogic_api.objects.command import Command
 from alphalogic_api.logger import log
 from alphalogic_api.tasks_pool import TasksPool
 from alphalogic_api.utils import shutdown, decode_string
-from alphalogic_api.attributes import Visible
+from alphalogic_api.attributes import Visible, Access
 from alphalogic_api.exceptions import ComponentNotFound
 from alphalogic_api.conf_inspector import ConfInspector
 from alphalogic_api import options
@@ -20,6 +22,9 @@ from alphalogic_api import utils
 
 
 class AbstractManager(object):
+    """
+    Class AbstractManager provides methods to request ObjectService from the C++ core
+    """
 
     def _call(self, name_func, id_object, *args, **kwargs):
         return self.multi_stub.object_call(name_func, id=id_object, *args, **kwargs)
@@ -72,6 +77,9 @@ class AbstractManager(object):
         return answer.id
 
     def create_event(self, id_object, name):
+        """
+        Request C++ core to create event with given name for the given object id
+        """
         answer = self._call('create_event', id_object, name=name)
         return answer.id
 
@@ -108,6 +116,9 @@ class AbstractManager(object):
         return answer.ids
 
     def events(self, id_object):
+        """
+        Request list of event ids for the given object id from the C++ core
+        """
         answer = self._call('events', id_object)
         return answer.ids
 
@@ -124,6 +135,9 @@ class AbstractManager(object):
         return answer.id
 
     def event(self, id_object, name):
+        """
+        Request event id by event name for the given object id from the C++ core
+        """
         answer = self._call('event', id_object, name=name)
         return answer.id
 
@@ -171,11 +185,15 @@ class AbstractManager(object):
 class Manager(AbstractManager):
     dict_type_objects = {}  # Dictionary of nodes classes. 'type' as a key
     nodes = {}  # Nodes dictionary. 'id' as a key
-    components = {}  # All commands, parameters, events dictionary. 'id' as a key
-    components_for_device = {}  # All commands, parameters, events of node. Node 'id' as a key
+    components = {}  # All commands, parameters, events dictionary. component id is a key
+
+    # All command, parameter, event ids of an object. object id is a key
+    components_for_device = {}
+
     inspector = ConfInspector()
 
-    # Dictionary of dictionaries of node classes (types of objects), keys are node_id and maker_id respectively
+    # Dictionary of dictionaries of node classes (types of objects),
+    # keys are node_id and maker_id respectively
     maker_ids = {}
 
     @staticmethod
@@ -197,25 +215,40 @@ class Manager(AbstractManager):
 
     def prepare_for_work(self, object, id):
         Manager.nodes[id] = object
-        list_id_parameters_already_exists = self.parameters(id)
-        list_parameters_name_already_exists = map(lambda id: self.multi_stub.parameter_call('name', id=id).name,
-                                                  list_id_parameters_already_exists)
-        list_parameters_name_period = [getattr(object, name).period_name for name in object.run_function_names]
-        list_parameters_name_should_exists = filter(lambda attr: type(getattr(object, attr)) is Parameter, dir(object))
+        core_parameter_ids = self.parameters(id)
+        core_parameter_names = [self.multi_stub.parameter_call('name', id=id_).name for id_
+                                in core_parameter_ids]
 
-        list_parameters_name_should_exists = map(lambda x: (getattr(object, x), x), list_parameters_name_should_exists)
-        list_parameters_name_should_exists = list(zip(*sorted(list_parameters_name_should_exists,
+        list_parameters_name_period = [getattr(object, name).period_name for name
+                                       in object.run_function_names]
+
+        # List of object parameters' names
+        object_parameter_names = [attr for attr in dir(object)
+                                  if type(getattr(object, attr)) is Parameter]
+
+        # List of pairs (parameter, parameter_name)
+        object_parameter_names = [(getattr(object, name), name) for name in object_parameter_names]
+
+        object_parameter_names = list(zip(*sorted(object_parameter_names,
                                                               key=lambda x: x[0].index_number))[1])
-        list_parameters_name_should_exists = list_parameters_name_should_exists + list_parameters_name_period
-        list_parameters_name_should_exists = [name for name in list_parameters_name_should_exists
-                                              if name not in list_parameters_name_already_exists]
+        object_parameter_names = object_parameter_names + list_parameters_name_period
 
-        # order of call below function is important
-        self.configure_run_function(object, id, list_id_parameters_already_exists)
-        list_id_parameters_already_exists = self.parameters(id)
-        self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_should_exists)
-        list_id_parameters_already_exists = self.parameters(id)
-        self.configure_parameters(object, id, list_id_parameters_already_exists, list_parameters_name_already_exists)
+        # List of names in the object and not in the core
+        object_parameter_names = [name for name in object_parameter_names
+                                  if name not in core_parameter_names]
+
+        # Attention: order of the following function calls is important
+        self.configure_run_function(object, id, core_parameter_ids)
+
+        self.create_dynamic_parameters(object)
+
+        # Update parameter ids
+        core_parameter_ids = self.parameters(id)
+        # TODO Why call configure_parameters twice?
+        self.configure_parameters(object, id, core_parameter_ids, object_parameter_names)
+        core_parameter_ids = self.parameters(id)
+        self.configure_parameters(object, id, core_parameter_ids, core_parameter_names)
+
         self.configure_commands(object, id)
         self.configure_events(object, id)
 
@@ -223,7 +256,8 @@ class Manager(AbstractManager):
         for child_id in super(Manager, self).children(id_parent):
             class_name_str = self.get_type(child_id)
             if class_name_str not in Manager.dict_type_objects:
-                Manager.dict_type_objects[class_name_str] = utils.get_class_name_from_str(class_name_str)
+                Manager.dict_type_objects[class_name_str] = utils.get_class_name_from_str(
+                    class_name_str)
             class_name = Manager.dict_type_objects[class_name_str]
 
             if class_name:
@@ -303,22 +337,105 @@ class Manager(AbstractManager):
         type_str = self.type(node_id)[7:]  # cut string 'device.'
         return type_str
 
-    def create_parameter(self, name, object, object_id, list_id_parameters_already_exists, is_copy=True,
-                         parameter=None):
-        list_name_parameters_already_exists = map(lambda id: self.multi_stub.parameter_call('name', id=id).name,
-                                                  list_id_parameters_already_exists)
-        if is_copy and name in object.__dict__:
-            parameter = object.__dict__[name].get_copy()
-        elif is_copy and name not in object.__dict__ and options.args.development_mode:
+    def create_dynamic_parameters(self, object_):
+        # Set up dynamically added parameters
+        core_parameter_ids = self.parameters(object_.id)
+        core_parameter_names = [self.multi_stub.parameter_call('name', id=id_).name
+                                for id_ in core_parameter_ids]
+        # dict {name: id}
+        core_parameters = dict(zip(core_parameter_names, core_parameter_ids))
+
+        object_parameter_names = [name for name in dir(object_)
+                                  if type(getattr(object_, name)) is Parameter]
+        parameters_to_add = [name for name in core_parameter_names
+                             if name not in object_parameter_names]
+        for name in parameters_to_add:
+            # Create parameter
+            id_ = core_parameters[name]
+
+            # ValueType
+            if self.multi_stub.parameter_call('is_string', id=id_).yes:
+                value_type = unicode
+            elif self.multi_stub.parameter_call('is_long', id=id_).yes:
+                value_type = int
+            elif self.multi_stub.parameter_call('is_double', id=id_).yes:
+                value_type = float
+            elif self.multi_stub.parameter_call('is_datetime', id=id_).yes:
+                value_type = datetime.datetime
+            elif self.multi_stub.parameter_call('is_bool', id=id_).yes:
+                value_type = bool
+            elif self.multi_stub.parameter_call('is_map', id=id_).yes:
+                value_type = dict
+            elif self.multi_stub.parameter_call('is_list', id=id_).yes:
+                value_type = list
+            else:
+                raise Exception("Unknown value type for parameter {}".format(name))
+
+            # Visible
+            if self.multi_stub.parameter_call('is_runtime', id=id_).yes:
+                visible = Visible.runtime
+            elif self.multi_stub.parameter_call('is_setup', id=id_).yes:
+                visible = Visible.setup
+            elif self.multi_stub.parameter_call('is_hidden', id=id_).yes:
+                visible = Visible.hidden
+            elif self.multi_stub.parameter_call('is_common', id=id_).yes:
+                visible = Visible.common
+            else:
+                raise Exception("Unknown visible option for parameter {}".format(name))
+
+            # Access
+            if self.multi_stub.parameter_call('is_read_write', id=id_).yes:
+                access = Access.read_write
+            elif self.multi_stub.parameter_call('is_read_only', id=id_).yes:
+                access = Access.read_only
+            else:
+                raise Exception("Unknown access option for parameter {}".format(name))
+
+            param = Parameter(value_type=value_type, parameter_name=name, id=id_,
+                              visible=visible, access=access)
+            param.set_multi_stub(self.multi_stub)
+            setattr(object_, name, param)
+
+    def add_parameter_to_object(self, object_, name, parameter):
+        """
+        Add dynamic `parameter` with `name` to device `object_`
+        Attention (1): must be called only after Object constructor (object_ must have id).
+        Attention (2): if parameter is overwritten, parameter type cannot be changed.
+        """
+        if hasattr(object_, name):
+            log.debug("Overwrite parameter {} of object {}".format(name, object_.id))
+
+        setattr(object_, name, parameter)
+        core_parameter_ids = self.parameters(object_.id)
+        self.create_parameter(name, object_, object_.id, core_parameter_ids, parameter=parameter,
+                              overwrite=True)
+
+    def create_parameter(self, name, object, object_id, list_id_parameters_already_exists,
+                         is_copy=True,
+                         parameter=None,
+                         overwrite=False):
+        """
+        overwrite flag means that instead of checking accordance between Python and C++ parts,
+        C++ parameter is overwritten with Python parameter
+        """
+        core_parameter_names = [self.multi_stub.parameter_call('name', id=id_).name for id_
+                                in list_id_parameters_already_exists]
+        if is_copy and hasattr(object, name):
+            # Parameter exists in Python object
+            parameter = getattr(object, name).get_copy()
+        elif is_copy and not hasattr(object, name) and options.args.development_mode:
+            # Development mode
             return
         elif parameter is None:
-            raise Exception('{0} is None'.format(name))
+            # Error: parameter doesn't exist in Python object
+            raise Exception("{0} is None".format(name))
 
-        object.__dict__[name] = parameter
+        setattr(object, name, parameter)
         parameter.parameter_name = name
         parameter.set_multi_stub(self.multi_stub)
 
-        if name not in list_name_parameters_already_exists or options.args.development_mode:  # if parameter doesn't exist
+        if name not in core_parameter_names or options.args.development_mode:
+            # Create new parameter
             value_type = parameter.value_type
             id_parameter = getattr(self, utils.create_parameter_definer(value_type)) \
                 (id_object=object_id, name=name)
@@ -327,6 +444,8 @@ class Manager(AbstractManager):
             getattr(parameter, parameter.access.create_func)()
             if parameter.choices is not None:
                 parameter.set_choices()
+
+            # Set value
             if id_parameter not in list_id_parameters_already_exists:
                 parameter.val = getattr(parameter, 'default', None)
             elif parameter.choices is not None:
@@ -334,70 +453,167 @@ class Manager(AbstractManager):
                 if (is_tuple and parameter.val not in zip(*parameter.choices)[0]) \
                         or not is_tuple and parameter.val not in parameter.choices:
                     parameter.val = getattr(parameter, 'default', None)
-        elif name in list_name_parameters_already_exists and not options.args.development_mode:
+
+        elif name in core_parameter_names and not options.args.development_mode:
+            # Parameter already exists in the C++ core
             id_parameter = self.parameter(object_id, name)
             parameter.id = id_parameter
-            Manager.inspector.check_parameter_accordance(parameter)
+            if overwrite:
+                # Parameter type must stay unchanged
+                Manager.inspector.check_parameter_type_accordance(parameter)
+
+                # Overwrite visibility, access flags, and choices in the C++ core
+                getattr(parameter, parameter.visible.create_func)()
+                getattr(parameter, parameter.access.create_func)()
+                if parameter.choices is not None:
+                    parameter.set_choices()
+            else:
+                Manager.inspector.check_parameter_accordance(parameter)
+        else:
+            raise Exception("create_parameter(): logical error")
 
         if is_copy:
             Manager.components[id_parameter] = parameter
             Manager.components_for_device[object_id].append(id_parameter)
 
-    def configure_parameters(self, object, object_id, list_id_parameters_already_exists, list_names):
+    def configure_parameters(self, object_, object_id, list_id_parameters_already_exists,
+                             list_names):
         for name in list_names:
-            self.create_parameter(name, object, object_id, list_id_parameters_already_exists)
+            self.create_parameter(name, object_, object_id, list_id_parameters_already_exists)
 
-    def create_command(self, name, command, object_id):
-        list_name_commands_already_exists = map(lambda id: self.multi_stub.command_call('name', id=id).name,
-                                                self.commands(object_id))
+    def create_command(self, name, command, object_id, overwrite=False):
+        """
+        overwrite flag means that instead of checking accordance between Python and C++ parts,
+        C++ command is overwritten with Python command
+        """
+        # List of command names from the C++ core
+        core_command_names = [self.multi_stub.command_call('name', id=id_).name
+                              for id_ in self.commands(object_id)]
         command.set_multi_stub(self.multi_stub)
-        if name not in list_name_commands_already_exists or options.args.development_mode:  # if event doesn't exist
+        if name not in core_command_names or options.args.development_mode:
+            # Create new command
             result_type = command.result_type
             id_command = getattr(self, utils.create_command_definer(result_type)) \
                 (id_object=object_id, name=name)
             command.id = id_command
+
+            # Set command arguments in the C++ core
             command.clear()
             for arg in command.arguments:
                 name_arg, value_arg = arg
                 command.update_or_create_argument(name_arg, value_arg)
-        elif name in list_name_commands_already_exists and not options.args.development_mode:
+        elif name in core_command_names and not options.args.development_mode:
+            # Command already exists in the C++ core
+            # Set existing command id
             id_command = self.command(object_id, name)
             command.id = id_command
-            Manager.inspector.check_command_accordance(command)
+            if overwrite:
+                # Command result type is not checked, but must stay unchanged,
+                # adapter is responsible for this
 
+                # Overwrite command arguments in the C++ core
+                command.clear()
+                for arg in command.arguments:
+                    name_arg, value_arg = arg
+                    command.update_or_create_argument(name_arg, value_arg)
+            else:
+                Manager.inspector.check_command_accordance(command)
+        else:
+            raise Exception("create_command(): logical error")
+
+        # Add command to Manager class
         Manager.components[id_command] = command
         Manager.components_for_device[object_id].append(id_command)
 
-    def configure_commands(self, object, object_id):
-        list_commands = filter(lambda attr: type(getattr(object, attr)) is Command, dir(object))
+    def configure_commands(self, object_, object_id):
+        """
+        Configure commands for given object (TODO why can't they get object_id from object?)
+        """
+        list_commands = [attr for attr in dir(object_) if type(getattr(object_, attr)) is Command]
         for name in list_commands:
-            command = object.__dict__[name]
+            command = getattr(object_, name)
             self.create_command(name, command, object_id)
 
-    def configure_single_event(self, name, event, object_id):
-        list_name_events_already_exists = map(lambda id: self.multi_stub.event_call('name', id=id).name,
-                                              self.events(object_id))
+    def add_command_to_object(self, object_, name, command):
+        """
+        Add dynamic `command` with `name` to device `object_`
+        If command with `name` already exists, it's overwritten with the new command.
+        Attention (1): must be called only after Object constructor (object_ must have id).
+        Attention (2): if command is overwritten, its result type cannot be changed.
+        """
+        if hasattr(object_, name):
+            log.debug("Overwrite command {} of object {}".format(name, object_.id))
+
+        # Set actual name in decorated command object
+        setattr(command, "function_name", name)
+
+        # Add command to object
+        command = Command(object_, command)
+        setattr(object_, name, command)
+        self.create_command(name, command, object_.id, overwrite=True)
+
+    def configure_single_event(self, name, event, object_id, overwrite=False):
+        """
+        overwrite flag means that instead of checking accordance between Python and C++ parts,
+        C++ event is overwritten with Python event
+        """
+        # List of event names from the C++ core
+        core_event_names = [self.multi_stub.event_call("name", id=event_id).name for event_id
+                            in self.events(object_id)]
         event.set_multi_stub(self.multi_stub)
-        if name not in list_name_events_already_exists or options.args.development_mode:  # if event doesn't exist
+        if name not in core_event_names or options.args.development_mode:
+            # Create new event
             event.id = self.create_event(id_object=object_id, name=name)
+
+            # Set priority in the C++ core
             getattr(event, event.priority.create_func)()
+
+            # Set event arguments in the C++ core
             event.clear()
             for name_arg, value_type in event.arguments:
                 value_arg = utils.value_from_rpc(utils.get_rpc_value(value_type))
                 event.update_or_create_argument(name_arg, value_arg)
-        elif name in list_name_events_already_exists and not options.args.development_mode:
+        elif name in core_event_names and not options.args.development_mode:
+            # Event already exists in the C++ core
+            # Set existing event id
             id_event = self.event(object_id, name)
             event.id = id_event
-            Manager.inspector.check_event_accordance(event)
+            if overwrite:
+                # Set priority in the C++ core
+                getattr(event, event.priority.create_func)()
 
+                # Overwrite event arguments in the C++ core
+                event.clear()
+                for name_arg, value_type in event.arguments:
+                    value_arg = utils.value_from_rpc(utils.get_rpc_value(value_type))
+                    event.update_or_create_argument(name_arg, value_arg)
+            else:
+                Manager.inspector.check_event_accordance(event)
+
+        # Add event to Manager class
         Manager.components[event.id] = event
         Manager.components_for_device[object_id].append(event.id)
 
-    def configure_events(self, object, object_id):
-        list_events = filter(lambda attr: type(getattr(object, attr)) is Event, dir(object))
-        for name in list_events:
-            object.__dict__[name] = object.__dict__[name].get_copy()
-            event = object.__dict__[name]
+    def add_event_to_object(self, object_, name, event):
+        """
+        Add dynamic `event` with `name` to device `object_`
+        If event with `name` already exists, it's overwritten with the new event.
+        Attention: must be called only after Object constructor (object_ must have id).
+        """
+        if hasattr(object_, name):
+            log.debug("Overwrite event {} of object {}".format(name, object_.id))
+        setattr(object_, name, event)
+        self.configure_single_event(name, event, object_.id, overwrite=True)
+
+    def configure_events(self, object_, object_id):
+        """
+        Configure events for given object (TODO why can't they get object_id from object?)
+        """
+        events = [attr for attr in dir(object_) if type(getattr(object_, attr)) is Event]
+        for name in events:
+            # TODO Make event clone (why?)
+            setattr(object_, name, getattr(object_, name).get_copy())
+            event = getattr(object_, name)
             self.configure_single_event(name, event, object_id)
 
     def get_components(self, object_id, component_type):
@@ -441,7 +657,8 @@ class Manager(AbstractManager):
             period_name = getattr(object, name).period_name
             period = getattr(object, name).period_default_value
             parameter_period = ParameterDouble(default=period, visible=Visible.setup)
-            self.create_parameter(period_name, object, object.id, list_id_parameters_already_exists,
+            self.create_parameter(period_name, object, object.id,
+                                  list_id_parameters_already_exists,
                                   is_copy=False, parameter=parameter_period)
             period = parameter_period.val  # Если параметр все-таки существует
             self.tasks_pool.add_task(time_stamp + period, getattr(object, name))
@@ -500,7 +717,9 @@ class Manager(AbstractManager):
                                     Manager.components[r.id].callback(device, param)
                                 except Exception as err:
                                     t = traceback.format_exc()
-                                    log.error('After set parameter value callback error:\n{0}'.format(decode_string(t)))
+                                    log.error(
+                                        'After set parameter value callback error:\n{0}'.format(
+                                            decode_string(t)))
                         else:
                             log.warn('Parameter {0} not found'.format(r.id))
 
