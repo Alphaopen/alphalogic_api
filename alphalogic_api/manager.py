@@ -474,7 +474,8 @@ class Manager(AbstractManager):
 
         if is_copy:
             Manager.components[id_parameter] = parameter
-            Manager.components_for_device[object_id].append(id_parameter)
+            if id_parameter not in Manager.components_for_device[object_id]:
+                Manager.components_for_device[object_id].append(id_parameter)
 
     def configure_parameters(self, object_, object_id, list_id_parameters_already_exists,
                              list_names):
@@ -523,7 +524,8 @@ class Manager(AbstractManager):
 
         # Add command to Manager class
         Manager.components[id_command] = command
-        Manager.components_for_device[object_id].append(id_command)
+        if id_command not in Manager.components_for_device[object_id]:
+            Manager.components_for_device[object_id].append(id_command)
 
     def configure_commands(self, object_, object_id):
         """
@@ -592,7 +594,8 @@ class Manager(AbstractManager):
 
         # Add event to Manager class
         Manager.components[event.id] = event
-        Manager.components_for_device[object_id].append(event.id)
+        if event.id not in Manager.components_for_device[object_id]:
+            Manager.components_for_device[object_id].append(event.id)
 
     def add_event_to_object(self, object_, name, event):
         """
