@@ -340,6 +340,35 @@ Handlers order example
             # 2: Parameters, commands, events created.
             #    Values from configuration loaded.
 
+Arbitrary object type
+---------------------
+Alphalogic object has ``type`` attribute. By default, it's set to Python object's class name. For example, an object with Python class ``MyObject`` has ``MyObject`` alphalogic object type.
+However, you may want to set an alphalogic type which cannot be represented by Python class name, like ``access.wipepoint``. Such names usually required for ACS adapters.
+In this case, two steps should be done to set an arbitrary type attribute.
+First, in list returned from parent's ``handle_available_children()`` method, corresponding item should be represented by a tuple with 3 elements where the last element is the required type name.
+Second, before creating root object, this type should be registered with ``Manager.add_device("type name", ClassName)`` method.
+Example:
+::
+    class AccessWipepoint(Object):
+        # This device has alphalogic type "access.wipepoint"
+        pass
+
+    class RootDevice(Root):
+        def handle_get_available_children(self):
+            # Set additional element in tuple with device type
+            return [(AccessWipepoint, "access wipepoint device", "access.wipepoint")]
+
+    if __name__ == "__main__":
+        # Add device AccessWipepoint to alphalogic-api with device type "access.wipepoint"
+        Manager.add_device("access.wipepoint", AccessWipepoint)
+
+        # main loop
+        root = RootDevice()
+        # ...
+
+
+If you need to set arbitrary type for the root object, this type must be set in the C++ part of your adapter.
+
 Dynamic object components
 -------------------------
 Besides adding a component (parameter, command, event) as a class attribute, components can be added dynamically since alphalogic_api v0.0.23.
