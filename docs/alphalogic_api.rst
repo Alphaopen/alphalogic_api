@@ -342,11 +342,14 @@ Handlers order example
 
 Arbitrary object type
 ---------------------
-Alphalogic object has ``type`` attribute. By default, it's set to Python object's class name. For example, an object with Python class ``MyObject`` has ``MyObject`` alphalogic object type.
-However, you may want to set an alphalogic type which cannot be represented by Python class name, like ``access.wipepoint``. Such names usually required for ACS adapters.
+Alphalogic objects have ``type`` attribute. By default, it's set to Python object's class name. For example, an object of Python class ``MyObject`` has ``MyObject`` alphalogic object type.
+However, you may want to set an alphalogic type, which cannot be represented by Python class name, like ``access.wipepoint``. Such names are usually required for ACS adapters.
 In this case, two steps should be done to set an arbitrary type attribute.
-First, in list returned from parent's ``handle_available_children()`` method, corresponding item should be represented by a tuple with 3 elements where the last element is the required type name.
+
+First, in the list returned from parent's ``handle_available_children()`` method, corresponding item should be represented by a tuple with 3 elements where the last element is the required type name.
+
 Second, before creating root object, this type should be registered with ``Manager.add_device("type name", ClassName)`` method.
+
 Example:
 ::
     class AccessWipepoint(Object):
@@ -355,7 +358,7 @@ Example:
 
     class RootDevice(Root):
         def handle_get_available_children(self):
-            # Set additional element in tuple with device type
+            # Set device type in a tuple (the last item)
             return [(AccessWipepoint, "access wipepoint device", "access.wipepoint")]
 
     if __name__ == "__main__":
