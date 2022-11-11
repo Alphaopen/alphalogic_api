@@ -25,7 +25,7 @@ The Alphalogic API is an official library that provides developers with the tool
 Compatibility
 -------------
 
-The library is compatible with Alphalogic adapters versions since ``.0315``.
+The library is compatible with Alphalogic adapter's core since ``381``.
 
 Installation
 ------------

@@ -78,8 +78,11 @@ def command(*argv_c, **kwargs_c):
 def run(*argv_r, **kwargs_r):
     """
     | This function is used to be called periodically by the gRPC process.
-    | It can be defined inside the Object class body to implement some repeatable tasks like interrogation of the controller, modem, database, etc.
+    | It can be defined inside the Object class body to implement some repeatable tasks like
+    | interrogation of the controller, modem, database, etc.
     | It is required to specify the necessary trigger period in seconds in the argument of the function.
+    | Name of this function should not be started with ``_``.
+
     Example: ::
 
         # Called every 1 second.
@@ -88,6 +91,17 @@ def run(*argv_r, **kwargs_r):
         @run(period_one=1)
         def run_one(self):
             self.counter.val += 1
+
+    | Synchronization
+    | All functions wrapped in ``@run`` decorator may be called simultaneously in a thread pool.
+    | However, ``Object`` has ``mutex`` attribute for synchronization between ``@run`` functions
+    | defined in one Object instance.
+    | They are also synchronized with ``handle_before_remove_device()``.
+    | ``handle_before_remove_device()`` can be called only after the end of the last call
+    | of any ``@run`` functions of the object.
+    | Note however, that there's no any synchronization between ``@run`` functions
+    | and object's constructor, ``handle_defaults_loaded()``, ``handle_prepare_for_work()``,
+    | ``handle_get_available_children()`` and also between different Object instances.
     """
     def decorator(func):
         def wrapped(device, call_again=False):

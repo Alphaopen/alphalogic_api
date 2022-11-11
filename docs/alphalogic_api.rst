@@ -182,7 +182,7 @@ Here is the definition of the class Event:
 
 
 Decorators
-----------
+~~~~~~~~~~
 A decorator is any callable Python object that is used to modify a function, method or class definition.
 A decorator is passed the original object being defined and returns a modified object, which is then bound to the name in the definition.
 Decorators are used for creating class methods or static methods, adding function attributes, tracing, setting pre- and postconditions, etc.
@@ -193,26 +193,24 @@ The @ special character is used to indicate a decorator.
 .. _command_link:
 
 Command
-~~~~~~~
+-------
 Possible values for result type are: unicode, datetime.datetime, int, float, bool, list, dict.
 Here is the definition of the class Command:
 
-.. autoclass:: command
-   :members:
+.. autofunction:: command
 
 
 Run functions
-~~~~~~~
+-------------
 There is easy way to do some job periodicaly. You can define a lot of run functions in the root or object.
 
-.. autoclass:: run
-   :members:
+.. autofunction:: run
 
 
 .. py:module:: alphalogic_api.exceptions
 
 Handlers
---------
+~~~~~~~~
 
 The handlers are executed when the corresponding condition occurs.
 There are three types of handlers which can be installed to control the workflow of the adapter before or after calling some functions:
@@ -278,6 +276,8 @@ Loaded from configuration
 1. ``__init__``. You can't do anything with parameters, events, commands here.
 2. Create parameters, events, commands
 3. ``handle_prepare_for_work`` handle
+
+.. Note:: Order of ``handle_prepare_for_work`` handle calls is from child objects to the root object. All initialization including handler calls is performed inside the Root constructor.
 
 Removed by user
 ---------------
