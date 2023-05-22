@@ -9,7 +9,7 @@ from alphalogic_api.objects.event import Event
 from alphalogic_api.objects.command import Command
 from alphalogic_api.objects.parameter import Parameter, ParameterString, ParameterBool, ParameterLong
 from alphalogic_api.attributes import Visible, Access
-from alphalogic_api.manager import Manager
+from alphalogic_api.manager import Manager, timeit
 from alphalogic_api.logger import log
 from alphalogic_api.utils import Exit, decode_string
 from alphalogic_api import init
@@ -224,6 +224,7 @@ class Root(Object):
             log.info('The attempt of stub\'s run was failed')
             sys.exit(2)
 
+    @timeit
     def init(self, id_root):
         """
         Called from Root constructor

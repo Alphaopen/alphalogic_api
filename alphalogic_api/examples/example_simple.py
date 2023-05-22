@@ -14,7 +14,9 @@ from alphalogic_api.decorators import command, run
 # Handle will be executed after parameter param_double was changed
 def handle_after_set_double(node, parameter):
     node.log.info('double changed')
-    node.after_set_value_test_event.emit(value=parameter.val)
+
+    # TODO this doesn't work
+    # node.after_set_value_test_event.emit(value=parameter.val)
 
 
 class MyRoot(Root):

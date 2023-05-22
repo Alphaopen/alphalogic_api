@@ -21,6 +21,22 @@ from alphalogic_api import options
 from alphalogic_api import utils
 
 
+def timeit(method):
+    """
+    Decorator for measuring execution time of a given method
+    https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
+    """
+
+    def timed(*args, **kw):
+        ts = time.time()
+        result = method(*args, **kw)
+        te = time.time()
+        log.debug("{} {} ms".format(method.__name__, (te - ts) * 1000))
+        return result
+
+    return timed
+
+
 class AbstractManager(object):
     """
     Class AbstractManager provides methods to request ObjectService from the C++ core
@@ -112,12 +128,15 @@ class AbstractManager(object):
         return answer.id
 
     def parameters(self, id_object):
+        """
+        Request list of parameter ids for a given object id from the C++ core
+        """
         answer = self._call('parameters', id_object)
         return answer.ids
 
     def events(self, id_object):
         """
-        Request list of event ids for the given object id from the C++ core
+        Request list of event ids for a given object id from the C++ core
         """
         answer = self._call('events', id_object)
         return answer.ids
@@ -213,11 +232,11 @@ class Manager(AbstractManager):
     def configure_multi_stub(self, address):
         self.multi_stub = MultiStub(address)
 
+    @timeit
     def prepare_for_work(self, object, id):
         Manager.nodes[id] = object
         core_parameter_ids = self.parameters(id)
-        core_parameter_names = [self.multi_stub.parameter_call('name', id=id_).name for id_
-                                in core_parameter_ids]
+        core_parameter_names = self._get_core_parameter_names(core_parameter_ids)
 
         list_parameters_name_period = [getattr(object, name).period_name for name
                                        in object.run_function_names]
@@ -230,7 +249,7 @@ class Manager(AbstractManager):
         object_parameter_names = [(getattr(object, name), name) for name in object_parameter_names]
 
         object_parameter_names = list(zip(*sorted(object_parameter_names,
-                                                              key=lambda x: x[0].index_number))[1])
+                                                  key=lambda x: x[0].index_number))[1])
         object_parameter_names = object_parameter_names + list_parameters_name_period
 
         # List of names in the object and not in the core
@@ -238,16 +257,17 @@ class Manager(AbstractManager):
                                   if name not in core_parameter_names]
 
         # Attention: order of the following function calls is important
-        self.configure_run_function(object, id, core_parameter_ids)
+        core_parameter_ids, core_parameter_names = self.configure_run_function(object, id, core_parameter_ids,
+                                                                               core_parameter_names)
 
-        self.create_dynamic_parameters(object)
+        self.create_dynamic_parameters(object, core_parameter_ids, core_parameter_names)
 
-        # Update parameter ids
-        core_parameter_ids = self.parameters(id)
         # TODO Why call configure_parameters twice?
-        self.configure_parameters(object, id, core_parameter_ids, object_parameter_names)
-        core_parameter_ids = self.parameters(id)
-        self.configure_parameters(object, id, core_parameter_ids, core_parameter_names)
+        core_parameter_ids, core_parameter_names = self.configure_parameters(object, id, core_parameter_ids,
+                                                                             core_parameter_names,
+                                                                             object_parameter_names)
+
+        self.configure_parameters(object, id, core_parameter_ids, core_parameter_names, core_parameter_names)
 
         self.configure_commands(object, id)
         self.configure_events(object, id)
@@ -256,8 +276,7 @@ class Manager(AbstractManager):
         for child_id in super(Manager, self).children(id_parent):
             class_name_str = self.get_type(child_id)
             if class_name_str not in Manager.dict_type_objects:
-                Manager.dict_type_objects[class_name_str] = utils.get_class_name_from_str(
-                    class_name_str)
+                Manager.dict_type_objects[class_name_str] = utils.get_class_name_from_str(class_name_str)
             class_name = Manager.dict_type_objects[class_name_str]
 
             if class_name:
@@ -275,6 +294,7 @@ class Manager(AbstractManager):
                 object = self.nodes[child_id]
                 object.handle_prepare_for_work()
 
+    @timeit
     def create_object(self, object_id, maker_id):
         class_name_str = self.get_type(object_id)
         class_name = Manager.get_node_class(maker_id)
@@ -285,6 +305,7 @@ class Manager(AbstractManager):
         object.handle_prepare_for_work()
         Manager.nodes[object_id] = object
 
+    @timeit
     def delete_object(self, object_id):
         self.tasks_pool.stop_operation_thread()
 
@@ -337,11 +358,8 @@ class Manager(AbstractManager):
         type_str = self.type(node_id)[7:]  # cut string 'device.'
         return type_str
 
-    def create_dynamic_parameters(self, object_):
-        # Set up dynamically added parameters
-        core_parameter_ids = self.parameters(object_.id)
-        core_parameter_names = [self.multi_stub.parameter_call('name', id=id_).name
-                                for id_ in core_parameter_ids]
+    @timeit
+    def create_dynamic_parameters(self, object_, core_parameter_ids, core_parameter_names):
         # dict {name: id}
         core_parameters = dict(zip(core_parameter_names, core_parameter_ids))
 
@@ -410,16 +428,35 @@ class Manager(AbstractManager):
         self.create_parameter(name, object_, object_.id, core_parameter_ids, parameter=parameter,
                               overwrite=True)
 
+    def add_parameters_to_object(self, object_, names, parameters):
+        """
+        Optimized version of add_parameter_to_object for multiple parameters
+        """
+        core_parameter_ids = self.parameters(object_.id)
+        core_names = self._get_core_parameter_names(core_parameter_ids)
+        for name, parameter in zip(names, parameters):
+            if hasattr(object_, name):
+                log.debug("Overwrite parameter {} of object {}".format(name, object_.id))
+            setattr(object_, name, parameter)
+            id_ = self.create_parameter(name, object_, object_.id, core_parameter_ids, parameter=parameter,
+                                        overwrite=True, core_parameter_names=core_names)
+            core_names.append(name)
+            core_parameter_ids.append(id_)
+
     def create_parameter(self, name, object, object_id, list_id_parameters_already_exists,
                          is_copy=True,
                          parameter=None,
-                         overwrite=False):
+                         overwrite=False,
+                         core_parameter_names=None):
         """
         overwrite flag means that instead of checking accordance between Python and C++ parts,
-        C++ parameter is overwritten with Python parameter
+        C++ parameter is overwritten with Python parameter.
+        Return id of created parameter
         """
-        core_parameter_names = [self.multi_stub.parameter_call('name', id=id_).name for id_
-                                in list_id_parameters_already_exists]
+
+        if core_parameter_names is None:
+            core_parameter_names = self._get_core_parameter_names(list_id_parameters_already_exists)
+
         if is_copy and hasattr(object, name):
             # Parameter exists in Python object
             parameter = getattr(object, name).get_copy()
@@ -477,10 +514,19 @@ class Manager(AbstractManager):
             if id_parameter not in Manager.components_for_device[object_id]:
                 Manager.components_for_device[object_id].append(id_parameter)
 
-    def configure_parameters(self, object_, object_id, list_id_parameters_already_exists,
-                             list_names):
+        return id_parameter
+
+    @timeit
+    def configure_parameters(self, object_, object_id, core_ids, core_names, list_names):
+        core_ids = list(core_ids)
+        core_names = list(core_names)
+
         for name in list_names:
-            self.create_parameter(name, object_, object_id, list_id_parameters_already_exists)
+            id_ = self.create_parameter(name, object_, object_id, core_ids, core_parameter_names=core_names)
+            if id_ is not None:
+                core_ids.append(id_)
+                core_names.append(name)
+        return core_ids, core_names
 
     def create_command(self, name, command, object_id, overwrite=False):
         """
@@ -554,14 +600,15 @@ class Manager(AbstractManager):
         setattr(object_, name, command)
         self.create_command(name, command, object_.id, overwrite=True)
 
-    def configure_single_event(self, name, event, object_id, overwrite=False):
+    def configure_single_event(self, name, event, object_id, overwrite=False, core_event_names=None):
         """
         overwrite flag means that instead of checking accordance between Python and C++ parts,
         C++ event is overwritten with Python event
         """
         # List of event names from the C++ core
-        core_event_names = [self.multi_stub.event_call("name", id=event_id).name for event_id
-                            in self.events(object_id)]
+        if core_event_names is None:
+            core_event_names = self._get_core_event_names(object_id)
+
         event.set_multi_stub(self.multi_stub)
         if name not in core_event_names or options.args.development_mode:
             # Create new event
@@ -608,16 +655,34 @@ class Manager(AbstractManager):
         setattr(object_, name, event)
         self.configure_single_event(name, event, object_.id, overwrite=True)
 
+    @timeit
+    def add_events_to_object(self, object_, names, events):
+        """
+        Add dynamic `events` with `names` to device `object_`
+        If event with given name already exists, it's overwritten with the new event.
+        Attention: must be called only after Object constructor (object_ must have id).
+        Optimized version of `add_event_to_object`
+        """
+        core_event_names = self._get_core_event_names(object_.id)
+        for name, event in zip(names, events):
+            if hasattr(object_, name):
+                log.debug("Overwrite event {} of object {}".format(name, object_.id))
+            setattr(object_, name, event)
+            self.configure_single_event(name, event, object_.id, True, core_event_names)
+            core_event_names.append(name)
+
     def configure_events(self, object_, object_id):
         """
         Configure events for given object (TODO why can't they get object_id from object?)
         """
         events = [attr for attr in dir(object_) if type(getattr(object_, attr)) is Event]
+        core_event_names = self._get_core_event_names(object_.id)
         for name in events:
             # TODO Make event clone (why?)
             setattr(object_, name, getattr(object_, name).get_copy())
             event = getattr(object_, name)
-            self.configure_single_event(name, event, object_id)
+            self.configure_single_event(name, event, object_id, core_event_names=core_event_names)
+            core_event_names.append(name)
 
     def get_components(self, object_id, component_type):
         ids = getattr(self, component_type)(id_object=object_id)
@@ -646,25 +711,52 @@ class Manager(AbstractManager):
         ids = super(Manager, self).children(object_id)
         return list(Manager.nodes[id] for id in ids if id in Manager.nodes)
 
+    @timeit
     def recover_run_functions(self):
         for id_object in Manager.nodes:
             object = Manager.nodes[id_object]
-            self.configure_run_function(object, id_object)
+            for name in object.run_function_names:
+                time_stamp = time.time()
+                # Get value for parameter period
+                # It's ensured that period parameter is completely initialized either in Root init() method or
+                # in create_object() which is synchronous to this call
+                period_name = getattr(object, name).period_name
+                period = getattr(object, period_name).val
+                self.tasks_pool.add_task(time_stamp + period, getattr(object, name))
 
-    def configure_run_function(self, object, object_id, list_id_parameters_already_exists=None):
-        if not list_id_parameters_already_exists:
-            list_id_parameters_already_exists = self.parameters(object_id)
+    def configure_run_function(self, object, object_id, core_ids=None, core_names=None):
+        """
+        Return updated (core_ids, core_names)
+        """
+        if core_ids is None:
+            core_ids = self.parameters(object_id)
+        else:
+            core_ids = list(core_ids)
+        if core_names is None:
+            core_names = self._get_core_parameter_names(core_ids)
+        else:
+            core_names = list(core_names)
 
         for name in object.run_function_names:
             time_stamp = time.time()
             period_name = getattr(object, name).period_name
             period = getattr(object, name).period_default_value
             parameter_period = ParameterDouble(default=period, visible=Visible.setup)
-            self.create_parameter(period_name, object, object.id,
-                                  list_id_parameters_already_exists,
-                                  is_copy=False, parameter=parameter_period)
+            period_id = self.create_parameter(period_name,
+                                              object,
+                                              object.id,
+                                              core_ids,
+                                              is_copy=False,
+                                              parameter=parameter_period,
+                                              core_parameter_names=core_names)
             period = parameter_period.val  # Если параметр все-таки существует
             self.tasks_pool.add_task(time_stamp + period, getattr(object, name))
+
+            if period_id is not None:
+                core_ids.append(period_id)
+                core_names.append(period_name)
+
+        return core_ids, core_names
 
     @staticmethod
     def add_device(device_type, class_name):
@@ -745,3 +837,10 @@ class Manager(AbstractManager):
         except Exception as err:
             t = traceback.format_exc()
             log.error('grpc_thread error2: {0}'.format(decode_string(t)))
+
+    def _get_core_parameter_names(self, ids):
+        return [self.multi_stub.parameter_call('name', id=id_).name for id_ in ids]
+
+    def _get_core_event_names(self, object_id):
+        return [self.multi_stub.event_call("name", id=event_id).name
+                for event_id in self.events(object_id)]
