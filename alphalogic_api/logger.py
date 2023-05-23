@@ -53,7 +53,7 @@ class Logger(object):
             # logging doesn't support trace level, which is used in adapters, assign it to debug
             if log_level == "TRACE":
                 log_level = b"DEBUG"
-            print(log_level)
+
             log.setLevel(getLevelName(log_level))
 
             if not os.path.isdir(options.args.log_directory):
