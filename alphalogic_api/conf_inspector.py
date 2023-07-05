@@ -191,5 +191,9 @@ class ConfInspector(object):
             return True
         elif arg_type_model is bool and arg_type_real is bool:
             return True
+        elif arg_type_model is dict and arg_type_real is dict:
+            return True
+        elif arg_type_model is list and arg_type_real is list:
+            return True
         else:
             return False
